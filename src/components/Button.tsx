@@ -2,8 +2,11 @@ import { ActivityIndicator, Pressable, StyleSheet, View, type ViewStyle } from '
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 import { useTheme, type ColorToken } from '@/theme';
+import { mirrorInRtl } from '@/utils/direction';
 
 import { AppText } from './AppText';
+
+const DIRECTIONAL_ICON = /^(arrow|chevron)-(forward|back)/;
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
 
@@ -66,7 +69,14 @@ export function Button({
         <ActivityIndicator color={theme.colors[fg]} />
       ) : (
         <View style={[styles.content, { gap: theme.spacing.sm }]}>
-          {icon ? <Ionicons name={icon} size={18} color={theme.colors[fg]} /> : null}
+          {icon ? (
+            <Ionicons
+              name={icon}
+              size={18}
+              color={theme.colors[fg]}
+              style={DIRECTIONAL_ICON.test(icon) ? mirrorInRtl() : undefined}
+            />
+          ) : null}
           <AppText variant="bodyStrong" color={fg}>
             {label}
           </AppText>

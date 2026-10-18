@@ -12,16 +12,12 @@ import { formatDaysAgo, formatTimeAgo } from '@/i18n/relative';
 import { useAppStore } from '@/store/appStore';
 import { useTheme } from '@/theme';
 
+import { workoutHref } from '../workout/routes';
 import { discardWorkout, finishWorkout, startWorkout } from '../workout/workoutService';
 
 import { DayCard } from './components/DayCard';
 import { ResumeBanner } from './components/ResumeBanner';
 import { loadHomeData, type HomeData } from './homeService';
-
-const workoutHref = (sessionId: number) => ({
-  pathname: '/workout/[sessionId]' as const,
-  params: { sessionId: String(sessionId) },
-});
 
 export function HomeScreen() {
   const { t } = useTranslation();

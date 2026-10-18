@@ -16,7 +16,7 @@ import { getMeta, META_KEYS } from '../repositories/appMeta';
 import { countExercises, listExercises } from '../repositories/exercises';
 import { listDayExercises } from '../repositories/programDayExercises';
 import { listProgramDays } from '../repositories/programDays';
-import { addSet, getPreviousPerformance, listSetsForSession } from '../repositories/sessionSets';
+import { addSet, getLastPerformance, listSetsForSession } from '../repositories/sessionSets';
 import {
   getActiveProgram,
   getProgramById,
@@ -126,7 +126,7 @@ describe('editing a single day', () => {
     expect(loadDayEntries(pull!.id)).toEqual(pullBefore);
     expect(loadDayEntries(legs!.id)).toEqual(legsBefore);
     expect(listSetsForSession(session.id)).toHaveLength(1);
-    expect(getPreviousPerformance(ids[0]!)?.sets[0]?.weightKg).toBe(60);
+    expect(getLastPerformance(ids[0]!)?.sets[0]?.weightKg).toBe(60);
   });
 });
 

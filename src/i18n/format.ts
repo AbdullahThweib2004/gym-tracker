@@ -76,3 +76,71 @@ export function formatSet(
     lng: language,
   });
 }
+
+// Left-to-right isolate: keeps "60 × 10" and "8–12" in reading order inside Arabic text,
+// where the bidi algorithm would otherwise reverse the numbers around "×" and "–".
+const LRI = '⁦';
+const PDI = '⁩';
+export const ltr = (text: string) => `${LRI}${text}${PDI}`;
+
+/** Compact set without units, e.g. "60 × 10" (for lists of sets). */
+export function formatSetCompact(weightKg: number, reps: number): string {
+  return ltr(`${formatNumber(weightKg)} × ${reps}`);
+}
+
+/** "60 × 10 · 60 × 8 · 55 × 10" */
+export function formatSetsLine(sets: readonly { weightKg: number; reps: number }[]): string {
+  return sets.map((set) => formatSetCompact(set.weightKg, set.reps)).join(' · ');
+}
+
+/** "3 × 8–12" (or "3 × 8" when min = max) */
+export function formatTarget(targetSets: number, repsMin: number, repsMax: number): string {
+  return ltr(
+    repsMin === repsMax ? `${targetSets} × ${repsMin}` : `${targetSets} × ${repsMin}–${repsMax}`,
+  );
+}
+
+/** Grouped number, e.g. "12,450" */
+export function formatGroupedNumber(value: number, language: Language = currentLanguage()): string {
+  return new Intl.NumberFormat(intlLocale(language), { maximumFractionDigits: 1 }).format(value);
+}
+
+/** "12,450 kg" / "12,450 كغ" */
+export function formatVolume(volumeKg: number, language: Language = currentLanguage()): string {
+  return i18n.t('common.units.weightValue', {
+    value: formatGroupedNumber(volumeKg, language),
+    lng: language,
+  });
+}
+
+/** "1 h 05 min" / "45 min" */
+export function formatDuration(ms: number, language: Language = currentLanguage()): string {
+  const totalMinutes = Math.max(0, Math.round(ms / 60_000));
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  if (hours === 0) return i18n.t('common.duration.minutes', { m: minutes, lng: language });
+  return i18n.t('common.duration.hoursMinutes', {
+    h: hours,
+    m: String(minutes).padStart(2, '0'),
+    lng: language,
+  });
+}
+
+/** Stopwatch style "12:34" or "1:02:03". */
+export function formatClock(ms: number): string {
+  const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+  const h = Math.floor(totalSeconds / 3600);
+  const m = Math.floor((totalSeconds % 3600) / 60);
+  const s = totalSeconds % 60;
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return h > 0 ? `${h}:${pad(m)}:${pad(s)}` : `${m}:${pad(s)}`;
+}
+
+/** "Oct 5 – 11" style range for a week. */
+export function formatDateRange(
+  start: string,
+  end: string,
+  language: Language = currentLanguage(),
+): string {
+  return `${formatDate(start, 'short', language)} – ${formatDate(end, 'short', language)}`;
+}

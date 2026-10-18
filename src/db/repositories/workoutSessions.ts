@@ -1,9 +1,17 @@
-import { and, between, desc, eq, isNotNull, isNull, sql } from 'drizzle-orm';
+import { and, asc, between, desc, eq, isNotNull, isNull, sql } from 'drizzle-orm';
 
 import { toIsoDate } from '@/utils/date';
+import { bestSet, computeVolume, sessionDurationMs, workingSets } from '@/utils/workoutStats';
 
 import { db, type DbExecutor } from '../client';
-import { workoutSessions, type WorkoutSession } from '../schema';
+import {
+  exercises,
+  sessionSets,
+  workoutSessions,
+  type Exercise,
+  type SessionSet,
+  type WorkoutSession,
+} from '../schema';
 
 export type StartSessionInput = {
   userProgramId: number | null;
@@ -137,4 +145,102 @@ export function countSessionsForProgram(userProgramId: number, executor: DbExecu
     .where(eq(workoutSessions.userProgramId, userProgramId))
     .get();
   return row?.count ?? 0;
+}
+
+export type SessionWithSets = { session: WorkoutSession; sets: SessionSet[] };
+
+/** A session and all its sets, ordered by exercise appearance and set number. */
+export function getSessionWithSets(id: number, executor: DbExecutor = db): SessionWithSets | null {
+  const session = getSessionById(id, executor);
+  if (!session) return null;
+  const sets = executor
+    .select()
+    .from(sessionSets)
+    .where(eq(sessionSets.sessionId, id))
+    .orderBy(asc(sessionSets.createdAt), asc(sessionSets.id))
+    .all();
+  return { session, sets };
+}
+
+export type ExerciseSummary = {
+  exercise: Exercise;
+  /** All sets for the exercise, by set number. */
+  sets: SessionSet[];
+  best: SessionSet | null;
+};
+
+export type SessionSummary = {
+  session: WorkoutSession;
+  durationMs: number;
+  exerciseCount: number;
+  workingSets: number;
+  /** Σ weight × reps over working sets, kg. */
+  volumeKg: number;
+  /** In the order exercises were first logged. */
+  exercises: ExerciseSummary[];
+};
+
+export function getSessionSummary(id: number, executor: DbExecutor = db): SessionSummary | null {
+  const session = getSessionById(id, executor);
+  if (!session) return null;
+  const rows = executor
+    .select({ set: sessionSets, exercise: exercises })
+    .from(sessionSets)
+    .innerJoin(exercises, eq(sessionSets.exerciseId, exercises.id))
+    .where(eq(sessionSets.sessionId, id))
+    .orderBy(asc(sessionSets.createdAt), asc(sessionSets.id))
+    .all();
+
+  const byExercise = new Map<number, { exercise: Exercise; sets: SessionSet[] }>();
+  for (const { set, exercise } of rows) {
+    const entry = byExercise.get(exercise.id) ?? { exercise, sets: [] };
+    entry.sets.push(set);
+    byExercise.set(exercise.id, entry);
+  }
+  const allSets = rows.map((row) => row.set);
+  return {
+    session,
+    durationMs: sessionDurationMs(session.startedAt, session.finishedAt),
+    exerciseCount: byExercise.size,
+    workingSets: workingSets(allSets).length,
+    volumeKg: computeVolume(allSets),
+    exercises: [...byExercise.values()].map(({ exercise, sets }) => {
+      const ordered = [...sets].sort((a, b) => a.setNumber - b.setNumber);
+      return { exercise, sets: ordered, best: bestSet(ordered) };
+    }),
+  };
+}
+
+export type SessionListItem = WorkoutSession & {
+  exerciseCount: number;
+  workingSets: number;
+  volumeKg: number;
+};
+
+/** Finished sessions with their totals, newest first. */
+export function listFinishedSessionsWithStats(
+  { limit = 500, offset = 0 }: { limit?: number; offset?: number } = {},
+  executor: DbExecutor = db,
+): SessionListItem[] {
+  const rows = executor
+    .select({
+      session: workoutSessions,
+      exerciseCount: sql<number>`count(distinct ${sessionSets.exerciseId})`,
+      workingSets: sql<number>`coalesce(sum(case when ${sessionSets.isWarmup} = 0 then 1 else 0 end), 0)`,
+      volumeKg: sql<number>`coalesce(sum(case when ${sessionSets.isWarmup} = 0 then ${sessionSets.weightKg} * ${sessionSets.reps} else 0 end), 0)`,
+    })
+    .from(workoutSessions)
+    .leftJoin(sessionSets, eq(sessionSets.sessionId, workoutSessions.id))
+    .where(isNotNull(workoutSessions.finishedAt))
+    .groupBy(workoutSessions.id)
+    .orderBy(desc(workoutSessions.startedAt), desc(workoutSessions.id))
+    .limit(limit)
+    .offset(offset)
+    .all();
+  return rows.map(({ session, exerciseCount, workingSets: working, volumeKg }) => ({
+    ...session,
+    exerciseCount,
+    workingSets: working,
+    volumeKg: Number.parseFloat(Number(volumeKg).toFixed(2)),
+  }));
 }

@@ -36,6 +36,10 @@
       "hoursAgo_other": "{{count}} hours ago",
       "daysAgo_one": "{{count}} day ago",
       "daysAgo_other": "{{count}} days ago"
+    },
+    "duration": {
+      "minutes": "{{m}} min",
+      "hoursMinutes": "{{h}} h {{m}} min"
     }
   },
   "tabs": {
@@ -69,24 +73,65 @@
   },
   "workout": {
     "title": "Workout",
+    "finish": "Finish workout",
+    "finishShort": "Finish",
+    "elapsed": "Elapsed time",
+    "notFound": "Workout not found",
+    "progress": "{{done}}/{{target}} sets",
+    "target": "Target {{target}}",
+    "addExercise": "Add exercise to this session",
+    "addExerciseTitle": "Add exercises",
+    "addExerciseHint": "Only for this workout. Your program stays the same.",
+    "discardWorkout": "Discard workout",
+    "unloggedTitle": "Finish anyway?",
+    "finishAnyway": "Finish anyway",
     "lastTime": "Last time",
-    "noPrevious": "First time doing this exercise",
+    "firstTime": "First time, set your starting weight",
+    "setShort": "Set",
     "weight": "Weight",
+    "weightKg": "Weight (kg)",
     "reps": "Reps",
-    "addSet": "Add set",
     "set": "Set {{number}}",
     "warmup": "Warm-up",
-    "finish": "Finish workout",
-    "notFound": "Workout not found",
-    "finishTitle": "Finish workout?",
-    "finishMessage": "It will be saved to your history.",
-    "startedAt": "Started at {{time}}",
-    "placeholder": "Set logging is coming next. For now you can finish or discard this workout."
+    "warmupShort": "W",
+    "addSet": "Add set",
+    "nextExercise": "Next exercise",
+    "backToWorkout": "Back to workout",
+    "viewHistory": "View history",
+    "decreaseWeight": "Decrease weight by 2.5 kg",
+    "increaseWeight": "Increase weight by 2.5 kg",
+    "decreaseReps": "Decrease reps",
+    "increaseReps": "Increase reps",
+    "confirmSet": "Save {{set}}",
+    "editSet": "Edit {{set}}",
+    "rowHint": "Long press for warm-up or delete",
+    "savedRowHint": "Saved. Tap to edit, long press for more",
+    "rowOptions": "Warm-up or delete",
+    "markWarmup": "Mark as warm-up",
+    "markWorking": "Mark as working set",
+    "deleteSet": "Delete set",
+    "invalidSet": "Enter a weight of 0 or more and at least 1 rep.",
+    "rowsHelp": "Grey numbers are last time’s. Tap ✓ to save a set. Long press a set for warm-up or delete.",
+    "saveFailedTitle": "Couldn’t save the set",
+    "saveFailedMessage": "Nothing was lost. Please try again.",
+    "unloggedMessage_one": "{{count}} exercise has no sets logged.",
+    "unloggedMessage_other": "{{count}} exercises have no sets logged.",
+    "addSelected_one": "Add {{count}} exercise",
+    "addSelected_other": "Add {{count}} exercises"
   },
   "history": {
     "title": "History",
     "emptyTitle": "No workouts yet",
-    "emptyMessage": "Finished workouts will show up here."
+    "emptyMessage": "Finished workouts will show up here.",
+    "thisWeek": "This week",
+    "lastWeek": "Last week",
+    "deleteSession": "Delete workout",
+    "deleteSessionTitle": "Delete this workout?",
+    "deleteSessionMessage": "The workout and all its sets will be deleted. This can’t be undone.",
+    "deleteSetTitle": "Delete this set?",
+    "deleteSetMessage": "This can’t be undone.",
+    "openExerciseHistory": "Opens this exercise’s history",
+    "editSetHint": "Edit or delete this set"
   },
   "settings": {
     "title": "Settings",
@@ -148,7 +193,10 @@
     "noResults": "No exercises match your search.",
     "otherMuscles": "Other muscles",
     "selectedInGroup_one": "{{count}} selected",
-    "selectedInGroup_other": "{{count}} selected"
+    "selectedInGroup_other": "{{count}} selected",
+    "notFound": "Exercise not found",
+    "noHistoryTitle": "No history yet",
+    "noHistoryMessage": "Finished workouts with this exercise will show up here."
   },
   "languages": {
     "en": "English",
@@ -178,5 +226,16 @@
     "chooseSplit": "Choose a split",
     "daysCount_one": "{{count}} day",
     "daysCount_other": "{{count}} days"
+  },
+  "summary": {
+    "title": "Workout complete",
+    "duration": "Duration",
+    "exercises": "Exercises",
+    "workingSets": "Working sets",
+    "volume": "Total volume",
+    "bestSets": "Best sets",
+    "noSets": "No sets were logged.",
+    "setsLogged_one": "{{count}} set",
+    "setsLogged_other": "{{count}} sets"
   }
 }

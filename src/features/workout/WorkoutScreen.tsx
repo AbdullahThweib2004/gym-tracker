@@ -1,32 +1,46 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Alert, View } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
 import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
+import { ElapsedTimer } from '@/components/ElapsedTimer';
 import { EmptyState } from '@/components/EmptyState';
 import { Screen } from '@/components/Screen';
 import { ScreenHeader } from '@/components/ScreenHeader';
 import { ExerciseThumb } from '@/features/exercises/components/ExerciseThumb';
-import { dayLabel, exerciseName, formatTime } from '@/i18n/format';
+import { dayLabel, exerciseName, formatTarget } from '@/i18n/format';
 import { useAppStore } from '@/store/appStore';
+import { useWorkoutDraftStore } from '@/store/workoutDraftStore';
 import { useTheme } from '@/theme';
+import { mirrorInRtl } from '@/utils/direction';
 
-import { discardWorkout, finishWorkout, loadWorkout } from './workoutService';
+import { addExerciseHref, exerciseLogHref, summaryHref } from './routes';
+import {
+  countUnloggedExercises,
+  discardWorkout,
+  finishWorkout,
+  loadWorkout,
+  type WorkoutData,
+} from './workoutService';
 
-/** Placeholder workout screen: set logging is built in the next step. */
 export function WorkoutScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
   const language = useAppStore((s) => s.language);
-  const { sessionId } = useLocalSearchParams<{ sessionId: string }>();
-  const [workout] = useState(() => loadWorkout(Number(sessionId)));
+  const clearDrafts = useWorkoutDraftStore((s) => s.clearSession);
+  const { sessionId: sessionParam } = useLocalSearchParams<{ sessionId: string }>();
+  const sessionId = Number(sessionParam);
+  const [data, setData] = useState<WorkoutData | null>(() => loadWorkout(sessionId));
+
+  useFocusEffect(useCallback(() => setData(loadWorkout(sessionId)), [sessionId]));
 
   const leave = () => (router.canGoBack() ? router.back() : router.replace('/'));
 
-  if (!workout) {
+  if (!data) {
     return (
       <Screen>
         <EmptyState
@@ -39,20 +53,26 @@ export function WorkoutScreen() {
     );
   }
 
-  const { session, splitType, exercises } = workout;
+  const { session, splitType, items } = data;
   const title = splitType ? dayLabel(splitType, session.dayKey) : session.dayKey;
 
-  const confirmFinish = () =>
-    Alert.alert(t('workout.finishTitle'), t('workout.finishMessage'), [
+  const finish = () => {
+    finishWorkout(session.id);
+    clearDrafts(session.id);
+    router.replace(summaryHref(session.id));
+  };
+
+  const confirmFinish = () => {
+    const unlogged = countUnloggedExercises(session.id);
+    if (unlogged === 0) {
+      finish();
+      return;
+    }
+    Alert.alert(t('workout.unloggedTitle'), t('workout.unloggedMessage', { count: unlogged }), [
       { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('workout.finish'),
-        onPress: () => {
-          finishWorkout(session.id);
-          leave();
-        },
-      },
+      { text: t('workout.finishAnyway'), onPress: finish },
     ]);
+  };
 
   const confirmDiscard = () =>
     Alert.alert(t('home.discardTitle'), t('home.discardMessage'), [
@@ -62,6 +82,7 @@ export function WorkoutScreen() {
         style: 'destructive',
         onPress: () => {
           discardWorkout(session.id);
+          clearDrafts(session.id);
           leave();
         },
       },
@@ -71,26 +92,66 @@ export function WorkoutScreen() {
     <Screen scroll>
       <ScreenHeader
         title={title}
-        subtitle={t('workout.startedAt', { time: formatTime(session.startedAt) })}
         onBack={leave}
         backLabel={t('common.back')}
+        trailing={<Button label={t('workout.finishShort')} onPress={confirmFinish} icon="flag" />}
       />
-      <Card>
-        <AppText color="textSecondary">{t('workout.placeholder')}</AppText>
-      </Card>
-      {exercises.map((exercise) => (
-        <View
-          key={exercise.id}
-          style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.md }}
-        >
-          <ExerciseThumb muscleGroup={exercise.muscleGroup} size={36} />
-          <AppText style={{ flex: 1 }}>{exerciseName(exercise, language)}</AppText>
+      {session.finishedAt ? null : (
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.sm }}>
+          <Ionicons name="timer-outline" size={18} color={theme.colors.primary} />
+          <ElapsedTimer since={session.startedAt} accessibilityLabel={t('workout.elapsed')} />
         </View>
-      ))}
-      <View style={{ gap: theme.spacing.sm, marginTop: theme.spacing.lg }}>
-        <Button label={t('workout.finish')} icon="checkmark" onPress={confirmFinish} fullWidth />
-        <Button label={t('home.discard')} variant="ghost" onPress={confirmDiscard} fullWidth />
-      </View>
+      )}
+
+      {items.map((item) => {
+        const name = exerciseName(item.exercise, language);
+        const progress = t('workout.progress', { done: item.workingSets, target: item.targetSets });
+        return (
+          <Card
+            key={item.exerciseId}
+            onPress={() => router.push(exerciseLogHref(session.id, item.exerciseId))}
+            accessibilityLabel={`${name}, ${progress}`}
+            style={item.isComplete ? { borderColor: theme.colors.success } : undefined}
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.md }}>
+              <ExerciseThumb muscleGroup={item.exercise.muscleGroup} />
+              <View style={{ flex: 1, gap: theme.spacing.xxs }}>
+                <AppText variant="bodyStrong" numberOfLines={2}>
+                  {name}
+                </AppText>
+                <AppText variant="caption" color={item.isComplete ? 'success' : 'textSecondary'}>
+                  {progress} ·{' '}
+                  {formatTarget(item.targetSets, item.targetRepsMin, item.targetRepsMax)}
+                </AppText>
+              </View>
+              {item.isComplete ? (
+                <Ionicons name="checkmark-circle" size={26} color={theme.colors.success} />
+              ) : (
+                <Ionicons
+                  name="chevron-forward"
+                  size={20}
+                  color={theme.colors.textSecondary}
+                  style={mirrorInRtl()}
+                />
+              )}
+            </View>
+          </Card>
+        );
+      })}
+
+      <Button
+        label={t('workout.addExercise')}
+        variant="secondary"
+        icon="add"
+        onPress={() => router.push(addExerciseHref(session.id))}
+        fullWidth
+      />
+      <Button
+        label={t('workout.discardWorkout')}
+        variant="ghost"
+        onPress={confirmDiscard}
+        fullWidth
+      />
     </Screen>
   );
 }

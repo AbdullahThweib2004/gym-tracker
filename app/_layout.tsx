@@ -108,7 +108,9 @@ function MigratedApp() {
       {/* Until a program is fully set up, only onboarding is reachable (and is the initial route). */}
       <Stack.Protected guard={isSetupComplete}>
         <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="workout/[sessionId]" />
+        <Stack.Screen name="workout" />
+        <Stack.Screen name="session/[sessionId]" />
+        <Stack.Screen name="exercise/[id]" />
       </Stack.Protected>
       <Stack.Screen name="onboarding" />
     </Stack>

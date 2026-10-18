@@ -28,6 +28,14 @@ type NumberInputProps = {
   accessibilityLabel: string;
   decrementLabel?: string;
   incrementLabel?: string;
+  /** Show the value in a muted color (e.g. a suggestion that isn't the user's entry yet). */
+  muted?: boolean;
+  /** Highlight as invalid. */
+  invalid?: boolean;
+  editable?: boolean;
+  /** Tighter layout for rows with several inputs. */
+  compact?: boolean;
+  onFocus?: () => void;
 };
 
 const toText = (value: number | null) => (value === null ? '' : formatNumber(value));
@@ -45,6 +53,11 @@ export function NumberInput({
   accessibilityLabel,
   decrementLabel = '−',
   incrementLabel = '+',
+  muted = false,
+  invalid = false,
+  editable = true,
+  compact = false,
+  onFocus,
 }: NumberInputProps) {
   const theme = useTheme();
   const [text, setText] = useState(() => toText(value));
@@ -92,13 +105,13 @@ export function NumberInput({
           styles.row,
           {
             backgroundColor: theme.colors.surfaceElevated,
-            borderColor: theme.colors.border,
+            borderColor: invalid ? theme.colors.danger : theme.colors.border,
             borderRadius: theme.radius.md,
-            paddingHorizontal: theme.spacing.xs,
+            paddingHorizontal: compact ? 0 : theme.spacing.xs,
           },
         ]}
       >
-        {step !== undefined ? (
+        {step !== undefined && editable ? (
           <IconButton
             icon="remove"
             size={18}
@@ -111,6 +124,8 @@ export function NumberInput({
           value={text}
           onChangeText={handleChangeText}
           onBlur={handleBlur}
+          onFocus={onFocus}
+          editable={editable}
           keyboardType={allowDecimal ? 'decimal-pad' : 'number-pad'}
           inputMode={allowDecimal ? 'decimal' : 'numeric'}
           placeholder={placeholder}
@@ -119,8 +134,14 @@ export function NumberInput({
           accessibilityLabel={accessibilityLabel}
           style={[
             styles.input,
+            compact && styles.compactInput,
             theme.typography.subheading,
-            { color: theme.colors.textPrimary, paddingVertical: theme.spacing.sm },
+            {
+              color: muted ? theme.colors.textMuted : theme.colors.textPrimary,
+              paddingVertical: theme.spacing.sm,
+              // Digits are always left-to-right, also inside an RTL layout.
+              writingDirection: 'ltr',
+            },
           ]}
         />
         {unit ? (
@@ -128,7 +149,7 @@ export function NumberInput({
             {unit}
           </AppText>
         ) : null}
-        {step !== undefined ? (
+        {step !== undefined && editable ? (
           <IconButton
             icon="add"
             size={18}
@@ -145,4 +166,5 @@ export function NumberInput({
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, minHeight: 48 },
   input: { flex: 1, textAlign: 'center', minWidth: 48 },
+  compactInput: { minWidth: 36, paddingHorizontal: 0 },
 });

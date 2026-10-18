@@ -1,6 +1,7 @@
 export const colors = {
   background: '#0E0F12',
   surface: '#17191E',
+  successSoft: '#16301F',
   surfaceElevated: '#20232A',
   primary: '#4F8CFF',
   primaryPressed: '#3B74E0',

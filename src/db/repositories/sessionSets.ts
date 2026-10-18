@@ -1,7 +1,7 @@
 import { and, asc, desc, eq, isNotNull, ne, sql } from 'drizzle-orm';
 
 import { db, type DbExecutor } from '../client';
-import { sessionSets, workoutSessions, type SessionSet, type WorkoutSession } from '../schema';
+import { sessionSets, workoutSessions, type SessionSet } from '../schema';
 
 export type AddSetInput = {
   sessionId: number;
@@ -91,28 +91,32 @@ export function deleteSet(id: number): void {
   });
 }
 
-export type PreviousPerformance = {
-  session: WorkoutSession;
+export type LastPerformance = {
+  sessionId: number;
+  /** YYYY-MM-DD of that session. */
+  date: string;
+  /** Working sets only, ordered by set number. */
   sets: SessionSet[];
 };
 
 /**
- * The sets logged for an exercise in the most recent *finished* session that included it.
- * This powers the "last time" panel and the input pre-fill.
+ * Working sets (warm-ups excluded) of an exercise from the most recent *finished* session in
+ * which it had a working set, plus that session's date. Powers "Last time" and the pre-fill.
  */
-export function getPreviousPerformance(
+export function getLastPerformance(
   exerciseId: number,
-  { excludeSessionId }: { excludeSessionId?: number } = {},
+  excludeSessionId?: number,
   executor: DbExecutor = db,
-): PreviousPerformance | null {
+): LastPerformance | null {
   const conditions = [
     eq(sessionSets.exerciseId, exerciseId),
+    eq(sessionSets.isWarmup, false),
     isNotNull(workoutSessions.finishedAt),
   ];
   if (excludeSessionId !== undefined) conditions.push(ne(workoutSessions.id, excludeSessionId));
 
   const last = executor
-    .select({ session: workoutSessions })
+    .select({ id: workoutSessions.id, date: workoutSessions.date })
     .from(sessionSets)
     .innerJoin(workoutSessions, eq(sessionSets.sessionId, workoutSessions.id))
     .where(and(...conditions))
@@ -121,10 +125,69 @@ export function getPreviousPerformance(
     .get();
   if (!last) return null;
 
-  return {
-    session: last.session,
-    sets: listSetsForSessionExercise(last.session.id, exerciseId, executor),
+  const sets = executor
+    .select()
+    .from(sessionSets)
+    .where(
+      and(
+        eq(sessionSets.sessionId, last.id),
+        eq(sessionSets.exerciseId, exerciseId),
+        eq(sessionSets.isWarmup, false),
+      ),
+    )
+    .orderBy(asc(sessionSets.setNumber))
+    .all();
+  return { sessionId: last.id, date: last.date, sets };
+}
+
+export type UpsertSetInput = {
+  /** Existing set to update; omit or null to insert. */
+  id?: number | null;
+  sessionId: number;
+  exerciseId: number;
+  setNumber: number;
+  weightKg: number;
+  reps: number;
+  isWarmup: boolean;
+};
+
+/** Inserts or updates one set and returns the stored row. */
+export function upsertSet(input: UpsertSetInput, executor: DbExecutor = db): SessionSet {
+  const values = {
+    setNumber: input.setNumber,
+    weightKg: input.weightKg,
+    reps: Math.round(input.reps),
+    isWarmup: input.isWarmup,
   };
+  if (input.id !== undefined && input.id !== null) {
+    const updated = executor
+      .update(sessionSets)
+      .set(values)
+      .where(eq(sessionSets.id, input.id))
+      .returning()
+      .get();
+    if (updated) return updated;
+  }
+  return executor
+    .insert(sessionSets)
+    .values({
+      ...values,
+      sessionId: input.sessionId,
+      exerciseId: input.exerciseId,
+      createdAt: new Date().toISOString(),
+    })
+    .returning()
+    .get();
+}
+
+/** Sets explicit set numbers (e.g. to match the order shown after a row was removed). */
+export function setSetNumbers(updates: readonly { id: number; setNumber: number }[]): void {
+  if (updates.length === 0) return;
+  db.transaction((tx) => {
+    for (const { id, setNumber } of updates) {
+      tx.update(sessionSets).set({ setNumber }).where(eq(sessionSets.id, id)).run();
+    }
+  });
 }
 
 export type ExerciseHistoryEntry = SessionSet & { date: string; sessionStartedAt: string };

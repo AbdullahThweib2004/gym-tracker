@@ -17,3 +17,6 @@ export const TARGET_SETS_MIN = 1;
 export const TARGET_SETS_MAX = 10;
 export const TARGET_REPS_MIN = 1;
 export const TARGET_REPS_MAX = 50;
+
+/** First day of the week for History grouping: Monday in English, Sunday in Arabic locales. */
+export const WEEK_STARTS_ON: Record<Language, 0 | 1> = { en: 1, ar: 0 };

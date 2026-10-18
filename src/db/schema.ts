@@ -124,6 +124,25 @@ export const sessionSets = sqliteTable(
   ],
 );
 
+/**
+ * Exercises added to one session on top of its program day ("Add exercise to this session").
+ * Stored so they survive a crash even before any set is logged; the program is unchanged.
+ */
+export const sessionExtraExercises = sqliteTable(
+  'session_extra_exercises',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    sessionId: integer('session_id')
+      .notNull()
+      .references(() => workoutSessions.id, { onDelete: 'cascade' }),
+    exerciseId: integer('exercise_id')
+      .notNull()
+      .references(() => exercises.id),
+    orderIndex: integer('order_index').notNull(),
+  },
+  (t) => [uniqueIndex('session_extra_exercises_unique_idx').on(t.sessionId, t.exerciseId)],
+);
+
 export type AppMetaRow = typeof appMeta.$inferSelect;
 export type Exercise = typeof exercises.$inferSelect;
 export type NewExercise = typeof exercises.$inferInsert;
@@ -137,3 +156,4 @@ export type WorkoutSession = typeof workoutSessions.$inferSelect;
 export type NewWorkoutSession = typeof workoutSessions.$inferInsert;
 export type SessionSet = typeof sessionSets.$inferSelect;
 export type NewSessionSet = typeof sessionSets.$inferInsert;
+export type SessionExtraExercise = typeof sessionExtraExercises.$inferSelect;

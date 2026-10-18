@@ -11,6 +11,7 @@ import { discardWorkout, finishWorkout, startWorkout } from '@/features/workout/
 import type { DraftEntry } from '@/store/programDraftStore';
 import type * as ShimModule from '@/test/expoSqliteShim';
 
+import { openDatabase } from '../client';
 import { getMeta, META_KEYS } from '../repositories/appMeta';
 import { countExercises, listExercises } from '../repositories/exercises';
 import { listDayExercises } from '../repositories/programDayExercises';
@@ -50,7 +51,8 @@ function setUpPpl() {
   return { program, days, ids };
 }
 
-beforeAll(() => {
+beforeAll(async () => {
+  await openDatabase();
   expect(seedDatabase()).toBe(true);
 });
 

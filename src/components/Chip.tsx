@@ -1,4 +1,4 @@
-import { Pressable } from 'react-native';
+import { Pressable, View } from 'react-native';
 
 import { useTheme } from '@/theme';
 
@@ -28,12 +28,9 @@ export function Chip({ label, selected = false, onPress, accessibilityLabel }: C
     </AppText>
   );
 
-  if (!onPress)
-    return (
-      <Pressable disabled style={style}>
-        {text}
-      </Pressable>
-    );
+  // A static tag is a plain View: on web a Pressable is a <button>, and chips often sit inside
+  // pressable cards, where nested buttons are invalid.
+  if (!onPress) return <View style={style}>{text}</View>;
 
   return (
     <Pressable

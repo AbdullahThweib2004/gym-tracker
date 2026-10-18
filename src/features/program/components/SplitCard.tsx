@@ -1,13 +1,14 @@
 import { View } from 'react-native';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { useTranslation } from 'react-i18next';
 
 import { AppText } from '@/components/AppText';
 import { Card } from '@/components/Card';
 import { Chip } from '@/components/Chip';
-import { IconButton } from '@/components/IconButton';
 import type { Split } from '@/constants/splits';
 import { dayLabel, splitLabel } from '@/i18n/format';
 import { useTheme } from '@/theme';
+import { mirrorInRtl } from '@/utils/direction';
 
 type SplitCardProps = {
   split: Split;
@@ -31,12 +32,12 @@ export function SplitCard({ split, onSelect }: SplitCardProps) {
             {t('splits.daysCount', { count: split.days.length })}
           </AppText>
         </View>
-        <IconButton
-          icon="chevron-forward"
-          directional
-          color="textSecondary"
-          onPress={onSelect}
-          accessibilityLabel={name}
+        {/* Decorative: the whole card is the button (nested buttons are invalid on web). */}
+        <Ionicons
+          name="chevron-forward"
+          size={20}
+          color={theme.colors.textSecondary}
+          style={mirrorInRtl()}
         />
       </View>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: theme.spacing.xs }}>

@@ -1,0 +1,107 @@
+{
+  "common": {
+    "appName": "Gym Tracker",
+    "loading": "Loading…",
+    "ok": "OK",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "done": "Done",
+    "retry": "Try again",
+    "back": "Back",
+    "next": "Next",
+    "increase": "Increase",
+    "decrease": "Decrease",
+    "units": {
+      "kg": "kg",
+      "reps": "reps",
+      "sets": "sets",
+      "weightValue": "{{value}} kg",
+      "setValue": "{{weight}} × {{reps}}"
+    },
+    "errors": {
+      "title": "Something went wrong",
+      "migrationTitle": "Couldn't prepare the database",
+      "migrationMessage": "Your data is safe. Close and reopen the app. If this keeps happening, reinstall it.",
+      "details": "Details: {{message}}"
+    }
+  },
+  "tabs": {
+    "home": "Home",
+    "history": "History",
+    "settings": "Settings"
+  },
+  "home": {
+    "title": "Today",
+    "activeProgram": "Current program",
+    "noProgram": "No program yet",
+    "comingSoon": "Your next workout will appear here."
+  },
+  "workout": {
+    "title": "Workout",
+    "lastTime": "Last time",
+    "noPrevious": "First time doing this exercise",
+    "weight": "Weight",
+    "reps": "Reps",
+    "addSet": "Add set",
+    "set": "Set {{number}}",
+    "warmup": "Warm-up",
+    "finish": "Finish workout"
+  },
+  "history": {
+    "title": "History",
+    "emptyTitle": "No workouts yet",
+    "emptyMessage": "Finished workouts will show up here."
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "languageHint": "The app restarts to apply the text direction.",
+    "changeLanguageTitle": "Change language?",
+    "changeLanguageMessage": "The app will restart to switch to {{language}}.",
+    "restart": "Restart",
+    "version": "Version",
+    "about": "About"
+  },
+  "onboarding": {
+    "title": "Welcome to Gym Tracker",
+    "subtitle": "Pick a training split to get started.",
+    "placeholder": "Program setup is coming next."
+  },
+  "exercises": {
+    "title": "Exercises",
+    "search": "Search exercises",
+    "custom": "Custom",
+    "archived": "Archived"
+  },
+  "languages": {
+    "en": "English",
+    "ar": "العربية"
+  },
+  "muscleGroups": {
+    "chest": "Chest",
+    "back": "Back",
+    "shoulders": "Shoulders",
+    "biceps": "Biceps",
+    "triceps": "Triceps",
+    "legs": "Legs",
+    "glutes": "Glutes",
+    "calves": "Calves",
+    "abs": "Abs",
+    "forearms": "Forearms"
+  },
+  "equipment": {
+    "barbell": "Barbell",
+    "dumbbell": "Dumbbell",
+    "machine": "Machine",
+    "cable": "Cable",
+    "bodyweight": "Bodyweight",
+    "other": "Other"
+  },
+  "splits": {
+    "chooseSplit": "Choose a split",
+    "daysCount_one": "{{count}} day",
+    "daysCount_other": "{{count}} days"
+  }
+}

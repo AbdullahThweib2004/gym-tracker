@@ -1,0 +1,111 @@
+{
+  "common": {
+    "appName": "متتبع التمارين",
+    "loading": "جارٍ التحميل…",
+    "ok": "حسناً",
+    "cancel": "إلغاء",
+    "save": "حفظ",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "done": "تم",
+    "retry": "حاول مجدداً",
+    "back": "رجوع",
+    "next": "التالي",
+    "increase": "زيادة",
+    "decrease": "إنقاص",
+    "units": {
+      "kg": "كغ",
+      "reps": "تكرار",
+      "sets": "مجموعات",
+      "weightValue": "{{value}} كغ",
+      "setValue": "{{weight}} × {{reps}}"
+    },
+    "errors": {
+      "title": "حدث خطأ ما",
+      "migrationTitle": "تعذّر تجهيز قاعدة البيانات",
+      "migrationMessage": "بياناتك محفوظة. أغلق التطبيق وافتحه مجدداً، وإذا تكررت المشكلة أعد تثبيته.",
+      "details": "التفاصيل: {{message}}"
+    }
+  },
+  "tabs": {
+    "home": "الرئيسية",
+    "history": "السجل",
+    "settings": "الإعدادات"
+  },
+  "home": {
+    "title": "اليوم",
+    "activeProgram": "البرنامج الحالي",
+    "noProgram": "لا يوجد برنامج بعد",
+    "comingSoon": "سيظهر تمرينك القادم هنا."
+  },
+  "workout": {
+    "title": "التمرين",
+    "lastTime": "المرة السابقة",
+    "noPrevious": "أول مرة تؤدي هذا التمرين",
+    "weight": "الوزن",
+    "reps": "التكرارات",
+    "addSet": "إضافة مجموعة",
+    "set": "المجموعة {{number}}",
+    "warmup": "إحماء",
+    "finish": "إنهاء التمرين"
+  },
+  "history": {
+    "title": "السجل",
+    "emptyTitle": "لا توجد تمارين بعد",
+    "emptyMessage": "ستظهر التمارين المكتملة هنا."
+  },
+  "settings": {
+    "title": "الإعدادات",
+    "language": "اللغة",
+    "languageHint": "سيُعاد تشغيل التطبيق لتطبيق اتجاه النص.",
+    "changeLanguageTitle": "تغيير اللغة؟",
+    "changeLanguageMessage": "سيُعاد تشغيل التطبيق للتبديل إلى {{language}}.",
+    "restart": "إعادة التشغيل",
+    "version": "الإصدار",
+    "about": "حول التطبيق"
+  },
+  "onboarding": {
+    "title": "أهلاً بك في متتبع التمارين",
+    "subtitle": "اختر نظام التقسيم للبدء.",
+    "placeholder": "إعداد البرنامج قادم في الخطوة التالية."
+  },
+  "exercises": {
+    "title": "التمارين",
+    "search": "ابحث عن تمرين",
+    "custom": "مخصص",
+    "archived": "مؤرشف"
+  },
+  "languages": {
+    "en": "English",
+    "ar": "العربية"
+  },
+  "muscleGroups": {
+    "chest": "صدر",
+    "back": "ظهر",
+    "shoulders": "أكتاف",
+    "biceps": "بايسبس",
+    "triceps": "ترايسبس",
+    "legs": "أرجل",
+    "glutes": "مؤخرة",
+    "calves": "سمانة",
+    "abs": "بطن",
+    "forearms": "ساعد"
+  },
+  "equipment": {
+    "barbell": "بار",
+    "dumbbell": "دمبل",
+    "machine": "جهاز",
+    "cable": "كيبل",
+    "bodyweight": "وزن الجسم",
+    "other": "أخرى"
+  },
+  "splits": {
+    "chooseSplit": "اختر نظام التقسيم",
+    "daysCount_zero": "لا أيام",
+    "daysCount_one": "يوم واحد",
+    "daysCount_two": "يومان",
+    "daysCount_few": "{{count}} أيام",
+    "daysCount_many": "{{count}} يوماً",
+    "daysCount_other": "{{count}} يوم"
+  }
+}

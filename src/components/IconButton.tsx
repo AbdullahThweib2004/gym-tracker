@@ -1,8 +1,13 @@
-import { Pressable, type ViewStyle } from 'react-native';
+import type { ViewStyle } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 import { useTheme, type ColorToken } from '@/theme';
 import { mirrorInRtl } from '@/utils/direction';
+
+import type { HapticKind } from './haptics';
+import { PressableScale } from './PressableScale';
+
+type IconButtonVariant = 'plain' | 'tonal' | 'filled';
 
 type IconButtonProps = {
   icon: keyof typeof Ionicons.glyphMap;
@@ -13,10 +18,14 @@ type IconButtonProps = {
   /** Mirror the icon in RTL. Use for arrows, chevrons and other directional glyphs. */
   directional?: boolean;
   disabled?: boolean;
+  /** @deprecated use variant="tonal" */
   filled?: boolean;
+  variant?: IconButtonVariant;
+  haptic?: HapticKind;
   style?: ViewStyle;
 };
 
+/** Icon-only button with a touch target of at least 44 pt. */
 export function IconButton({
   icon,
   onPress,
@@ -26,19 +35,29 @@ export function IconButton({
   directional = false,
   disabled = false,
   filled = false,
+  variant = filled ? 'tonal' : 'plain',
+  haptic,
   style,
 }: IconButtonProps) {
   const theme = useTheme();
-  const box = size + theme.spacing.lg;
+  const box = Math.max(theme.touchTarget, size + theme.spacing.lg);
+  const background = (pressed: boolean): string => {
+    if (variant === 'filled') return pressed ? theme.colors.primaryPressed : theme.colors.primary;
+    if (variant === 'tonal')
+      return pressed ? theme.colors.surfaceHighlight : theme.colors.surfaceElevated;
+    return pressed ? theme.colors.surfaceElevated : theme.colors.transparent;
+  };
 
   return (
-    <Pressable
+    <PressableScale
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
       accessibilityState={{ disabled }}
       disabled={disabled}
-      hitSlop={theme.spacing.sm}
+      hitSlop={theme.spacing.xs}
       onPress={onPress}
+      haptic={haptic}
+      scaleTo={0.92}
       style={({ pressed }) => [
         {
           width: box,
@@ -46,9 +65,8 @@ export function IconButton({
           borderRadius: theme.radius.pill,
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor:
-            pressed || filled ? theme.colors.surfaceElevated : theme.colors.transparent,
-          opacity: disabled ? 0.4 : 1,
+          backgroundColor: background(pressed),
+          opacity: disabled ? 0.35 : 1,
         },
         style,
       ]}
@@ -56,9 +74,9 @@ export function IconButton({
       <Ionicons
         name={icon}
         size={size}
-        color={theme.colors[color]}
+        color={variant === 'filled' ? theme.colors.onPrimary : theme.colors[color]}
         style={directional ? mirrorInRtl() : undefined}
       />
-    </Pressable>
+    </PressableScale>
   );
 }

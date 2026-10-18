@@ -12,22 +12,39 @@ type ScreenHeaderProps = {
   onBack?: () => void;
   backLabel?: string;
   trailing?: ReactNode;
+  /** Larger title for top-level screens. */
+  large?: boolean;
 };
 
-export function ScreenHeader({ title, subtitle, onBack, backLabel, trailing }: ScreenHeaderProps) {
+export function ScreenHeader({
+  title,
+  subtitle,
+  onBack,
+  backLabel,
+  trailing,
+  large = false,
+}: ScreenHeaderProps) {
   const theme = useTheme();
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.sm }}>
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: theme.spacing.sm,
+        minHeight: theme.touchTarget,
+      }}
+    >
       {onBack ? (
         <IconButton
           icon="arrow-back"
+          variant="tonal"
           directional
           onPress={onBack}
           accessibilityLabel={backLabel ?? ''}
         />
       ) : null}
-      <View style={{ flex: 1, gap: theme.spacing.xxs }}>
-        <AppText variant="heading" accessibilityRole="header" numberOfLines={1}>
+      <View style={{ flex: 1, gap: theme.spacing.xs }}>
+        <AppText variant={large ? 'title' : 'heading'} accessibilityRole="header" numberOfLines={2}>
           {title}
         </AppText>
         {subtitle ? (

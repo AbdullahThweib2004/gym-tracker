@@ -22,11 +22,11 @@ export function SearchBar({ value, onChangeText, placeholder, clearLabel }: Sear
         gap: theme.spacing.sm,
         paddingStart: theme.spacing.md,
         paddingEnd: theme.spacing.xs,
-        minHeight: 44,
+        minHeight: 48,
         borderRadius: theme.radius.md,
         borderWidth: 1,
         borderColor: theme.colors.border,
-        backgroundColor: theme.colors.surfaceElevated,
+        backgroundColor: theme.colors.surface,
       }}
     >
       <Ionicons name="search" size={18} color={theme.colors.textMuted} />

@@ -1,8 +1,9 @@
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 
 import { useTheme } from '@/theme';
 
 import { AppText } from './AppText';
+import { PressableScale } from './PressableScale';
 
 type Option<T extends string> = { value: T; label: string };
 
@@ -26,23 +27,26 @@ export function SegmentedControl<T extends string>({
       accessibilityLabel={accessibilityLabel}
       style={{
         flexDirection: 'row',
-        padding: theme.spacing.xxs,
-        gap: theme.spacing.xxs,
+        padding: theme.spacing.xs,
+        gap: theme.spacing.xs,
         borderRadius: theme.radius.md,
-        backgroundColor: theme.colors.surfaceElevated,
+        borderWidth: 1,
+        borderColor: theme.colors.border,
+        backgroundColor: theme.colors.surface,
       }}
     >
       {options.map((option) => {
         const selected = option.value === value;
         return (
-          <Pressable
+          <PressableScale
+            haptic="selection"
             key={option.value}
             accessibilityRole="tab"
             accessibilityState={{ selected }}
             onPress={() => onChange(option.value)}
             style={{
               flex: 1,
-              minHeight: 36,
+              minHeight: 40,
               alignItems: 'center',
               justifyContent: 'center',
               paddingHorizontal: theme.spacing.xs,
@@ -58,7 +62,7 @@ export function SegmentedControl<T extends string>({
             >
               {option.label}
             </AppText>
-          </Pressable>
+          </PressableScale>
         );
       })}
     </View>

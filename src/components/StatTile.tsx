@@ -20,20 +20,22 @@ export function StatTile({ label, value, caption, valueColor = 'textPrimary' }: 
       style={{
         flexGrow: 1,
         flexBasis: '45%',
-        gap: theme.spacing.xxs,
-        padding: theme.spacing.md,
-        borderRadius: theme.radius.md,
-        backgroundColor: theme.colors.surfaceElevated,
+        gap: theme.spacing.xs,
+        padding: theme.spacing.lg,
+        borderRadius: theme.radius.lg,
+        borderWidth: 1,
+        borderColor: theme.colors.border,
+        backgroundColor: theme.colors.surface,
       }}
     >
       <AppText variant="label" color="textSecondary">
         {label}
       </AppText>
-      <AppText variant="subheading" color={valueColor}>
+      <AppText variant="numberSmall" color={valueColor} numberOfLines={1} adjustsFontSizeToFit>
         {value}
       </AppText>
       {caption ? (
-        <AppText variant="caption" color="textMuted">
+        <AppText variant="caption" color="textMuted" numberOfLines={1}>
           {caption}
         </AppText>
       ) : null}

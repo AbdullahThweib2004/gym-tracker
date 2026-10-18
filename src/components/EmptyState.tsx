@@ -32,7 +32,19 @@ export function EmptyState({
         padding: theme.spacing.xl,
       }}
     >
-      <Ionicons name={icon} size={48} color={theme.colors.textMuted} />
+      <View
+        style={{
+          width: 72,
+          height: 72,
+          borderRadius: theme.radius.pill,
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: theme.colors.primarySoft,
+          marginBottom: theme.spacing.sm,
+        }}
+      >
+        <Ionicons name={icon} size={34} color={theme.colors.primary} />
+      </View>
       <AppText variant="subheading" align="center">
         {title}
       </AppText>
@@ -41,7 +53,9 @@ export function EmptyState({
           {message}
         </AppText>
       ) : null}
-      {actionLabel && onAction ? <Button label={actionLabel} onPress={onAction} /> : null}
+      {actionLabel && onAction ? (
+        <Button label={actionLabel} onPress={onAction} style={{ marginTop: theme.spacing.sm }} />
+      ) : null}
     </View>
   );
 }

@@ -26,7 +26,7 @@ export function SplitCard({ split, onSelect }: SplitCardProps) {
       accessibilityLabel={`${name}, ${t('splits.daysCount', { count: split.days.length })}`}
     >
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.md }}>
-        <View style={{ flex: 1, gap: theme.spacing.xxs }}>
+        <View style={{ flex: 1, gap: theme.spacing.xs }}>
           <AppText variant="subheading">{name}</AppText>
           <AppText variant="caption" color="textSecondary">
             {t('splits.daysCount', { count: split.days.length })}

@@ -92,7 +92,7 @@ export function HistoryScreen() {
               accessibilityLabel={`${name}, ${details}`}
             >
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.md }}>
-                <View style={{ flex: 1, gap: theme.spacing.xxs }}>
+                <View style={{ flex: 1, gap: theme.spacing.xs }}>
                   <AppText variant="caption" color="textSecondary">
                     {formatDate(item.date, 'weekday')}
                   </AppText>

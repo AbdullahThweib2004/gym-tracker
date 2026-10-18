@@ -135,7 +135,7 @@ export function ExerciseLibraryScreen() {
             <Card onPress={() => router.push(editExerciseHref(item.id))} accessibilityLabel={name}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.md }}>
                 <ExerciseThumb exercise={item} />
-                <View style={{ flex: 1, gap: theme.spacing.xxs }}>
+                <View style={{ flex: 1, gap: theme.spacing.xs }}>
                   <AppText
                     variant="bodyStrong"
                     color={item.isArchived ? 'textMuted' : 'textPrimary'}

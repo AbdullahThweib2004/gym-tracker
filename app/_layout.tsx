@@ -1,8 +1,19 @@
 import '@/i18n';
 
 import { useEffect, useRef, useState } from 'react';
+import {
+  IBMPlexSansArabic_400Regular,
+  IBMPlexSansArabic_500Medium,
+  IBMPlexSansArabic_600SemiBold,
+  IBMPlexSansArabic_700Bold,
+  useFonts,
+} from '@expo-google-fonts/ibm-plex-sans-arabic';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { DarkTheme, router, Stack, ThemeProvider } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
+import { StyleSheet } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -14,7 +25,10 @@ import { bootstrapApp } from '@/features/bootstrap/bootstrap';
 import { ErrorScreen } from '@/features/bootstrap/ErrorScreen';
 import { RestTimerWatcher } from '@/features/restTimer/RestTimerWatcher';
 import { useAppStore } from '@/store/appStore';
-import { colors } from '@/theme';
+import { colors, fonts } from '@/theme';
+
+// Keep the native splash up until the fonts are ready, so text never flashes in the wrong font.
+void SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
 const navigationTheme = {
   ...DarkTheme,
@@ -27,18 +41,46 @@ const navigationTheme = {
     border: colors.border,
     notification: colors.danger,
   },
+  fonts: {
+    regular: { fontFamily: fonts.regular, fontWeight: '400' as const },
+    medium: { fontFamily: fonts.medium, fontWeight: '500' as const },
+    bold: { fontFamily: fonts.bold, fontWeight: '700' as const },
+    heavy: { fontFamily: fonts.bold, fontWeight: '700' as const },
+  },
 };
 
 export default function RootLayout() {
+  const [fontsLoaded, fontError] = useFonts({
+    IBMPlexSansArabic_400Regular,
+    IBMPlexSansArabic_500Medium,
+    IBMPlexSansArabic_600SemiBold,
+    IBMPlexSansArabic_700Bold,
+  });
+  const fontsReady = fontsLoaded || Boolean(fontError);
+
+  useEffect(() => {
+    if (fontsReady) void SplashScreen.hideAsync().catch(() => undefined);
+  }, [fontsReady]);
+
+  if (!fontsReady) return null;
+
   return (
-    <SafeAreaProvider>
-      <ThemeProvider value={navigationTheme}>
-        <StatusBar style="light" />
-        <AppGate />
-      </ThemeProvider>
-    </SafeAreaProvider>
+    <GestureHandlerRootView style={styles.root}>
+      <SafeAreaProvider>
+        <BottomSheetModalProvider>
+          <ThemeProvider value={navigationTheme}>
+            <StatusBar style="light" />
+            <AppGate />
+          </ThemeProvider>
+        </BottomSheetModalProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }
+
+const styles = StyleSheet.create({
+  root: { flex: 1, backgroundColor: colors.background },
+});
 
 const toError = (err: unknown) => (err instanceof Error ? err : new Error(String(err)));
 

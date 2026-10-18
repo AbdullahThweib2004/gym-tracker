@@ -123,7 +123,7 @@ export function WorkoutScreen() {
             >
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.md }}>
                 <ExerciseThumb exercise={item.exercise} />
-                <View style={{ flex: 1, gap: theme.spacing.xxs }}>
+                <View style={{ flex: 1, gap: theme.spacing.xs }}>
                   <AppText variant="bodyStrong" numberOfLines={2}>
                     {name}
                   </AppText>

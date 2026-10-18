@@ -47,20 +47,24 @@ export function Stepper({
           flexDirection: 'row',
           alignItems: 'center',
           gap: theme.spacing.xs,
-          borderRadius: theme.radius.md,
-          backgroundColor: theme.colors.surfaceElevated,
-          paddingHorizontal: theme.spacing.xs,
+          borderRadius: theme.radius.pill,
+          backgroundColor: theme.colors.surface,
+          borderWidth: 1,
+          borderColor: theme.colors.border,
+          padding: theme.spacing.xs,
         }}
       >
         <IconButton
           icon="remove"
-          size={18}
+          size={20}
+          variant="tonal"
+          haptic="selection"
           onPress={() => onChange(Math.max(min, value - step))}
           disabled={value <= min}
           accessibilityLabel={`${decrementLabel} ${label}`}
         />
         <AppText
-          variant="subheading"
+          variant="numberSmall"
           align="center"
           accessibilityLiveRegion="polite"
           style={{ minWidth: 48 }}
@@ -69,7 +73,9 @@ export function Stepper({
         </AppText>
         <IconButton
           icon="add"
-          size={18}
+          size={20}
+          variant="tonal"
+          haptic="selection"
           onPress={() => onChange(Math.min(max, value + step))}
           disabled={value >= max}
           accessibilityLabel={`${incrementLabel} ${label}`}

@@ -101,7 +101,7 @@ export function HomeScreen() {
   return (
     <Screen scroll>
       <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: theme.spacing.md }}>
-        <View style={{ flex: 1, gap: theme.spacing.xxs }}>
+        <View style={{ flex: 1, gap: theme.spacing.xs }}>
           <AppText variant="label" color="textSecondary">
             {t('home.activeProgram')}
           </AppText>
@@ -124,7 +124,7 @@ export function HomeScreen() {
         <Card>
           <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: theme.spacing.sm }}>
             <Ionicons name="cloud-upload-outline" size={22} color={theme.colors.warning} />
-            <View style={{ flex: 1, gap: theme.spacing.xxs }}>
+            <View style={{ flex: 1, gap: theme.spacing.xs }}>
               <AppText variant="bodyStrong">{t('backup.reminderTitle')}</AppText>
               <AppText variant="caption" color="textSecondary">
                 {t('backup.reminderMessage')}

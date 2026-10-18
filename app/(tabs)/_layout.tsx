@@ -3,6 +3,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { Tabs } from 'expo-router/js-tabs';
 import { useTranslation } from 'react-i18next';
 
+import { haptic } from '@/components/haptics';
 import { useTheme } from '@/theme';
 
 type IconName = keyof typeof Ionicons.glyphMap;
@@ -20,13 +21,22 @@ export default function TabsLayout() {
 
   return (
     <Tabs
+      screenListeners={{ tabPress: () => haptic('selection') }}
       screenOptions={{
         headerStyle: { backgroundColor: theme.colors.background },
         headerTintColor: theme.colors.textPrimary,
+        headerTitleStyle: { fontFamily: theme.fonts.bold, fontSize: theme.fontSizes.lg },
+        headerTitleAlign: 'center',
         headerShadowVisible: false,
         tabBarActiveTintColor: theme.colors.primary,
-        tabBarInactiveTintColor: theme.colors.textSecondary,
-        tabBarStyle: { backgroundColor: theme.colors.surface, borderTopColor: theme.colors.border },
+        tabBarInactiveTintColor: theme.colors.textMuted,
+        tabBarLabelStyle: { fontFamily: theme.fonts.medium, fontSize: theme.fontSizes.xs },
+        tabBarStyle: {
+          backgroundColor: theme.colors.surface,
+          borderTopColor: theme.colors.border,
+          minHeight: 64,
+          paddingTop: theme.spacing.xs,
+        },
         sceneStyle: { backgroundColor: theme.colors.background },
       }}
     >

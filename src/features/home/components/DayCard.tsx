@@ -36,7 +36,7 @@ export function DayCard({
       style={isSuggested ? { borderColor: theme.colors.primary, borderWidth: 2 } : undefined}
     >
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.sm }}>
-        <View style={{ flex: 1, gap: theme.spacing.xxs }}>
+        <View style={{ flex: 1, gap: theme.spacing.xs }}>
           <View
             style={{
               flexDirection: 'row',

@@ -80,7 +80,7 @@ export function SummaryScreen() {
         <Card style={{ borderColor: theme.colors.warning }}>
           <AppText variant="subheading">{t('records.sessionTitle', { count: prs.length })}</AppText>
           {prs.map(({ exercise, set, records }) => (
-            <View key={set.id} style={{ gap: theme.spacing.xxs }}>
+            <View key={set.id} style={{ gap: theme.spacing.xs }}>
               <AppText variant="bodyStrong">
                 {exerciseName(exercise, language)} · {formatSet(set.weightKg, set.reps)}
               </AppText>

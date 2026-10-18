@@ -1,32 +1,18 @@
 import { useCallback, useEffect, useState } from 'react';
-import { AccessibilityInfo, Animated, Modal, Pressable, ScrollView, View } from 'react-native';
+import { Animated, Modal, Pressable, ScrollView, View } from 'react-native';
 import { Image } from 'expo-image';
 import { useFocusEffect } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
 import { AppText } from '@/components/AppText';
 import { IconButton } from '@/components/IconButton';
-import { useTheme } from '@/theme';
+import { useReduceMotion, useTheme } from '@/theme';
 
 import { exerciseImageFor, type ExerciseImageInput } from '../useExerciseImage';
 
 /** Each position is shown for ~1.2 s: a 300 ms cross-fade plus 900 ms hold. */
 const FADE_MS = 300;
 const HOLD_MS = 900;
-
-function useReduceMotion(): boolean {
-  const [reduce, setReduce] = useState(false);
-  useEffect(() => {
-    let mounted = true;
-    void AccessibilityInfo.isReduceMotionEnabled().then((value) => mounted && setReduce(value));
-    const sub = AccessibilityInfo.addEventListener('reduceMotionChanged', setReduce);
-    return () => {
-      mounted = false;
-      sub.remove();
-    };
-  }, []);
-  return reduce;
-}
 
 type ExerciseMotionProps = {
   exercise: ExerciseImageInput;

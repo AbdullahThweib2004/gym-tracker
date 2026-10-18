@@ -236,7 +236,7 @@ export function SettingsScreen() {
             backgroundColor: pressed ? theme.colors.surfaceElevated : theme.colors.transparent,
           })}
         >
-          <View style={{ flex: 1, gap: theme.spacing.xxs }}>
+          <View style={{ flex: 1, gap: theme.spacing.xs }}>
             <AppText color="textSecondary">{t('settings.credits')}</AppText>
             <AppText variant="caption">{t('settings.creditsImages')}</AppText>
           </View>

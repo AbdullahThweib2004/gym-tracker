@@ -15,7 +15,7 @@ export function ToggleRow({ label, hint, value, onValueChange }: ToggleRowProps)
   const theme = useTheme();
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.md }}>
-      <View style={{ flex: 1, gap: theme.spacing.xxs }}>
+      <View style={{ flex: 1, gap: theme.spacing.xs }}>
         <AppText variant="body">{label}</AppText>
         {hint ? (
           <AppText variant="caption" color="textSecondary">

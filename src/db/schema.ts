@@ -27,6 +27,8 @@ export const exercises = sqliteTable(
   'exercises',
   {
     id: integer('id').primaryKey({ autoIncrement: true }),
+    /** Stable slug for built-in exercises (bundled images are keyed by it); null for custom ones. */
+    key: text('key'),
     nameEn: text('name_en').notNull(),
     nameAr: text('name_ar').notNull(),
     muscleGroup: text('muscle_group', { enum: MUSCLE_GROUPS }).notNull(),
@@ -36,7 +38,10 @@ export const exercises = sqliteTable(
     isArchived: integer('is_archived', { mode: 'boolean' }).notNull().default(false),
     createdAt: text('created_at').notNull().default(nowIso),
   },
-  (t) => [index('exercises_muscle_group_idx').on(t.muscleGroup)],
+  (t) => [
+    index('exercises_muscle_group_idx').on(t.muscleGroup),
+    uniqueIndex('exercises_key_idx').on(t.key),
+  ],
 );
 
 export const userPrograms = sqliteTable(

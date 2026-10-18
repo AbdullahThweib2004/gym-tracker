@@ -71,6 +71,7 @@ export function ExerciseFormScreen() {
   const previewExercise = {
     muscleGroup,
     imageUri: pendingPhoto ?? exercise?.imageUri ?? null,
+    key: exercise?.key ?? null,
   };
 
   const choosePhoto = async (source: PhotoSource) => {

@@ -52,7 +52,8 @@
     "duration": {
       "minutes": "{{m}} د",
       "hoursMinutes": "{{h}} س {{m}} د"
-    }
+    },
+    "close": "إغلاق"
   },
   "tabs": {
     "home": "الرئيسية",
@@ -194,7 +195,10 @@
       "generated_many": "أُضيف {{count}} تمريناً.",
       "generated_other": "أُضيف {{count}} تمرين."
     },
-    "data": "بياناتك"
+    "data": "بياناتك",
+    "credits": "المصادر",
+    "creditsImages": "صور التمارين: free-exercise-db (ملكية عامة)",
+    "openLinkHint": "يفتح في المتصفح"
   },
   "onboarding": {
     "title": "اختر نظام التقسيم",
@@ -284,6 +288,12 @@
       },
       "failedTitle": "تعذّر حفظ الصورة",
       "failedMessage": "حاول مرة أخرى."
+    },
+    "motion": {
+      "label": "طريقة أداء {{name}}",
+      "start": "وضع البداية",
+      "end": "وضع النهاية",
+      "openHint": "يعرض الوضعين بملء الشاشة"
     }
   },
   "languages": {

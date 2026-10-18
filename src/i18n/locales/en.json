@@ -40,7 +40,8 @@
     "duration": {
       "minutes": "{{m}} min",
       "hoursMinutes": "{{h}} h {{m}} min"
-    }
+    },
+    "close": "Close"
   },
   "tabs": {
     "home": "Home",
@@ -162,7 +163,10 @@
       "generated_one": "Added {{count}} workout.",
       "generated_other": "Added {{count}} workouts."
     },
-    "data": "Your data"
+    "data": "Your data",
+    "credits": "Credits",
+    "creditsImages": "Exercise images: free-exercise-db (public domain)",
+    "openLinkHint": "Opens in your browser"
   },
   "onboarding": {
     "title": "Choose your split",
@@ -244,6 +248,12 @@
       },
       "failedTitle": "Couldn’t save the photo",
       "failedMessage": "Please try again."
+    },
+    "motion": {
+      "label": "{{name}} demonstration",
+      "start": "Start position",
+      "end": "End position",
+      "openHint": "Opens both positions full screen"
     }
   },
   "languages": {

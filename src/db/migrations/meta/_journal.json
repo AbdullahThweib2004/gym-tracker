@@ -22,6 +22,13 @@
       "when": 1792322590042,
       "tag": "0002_set_drafts",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1792351534646,
+      "tag": "0003_exercise_keys",
+      "breakpoints": true
     }
   ]
 }

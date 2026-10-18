@@ -12,7 +12,7 @@ A personal, offline gym workout tracker for iOS and Android, in English and Arab
 - **Progress charts**: best weight, estimated 1RM and volume per exercise over 1, 3, 6 months or all time.
 - **Rest timer**: starts automatically after each set, keeps time while the phone is locked and notifies you when rest is over.
 - **History**: workouts grouped by week, editable sets, per-exercise history.
-- **Exercise library**: about 100 built-in exercises with English and Arabic gym names, custom exercises, and your own photos of the machines at your gym.
+- **Exercise library**: about 100 built-in exercises with English and Arabic gym names and start/end position images, custom exercises, and your own photos of the machines at your gym.
 - **Backup and restore**: export everything to a JSON file and restore it on any device.
 - **English and Arabic** with full right-to-left layout, dark theme.
 
@@ -103,6 +103,10 @@ Home shows a reminder when your last backup is more than 14 days old.
 - The notification permission is used only for the rest timer ("rest is over").
 - The camera and photo library are used only when you choose to add a photo to an exercise. Photos are stored in the app's private storage.
 
+## Credits
+
+Exercise images: [free-exercise-db](https://github.com/yuhonas/free-exercise-db) (public domain, Unlicense). They are bundled with the app, so they work offline. `scripts/exercise-images/` contains the reviewed mapping and the script that prepares them.
+
 ## License
 
 [MIT](LICENSE) © Abdullah Thweib
@@ -125,7 +129,7 @@ Home shows a reminder when your last backup is more than 14 days old.
 - **رسوم التقدم**: أفضل وزن و1RM التقديري والحجم لكل تمرين خلال شهر أو 3 أو 6 أشهر أو كل الفترة.
 - **مؤقت الراحة**: يبدأ تلقائياً بعد كل مجموعة، ويبقى دقيقاً والهاتف مقفل، وينبّهك عند انتهاء الراحة.
 - **السجل**: التمارين مجمّعة حسب الأسبوع، مع إمكانية تعديل المجموعات وسجل لكل تمرين.
-- **مكتبة التمارين**: نحو 100 تمرين مدمج بأسماء الجيم العربية والإنجليزية، وتمارين مخصصة، وصورك الخاصة لأجهزة ناديك.
+- **مكتبة التمارين**: نحو 100 تمرين مدمج بأسماء الجيم العربية والإنجليزية مع صور لوضعي البداية والنهاية، وتمارين مخصصة، وصورك الخاصة لأجهزة ناديك.
 - **النسخ الاحتياطي والاستعادة**: تصدير كل البيانات إلى ملف JSON واستعادتها على أي جهاز.
 - **العربية والإنجليزية** مع دعم كامل للاتجاه من اليمين لليسار، وواجهة داكنة.
 
@@ -180,6 +184,10 @@ eas build --profile production --platform all    # نسخ المتاجر
 - كل البيانات تبقى على جهازك في قاعدة بيانات محلية. لا حساب ولا خادم ولا تحليلات ولا تتبع.
 - إذن الإشعارات يُستخدم فقط لمؤقت الراحة.
 - الكاميرا ومكتبة الصور تُستخدمان فقط عندما تختار إضافة صورة لتمرين، وتُحفظ الصور داخل مساحة التطبيق الخاصة.
+
+### المصادر
+
+صور التمارين: [free-exercise-db](https://github.com/yuhonas/free-exercise-db) (ملكية عامة، Unlicense). الصور مضمّنة في التطبيق فتعمل بدون إنترنت.
 
 ### الترخيص
 

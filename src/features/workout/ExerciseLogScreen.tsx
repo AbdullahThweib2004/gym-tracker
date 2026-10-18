@@ -18,6 +18,7 @@ import { Card } from '@/components/Card';
 import { EmptyState } from '@/components/EmptyState';
 import { Screen } from '@/components/Screen';
 import { ScreenHeader } from '@/components/ScreenHeader';
+import { ExerciseMotion } from '@/features/exercises/components/ExerciseMotion';
 import { suggestNextWeight } from '@/features/progress/overload';
 import { recordsForSet } from '@/features/progress/progressService';
 import type { RecordKind } from '@/features/progress/records';
@@ -267,6 +268,12 @@ export function ExerciseLogScreen() {
               {t('workout.viewHistory')}
             </AppText>
           </Pressable>
+
+          <ExerciseMotion
+            exercise={item.exercise}
+            height={180}
+            accessibilityLabel={t('exercises.motion.label', { name })}
+          />
 
           <Card>
             <AppText variant="label" color="textSecondary">

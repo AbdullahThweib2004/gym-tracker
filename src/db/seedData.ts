@@ -1,6 +1,9 @@
 import type { Equipment, MuscleGroup } from '@/constants/muscles';
+import { slugify } from '@/utils/slug';
 
 export type SeedExercise = {
+  /** Stable identifier for built-in exercises (e.g. bundled images are keyed by it). */
+  key: string;
   nameEn: string;
   nameAr: string;
   muscleGroup: MuscleGroup;
@@ -13,6 +16,7 @@ const e = (
   muscleGroup: MuscleGroup,
   equipment: Equipment,
 ): SeedExercise => ({
+  key: slugify(nameEn),
   nameEn,
   nameAr,
   muscleGroup,

@@ -1,6 +1,6 @@
 import { db } from './client';
 import { getMeta, META_KEYS, setMeta } from './repositories/appMeta';
-import { insertExercises } from './repositories/exercises';
+import { backfillBuiltInKeys, insertExercises } from './repositories/exercises';
 import { SEED_EXERCISES } from './seedData';
 
 /**
@@ -25,4 +25,15 @@ export function seedDatabase(): boolean {
     setMeta(META_KEYS.seeded, 'true', tx);
   });
   return true;
+}
+
+/**
+ * Makes sure built-in exercises have their stable key. The 0003 migration backfills existing
+ * rows; this also covers data restored from a backup made before keys existed. Cheap and
+ * idempotent, so it runs on every start.
+ */
+export function ensureExerciseKeys(): number {
+  return backfillBuiltInKeys(
+    new Map(SEED_EXERCISES.map((exercise) => [exercise.nameEn, exercise.key])),
+  );
 }

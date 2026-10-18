@@ -1,0 +1,408 @@
+{
+  "barbell-bench-press": {
+    "datasetId": "Barbell_Bench_Press_-_Medium_Grip",
+    "confidence": "high"
+  },
+  "incline-barbell-bench-press": {
+    "datasetId": "Barbell_Incline_Bench_Press_-_Medium_Grip",
+    "confidence": "high"
+  },
+  "decline-barbell-bench-press": {
+    "datasetId": "Decline_Barbell_Bench_Press",
+    "confidence": "high"
+  },
+  "dumbbell-bench-press": {
+    "datasetId": "Dumbbell_Bench_Press",
+    "confidence": "high"
+  },
+  "incline-dumbbell-press": {
+    "datasetId": "Incline_Dumbbell_Press",
+    "confidence": "high"
+  },
+  "dumbbell-fly": {
+    "datasetId": "Dumbbell_Flyes",
+    "confidence": "high"
+  },
+  "machine-chest-press": {
+    "datasetId": "Machine_Bench_Press",
+    "confidence": "high",
+    "note": "Seated machine chest press (checked visually)."
+  },
+  "pec-deck-fly": {
+    "datasetId": "Butterfly",
+    "confidence": "high",
+    "note": "The dataset calls the pec deck machine \"Butterfly\"."
+  },
+  "cable-crossover": {
+    "datasetId": "Cable_Crossover",
+    "confidence": "high"
+  },
+  "low-to-high-cable-fly": {
+    "datasetId": "Low_Cable_Crossover",
+    "confidence": "high",
+    "note": "Low cable crossover = low-to-high fly."
+  },
+  "push-up": {
+    "datasetId": "Pushups",
+    "confidence": "high"
+  },
+  "chest-dip": {
+    "datasetId": "Dips_-_Chest_Version",
+    "confidence": "high"
+  },
+  "deadlift": {
+    "datasetId": "Barbell_Deadlift",
+    "confidence": "high"
+  },
+  "barbell-row": {
+    "datasetId": "Bent_Over_Barbell_Row",
+    "confidence": "high"
+  },
+  "t-bar-row": {
+    "datasetId": "T-Bar_Row_with_Handle",
+    "confidence": "high"
+  },
+  "one-arm-dumbbell-row": {
+    "datasetId": "One-Arm_Dumbbell_Row",
+    "confidence": "high"
+  },
+  "dumbbell-pullover": {
+    "datasetId": "Straight-Arm_Dumbbell_Pullover",
+    "confidence": "high",
+    "note": "Classic lying pullover (checked visually)."
+  },
+  "lat-pulldown": {
+    "datasetId": "Wide-Grip_Lat_Pulldown",
+    "confidence": "high"
+  },
+  "close-grip-lat-pulldown": {
+    "datasetId": "Close-Grip_Front_Lat_Pulldown",
+    "confidence": "high"
+  },
+  "seated-cable-row": {
+    "datasetId": "Seated_Cable_Rows",
+    "confidence": "high"
+  },
+  "straight-arm-pulldown": {
+    "datasetId": "Straight-Arm_Pulldown",
+    "confidence": "high"
+  },
+  "machine-row": {
+    "datasetId": "Leverage_Iso_Row",
+    "confidence": "medium",
+    "note": "Plate-loaded seated row; machines vary between gyms."
+  },
+  "back-extension": {
+    "datasetId": "Hyperextensions_Back_Extensions",
+    "confidence": "high"
+  },
+  "pull-up": {
+    "datasetId": "Pullups",
+    "confidence": "high"
+  },
+  "overhead-barbell-press": {
+    "datasetId": "Standing_Military_Press",
+    "confidence": "high"
+  },
+  "barbell-upright-row": {
+    "datasetId": "Upright_Barbell_Row",
+    "confidence": "high"
+  },
+  "seated-dumbbell-shoulder-press": {
+    "datasetId": "Seated_Dumbbell_Press",
+    "confidence": "high"
+  },
+  "arnold-press": {
+    "datasetId": "Arnold_Dumbbell_Press",
+    "confidence": "high"
+  },
+  "dumbbell-lateral-raise": {
+    "datasetId": "Side_Lateral_Raise",
+    "confidence": "high"
+  },
+  "dumbbell-front-raise": {
+    "datasetId": "Front_Dumbbell_Raise",
+    "confidence": "high"
+  },
+  "rear-delt-dumbbell-fly": {
+    "datasetId": "Reverse_Flyes",
+    "confidence": "medium",
+    "note": "Chest-supported on an incline bench (checked visually)."
+  },
+  "dumbbell-shrug": {
+    "datasetId": "Dumbbell_Shrug",
+    "confidence": "high"
+  },
+  "machine-shoulder-press": {
+    "datasetId": "Machine_Shoulder_Military_Press",
+    "confidence": "high"
+  },
+  "reverse-pec-deck": {
+    "datasetId": "Reverse_Machine_Flyes",
+    "confidence": "high"
+  },
+  "cable-lateral-raise": {
+    "datasetId": "Cable_Seated_Lateral_Raise",
+    "confidence": "medium",
+    "note": "Seated two-arm version; same movement (checked visually)."
+  },
+  "face-pull": {
+    "datasetId": "Face_Pull",
+    "confidence": "high"
+  },
+  "barbell-curl": {
+    "datasetId": "Barbell_Curl",
+    "confidence": "high"
+  },
+  "ez-bar-curl": {
+    "datasetId": "EZ-Bar_Curl",
+    "confidence": "high"
+  },
+  "dumbbell-curl": {
+    "datasetId": "Dumbbell_Bicep_Curl",
+    "confidence": "high"
+  },
+  "hammer-curl": {
+    "datasetId": "Hammer_Curls",
+    "confidence": "high"
+  },
+  "incline-dumbbell-curl": {
+    "datasetId": "Incline_Dumbbell_Curl",
+    "confidence": "high"
+  },
+  "concentration-curl": {
+    "datasetId": "Concentration_Curls",
+    "confidence": "high"
+  },
+  "preacher-curl": {
+    "datasetId": "Preacher_Curl",
+    "confidence": "high"
+  },
+  "machine-preacher-curl": {
+    "datasetId": "Machine_Preacher_Curls",
+    "confidence": "high"
+  },
+  "cable-curl": {
+    "datasetId": "Standing_Biceps_Cable_Curl",
+    "confidence": "high"
+  },
+  "close-grip-bench-press": {
+    "datasetId": "Close-Grip_Barbell_Bench_Press",
+    "confidence": "high"
+  },
+  "skull-crusher": {
+    "datasetId": "EZ-Bar_Skullcrusher",
+    "confidence": "high",
+    "note": "Shown with an EZ bar."
+  },
+  "overhead-dumbbell-extension": {
+    "datasetId": "Standing_Dumbbell_Triceps_Extension",
+    "confidence": "high"
+  },
+  "dumbbell-kickback": {
+    "datasetId": "Tricep_Dumbbell_Kickback",
+    "confidence": "high"
+  },
+  "machine-triceps-extension": {
+    "datasetId": "Machine_Triceps_Extension",
+    "confidence": "high"
+  },
+  "cable-pushdown": {
+    "datasetId": "Triceps_Pushdown",
+    "confidence": "high"
+  },
+  "rope-pushdown": {
+    "datasetId": "Triceps_Pushdown_-_Rope_Attachment",
+    "confidence": "high"
+  },
+  "overhead-cable-extension": {
+    "datasetId": "Cable_Rope_Overhead_Triceps_Extension",
+    "confidence": "high"
+  },
+  "triceps-dip": {
+    "datasetId": "Dips_-_Triceps_Version",
+    "confidence": "high"
+  },
+  "back-squat": {
+    "datasetId": "Barbell_Squat",
+    "confidence": "high"
+  },
+  "front-squat": {
+    "datasetId": "Front_Barbell_Squat",
+    "confidence": "high"
+  },
+  "romanian-deadlift": {
+    "datasetId": "Romanian_Deadlift",
+    "confidence": "high"
+  },
+  "goblet-squat": {
+    "datasetId": "Goblet_Squat",
+    "confidence": "low",
+    "note": "Shown with a kettlebell instead of a dumbbell; same hold and movement."
+  },
+  "dumbbell-walking-lunge": {
+    "datasetId": "Dumbbell_Lunges",
+    "confidence": "high"
+  },
+  "bulgarian-split-squat": {
+    "datasetId": "Split_Squat_with_Dumbbells",
+    "confidence": "high",
+    "note": "Rear foot on a bench = Bulgarian split squat (checked visually)."
+  },
+  "leg-press": {
+    "datasetId": "Leg_Press",
+    "confidence": "high"
+  },
+  "hack-squat": {
+    "datasetId": "Hack_Squat",
+    "confidence": "high"
+  },
+  "smith-machine-squat": {
+    "datasetId": "Smith_Machine_Squat",
+    "confidence": "high"
+  },
+  "leg-extension": {
+    "datasetId": "Leg_Extensions",
+    "confidence": "high"
+  },
+  "lying-leg-curl": {
+    "datasetId": "Lying_Leg_Curls",
+    "confidence": "high"
+  },
+  "seated-leg-curl": {
+    "datasetId": "Seated_Leg_Curl",
+    "confidence": "high"
+  },
+  "hip-adduction-machine": {
+    "datasetId": "Thigh_Adductor",
+    "confidence": "high"
+  },
+  "standing-cable-leg-curl": {
+    "datasetId": null,
+    "note": "Only a standing leg-curl MACHINE exists in the dataset; a cable version looks different."
+  },
+  "barbell-hip-thrust": {
+    "datasetId": "Barbell_Hip_Thrust",
+    "confidence": "high"
+  },
+  "sumo-deadlift": {
+    "datasetId": "Sumo_Deadlift",
+    "confidence": "high"
+  },
+  "dumbbell-step-up": {
+    "datasetId": "Dumbbell_Step_Ups",
+    "confidence": "high"
+  },
+  "hip-abduction-machine": {
+    "datasetId": "Thigh_Abductor",
+    "confidence": "high"
+  },
+  "machine-glute-kickback": {
+    "datasetId": null,
+    "note": "Only a bodyweight (all fours) kickback exists in the dataset."
+  },
+  "cable-glute-kickback": {
+    "datasetId": "One-Legged_Cable_Kickback",
+    "confidence": "high"
+  },
+  "cable-pull-through": {
+    "datasetId": "Pull_Through",
+    "confidence": "high"
+  },
+  "glute-bridge": {
+    "datasetId": "Butt_Lift_Bridge",
+    "confidence": "high"
+  },
+  "standing-barbell-calf-raise": {
+    "datasetId": "Standing_Barbell_Calf_Raise",
+    "confidence": "high"
+  },
+  "dumbbell-calf-raise": {
+    "datasetId": "Standing_Dumbbell_Calf_Raise",
+    "confidence": "high"
+  },
+  "standing-calf-raise-machine": {
+    "datasetId": "Standing_Calf_Raises",
+    "confidence": "high"
+  },
+  "seated-calf-raise": {
+    "datasetId": "Seated_Calf_Raise",
+    "confidence": "high"
+  },
+  "leg-press-calf-raise": {
+    "datasetId": "Calf_Press_On_The_Leg_Press_Machine",
+    "confidence": "high"
+  },
+  "cable-calf-raise": {
+    "datasetId": null,
+    "note": "No cable calf raise in the dataset."
+  },
+  "barbell-rollout": {
+    "datasetId": "Barbell_Ab_Rollout_-_On_Knees",
+    "confidence": "high"
+  },
+  "dumbbell-side-bend": {
+    "datasetId": "Dumbbell_Side_Bend",
+    "confidence": "high"
+  },
+  "russian-twist": {
+    "datasetId": "Russian_Twist",
+    "confidence": "medium",
+    "note": "Shown holding a plate instead of a dumbbell (checked visually)."
+  },
+  "ab-crunch-machine": {
+    "datasetId": "Ab_Crunch_Machine",
+    "confidence": "high"
+  },
+  "cable-crunch": {
+    "datasetId": "Cable_Crunch",
+    "confidence": "high"
+  },
+  "cable-woodchopper": {
+    "datasetId": "Standing_Cable_Wood_Chop",
+    "confidence": "high"
+  },
+  "crunch": {
+    "datasetId": "Crunches",
+    "confidence": "high"
+  },
+  "hanging-leg-raise": {
+    "datasetId": "Hanging_Leg_Raise",
+    "confidence": "high"
+  },
+  "plank": {
+    "datasetId": "Plank",
+    "confidence": "high",
+    "startIndex": 1,
+    "note": "The dataset\u2019s first frame is the kneeling setup; the plank hold (second frame) is used as the start image."
+  },
+  "ab-wheel-rollout": {
+    "datasetId": "Ab_Roller",
+    "confidence": "high"
+  },
+  "barbell-wrist-curl": {
+    "datasetId": "Palms-Up_Barbell_Wrist_Curl_Over_A_Bench",
+    "confidence": "high"
+  },
+  "reverse-barbell-curl": {
+    "datasetId": "Reverse_Barbell_Curl",
+    "confidence": "high"
+  },
+  "dumbbell-wrist-curl": {
+    "datasetId": "Seated_Dumbbell_Palms-Up_Wrist_Curl",
+    "confidence": "high"
+  },
+  "farmers-walk": {
+    "datasetId": null,
+    "note": "The dataset shows strongman frame handles, not dumbbells."
+  },
+  "behind-the-back-smith-wrist-curl": {
+    "datasetId": "Standing_Palms-Up_Barbell_Behind_The_Back_Wrist_Curl",
+    "confidence": "medium",
+    "note": "Free barbell instead of a Smith machine; same movement (checked visually)."
+  },
+  "cable-wrist-curl": {
+    "datasetId": "Cable_Wrist_Curl",
+    "confidence": "high"
+  }
+}

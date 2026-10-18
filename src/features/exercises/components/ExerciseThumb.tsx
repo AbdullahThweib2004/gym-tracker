@@ -1,13 +1,13 @@
 import { useState } from 'react';
-import { Image, View } from 'react-native';
+import { View } from 'react-native';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import { Image } from 'expo-image';
 import { useTranslation } from 'react-i18next';
 
 import type { MuscleGroup } from '@/constants/muscles';
-import type { Exercise } from '@/db/schema';
 import { useTheme } from '@/theme';
 
-import { resolvePhotoUri } from '../photoStorage';
+import { exerciseImageFor, type ExerciseImageInput } from '../useExerciseImage';
 
 type IconName = keyof typeof MaterialCommunityIcons.glyphMap;
 
@@ -25,17 +25,20 @@ const MUSCLE_GROUP_ICONS: Record<MuscleGroup, IconName> = {
 };
 
 type ExerciseThumbProps = {
-  exercise: Pick<Exercise, 'muscleGroup' | 'imageUri'>;
+  exercise: ExerciseImageInput;
   size?: number;
 };
 
-/** The exercise's photo when it has one, otherwise a muscle-group icon on a tile. */
+/** The user's photo, else the bundled start image, else a muscle-group icon on a tile. */
 export function ExerciseThumb({ exercise, size = 44 }: ExerciseThumbProps) {
   const theme = useTheme();
   const { t } = useTranslation();
-  const uri = resolvePhotoUri(exercise.imageUri);
-  const [failedUri, setFailedUri] = useState<string | null>(null);
-  const showPhoto = uri !== null && uri !== failedUri;
+  const image = exerciseImageFor(exercise);
+  const source =
+    image.kind === 'photo' ? { uri: image.uri } : image.kind === 'bundled' ? image.start : null;
+  // A deleted or unreadable photo falls back to the icon instead of a blank tile.
+  const [failed, setFailed] = useState<unknown>(null);
+  const showImage = source !== null && failed !== source;
 
   return (
     <View
@@ -52,13 +55,14 @@ export function ExerciseThumb({ exercise, size = 44 }: ExerciseThumbProps) {
         overflow: 'hidden',
       }}
     >
-      {showPhoto ? (
+      {showImage ? (
         <Image
-          source={{ uri }}
+          source={source}
           style={{ width: size, height: size }}
-          resizeMode="cover"
-          // A deleted or moved file falls back to the icon instead of a blank tile.
-          onError={() => setFailedUri(uri)}
+          contentFit="cover"
+          transition={150}
+          cachePolicy="memory"
+          onError={() => setFailed(source)}
         />
       ) : (
         <MaterialCommunityIcons

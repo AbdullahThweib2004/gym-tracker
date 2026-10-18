@@ -1,5 +1,5 @@
 import { hasCompleteActiveProgram } from '@/db/repositories/userPrograms';
-import { seedDatabase } from '@/db/seed';
+import { ensureExerciseKeys, seedDatabase } from '@/db/seed';
 import { initLanguage, reloadApp } from '@/i18n/language';
 import { configureRestNotifications } from '@/features/restTimer/restNotifications';
 import { useRestTimerStore } from '@/features/restTimer/restTimerStore';
@@ -11,6 +11,7 @@ import { useAppStore } from '@/store/appStore';
  */
 export async function bootstrapApp(): Promise<void> {
   seedDatabase();
+  ensureExerciseKeys();
   const { language, needsReload } = await initLanguage();
   if (needsReload) {
     await reloadApp();

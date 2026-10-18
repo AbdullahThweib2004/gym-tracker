@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { Alert, Pressable, View } from 'react-native';
+import { Alert, Linking, Pressable, View } from 'react-native';
 import Constants from 'expo-constants';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router, useFocusEffect } from 'expo-router';
@@ -34,6 +34,8 @@ const DevToolsSection: typeof DevToolsModule.DevToolsSection | null = __DEV__
   ? // eslint-disable-next-line @typescript-eslint/no-require-imports -- conditional so it's stripped from production
     (require('@/features/dev/DevToolsSection') as typeof DevToolsModule).DevToolsSection
   : null;
+
+const EXERCISE_IMAGES_CREDIT_URL = 'https://github.com/yuhonas/free-exercise-db';
 
 export function SettingsScreen() {
   const { t } = useTranslation();
@@ -220,6 +222,26 @@ export function SettingsScreen() {
           <AppText color="textSecondary">{t('settings.version')}</AppText>
           <AppText>{version}</AppText>
         </View>
+        <Pressable
+          accessibilityRole="link"
+          accessibilityHint={t('settings.openLinkHint')}
+          onPress={() => void Linking.openURL(EXERCISE_IMAGES_CREDIT_URL)}
+          style={({ pressed }) => ({
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: theme.spacing.md,
+            minHeight: 44,
+            paddingVertical: theme.spacing.sm,
+            borderRadius: theme.radius.sm,
+            backgroundColor: pressed ? theme.colors.surfaceElevated : theme.colors.transparent,
+          })}
+        >
+          <View style={{ flex: 1, gap: theme.spacing.xxs }}>
+            <AppText color="textSecondary">{t('settings.credits')}</AppText>
+            <AppText variant="caption">{t('settings.creditsImages')}</AppText>
+          </View>
+          <Ionicons name="open-outline" size={18} color={theme.colors.primary} />
+        </Pressable>
       </Card>
       {DevToolsSection ? <DevToolsSection /> : null}
     </Screen>

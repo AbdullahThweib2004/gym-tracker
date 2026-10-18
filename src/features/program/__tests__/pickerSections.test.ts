@@ -10,6 +10,7 @@ const ex = (
   equipment: Exercise['equipment'],
 ): Exercise => ({
   id: nextId++,
+  key: null,
   nameEn,
   nameAr,
   muscleGroup,

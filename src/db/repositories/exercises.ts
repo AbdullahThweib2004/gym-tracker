@@ -1,4 +1,4 @@
-import { and, asc, eq, inArray, like, or, sql, type SQL } from 'drizzle-orm';
+import { and, asc, eq, inArray, isNull, like, or, sql, type SQL } from 'drizzle-orm';
 
 import type { Equipment, MuscleGroup } from '@/constants/muscles';
 
@@ -153,4 +153,34 @@ export function deleteCustomExercise(
   if (isExerciseInUse(id, executor)) return 'inUse';
   executor.delete(exercises).where(eq(exercises.id, id)).run();
   return 'deleted';
+}
+
+/**
+ * Sets the stable key of built-in exercises that don't have one yet, matched by English name.
+ * Returns how many rows were updated. Custom exercises are never touched.
+ */
+export function backfillBuiltInKeys(
+  keysByNameEn: ReadonlyMap<string, string>,
+  executor: DbExecutor = db,
+): number {
+  const missing = executor
+    .select({ id: exercises.id, nameEn: exercises.nameEn })
+    .from(exercises)
+    .where(and(eq(exercises.isCustom, false), isNull(exercises.key)))
+    .all();
+  let updated = 0;
+  for (const row of missing) {
+    const key = keysByNameEn.get(row.nameEn);
+    if (!key) continue;
+    // Skip if another row already owns this key (keys are unique).
+    const taken = executor
+      .select({ id: exercises.id })
+      .from(exercises)
+      .where(eq(exercises.key, key))
+      .get();
+    if (taken) continue;
+    executor.update(exercises).set({ key }).where(eq(exercises.id, row.id)).run();
+    updated++;
+  }
+  return updated;
 }

@@ -32,3 +32,14 @@ describe('buildWorkoutExercises', () => {
     expect(second).toMatchObject({ loggedSets: 3, workingSets: 2, isComplete: true });
   });
 });
+
+describe('rest per exercise', () => {
+  it('carries the program rest time and leaves extras on the default', () => {
+    const items = buildWorkoutExercises(
+      [{ exerciseId: 1, targetSets: 3, targetRepsMin: 8, targetRepsMax: 12, restSeconds: 120 }],
+      [2],
+      [],
+    );
+    expect(items.map((i) => i.restSeconds)).toEqual([120, null]);
+  });
+});

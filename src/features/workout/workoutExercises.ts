@@ -6,6 +6,8 @@ export type WorkoutExerciseSource = 'program' | 'extra' | 'logged';
 
 export type WorkoutExerciseItem = ExerciseTargets & {
   exerciseId: number;
+  /** Rest after each set from the program, or null to use the default. */
+  restSeconds: number | null;
   source: WorkoutExerciseSource;
   /** Logged sets (any kind) and logged working sets for this exercise in the session. */
   loggedSets: number;
@@ -19,17 +21,26 @@ export type WorkoutExerciseItem = ExerciseTargets & {
  * program after the session started), so no logged data is ever hidden.
  */
 export function buildWorkoutExercises(
-  dayEntries: readonly (ExerciseTargets & { exerciseId: number })[],
+  dayEntries: readonly (ExerciseTargets & { exerciseId: number; restSeconds?: number | null })[],
   extraExerciseIds: readonly number[],
   sets: readonly SetRef[],
 ): WorkoutExerciseItem[] {
   const seen = new Set<number>();
-  const ordered: { exerciseId: number; targets: ExerciseTargets; source: WorkoutExerciseSource }[] =
-    [];
-  const push = (exerciseId: number, targets: ExerciseTargets, source: WorkoutExerciseSource) => {
+  const ordered: {
+    exerciseId: number;
+    targets: ExerciseTargets;
+    restSeconds: number | null;
+    source: WorkoutExerciseSource;
+  }[] = [];
+  const push = (
+    exerciseId: number,
+    targets: ExerciseTargets,
+    source: WorkoutExerciseSource,
+    restSeconds: number | null = null,
+  ) => {
     if (seen.has(exerciseId)) return;
     seen.add(exerciseId);
-    ordered.push({ exerciseId, targets, source });
+    ordered.push({ exerciseId, targets, restSeconds, source });
   };
 
   for (const entry of dayEntries) {
@@ -41,17 +52,19 @@ export function buildWorkoutExercises(
         targetRepsMax: entry.targetRepsMax,
       },
       'program',
+      entry.restSeconds ?? null,
     );
   }
   for (const id of extraExerciseIds) push(id, DEFAULT_TARGETS, 'extra');
   for (const set of sets) push(set.exerciseId, DEFAULT_TARGETS, 'logged');
 
-  return ordered.map(({ exerciseId, targets, source }) => {
+  return ordered.map(({ exerciseId, targets, restSeconds, source }) => {
     const mine = sets.filter((set) => set.exerciseId === exerciseId);
     const working = mine.filter((set) => !set.isWarmup).length;
     return {
       exerciseId,
       source,
+      restSeconds,
       ...targets,
       loggedSets: mine.length,
       workingSets: working,

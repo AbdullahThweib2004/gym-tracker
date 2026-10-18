@@ -12,6 +12,13 @@ import {
 } from '@/constants/settings';
 import { useTheme } from '@/theme';
 
+import { formatRestSeconds } from '@/i18n/format';
+import {
+  REST_ADJUST_SECONDS,
+  REST_MAX_SECONDS,
+  snapRestSeconds,
+} from '@/features/restTimer/restMath';
+
 import { normalizeTargets, type ExerciseTargets } from '../targets';
 
 type TargetEditorModalProps = {
@@ -19,6 +26,9 @@ type TargetEditorModalProps = {
   title: string;
   targets: ExerciseTargets;
   onChange: (targets: ExerciseTargets) => void;
+  /** Rest after each set; null means "use the default from Settings". */
+  restSeconds: number | null;
+  onChangeRest: (restSeconds: number | null) => void;
   onRemove: () => void;
   onClose: () => void;
 };
@@ -28,6 +38,8 @@ export function TargetEditorModal({
   title,
   targets,
   onChange,
+  restSeconds,
+  onChangeRest,
   onRemove,
   onClose,
 }: TargetEditorModalProps) {
@@ -85,6 +97,18 @@ export function TargetEditorModal({
             onChange={(targetRepsMax) =>
               onChange(normalizeTargets({ ...targets, targetRepsMax }, 'max'))
             }
+            {...stepLabels}
+          />
+          <Stepper
+            label={t('restTimer.restPerSet')}
+            value={restSeconds ?? 0}
+            min={0}
+            max={REST_MAX_SECONDS}
+            step={REST_ADJUST_SECONDS}
+            formatValue={(seconds) =>
+              seconds === 0 ? t('restTimer.useDefault') : formatRestSeconds(seconds)
+            }
+            onChange={(next) => onChangeRest(snapRestSeconds(restSeconds ?? 0, next))}
             {...stepLabels}
           />
           <View style={{ flexDirection: 'row', gap: theme.spacing.sm }}>

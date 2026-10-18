@@ -79,8 +79,9 @@ export function formatSet(
 
 // Left-to-right isolate: keeps "60 × 10" and "8–12" in reading order inside Arabic text,
 // where the bidi algorithm would otherwise reverse the numbers around "×" and "–".
-const LRI = '⁦';
-const PDI = '⁩';
+// Built from code points so the source shows what they are and the UI gets the real characters.
+const LRI = String.fromCharCode(0x2066);
+const PDI = String.fromCharCode(0x2069);
 export const ltr = (text: string) => `${LRI}${text}${PDI}`;
 
 /** Compact set without units, e.g. "60 × 10" (for lists of sets). */
@@ -143,4 +144,21 @@ export function formatDateRange(
   language: Language = currentLanguage(),
 ): string {
   return `${formatDate(start, 'short', language)} – ${formatDate(end, 'short', language)}`;
+}
+
+/** Rest duration as a clock, e.g. "1:30". */
+export function formatRestSeconds(seconds: number): string {
+  return ltr(formatClock(seconds * 1000));
+}
+
+/** "+7.5 kg" / "−2.5 kg" / "0 kg" with the sign kept next to the number in RTL. */
+export function formatWeightChange(
+  deltaKg: number,
+  language: Language = currentLanguage(),
+): string {
+  const sign = deltaKg > 0 ? '+' : deltaKg < 0 ? '−' : '';
+  return i18n.t('common.units.weightValue', {
+    value: ltr(`${sign}${formatNumber(Math.abs(deltaKg))}`),
+    lng: language,
+  });
 }

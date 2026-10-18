@@ -15,6 +15,13 @@
       "when": 1792321413168,
       "tag": "0001_session_extra_exercises",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1792322590042,
+      "tag": "0002_set_drafts",
+      "breakpoints": true
     }
   ]
 }

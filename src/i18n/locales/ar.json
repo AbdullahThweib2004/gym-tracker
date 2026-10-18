@@ -175,7 +175,23 @@
     "changeSplit": "تغيير نظام التقسيم",
     "changeSplitTitle": "تغيير نظام التقسيم؟",
     "changeSplitMessage": "سجل تمارينك محفوظ. ستختار نظام تقسيم جديداً وسيتم إنشاء برنامج جديد.",
-    "changeSplitConfirm": "متابعة"
+    "changeSplitConfirm": "متابعة",
+    "dev": {
+      "title": "أدوات المطوّر",
+      "hint": "تظهر فقط في نسخ التطوير.",
+      "generate": "إنشاء سجل تجريبي",
+      "clear": "مسح كل سجل التمارين",
+      "clearTitle": "مسح كل سجل التمارين؟",
+      "clearMessage": "سيتم حذف كل التمارين والمجموعات، مع الإبقاء على برنامجك.",
+      "clearConfirm": "مسح السجل",
+      "cleared": "تم مسح سجل التمارين.",
+      "generated_zero": "لم يُضف أي تمرين.",
+      "generated_one": "أُضيف تمرين واحد.",
+      "generated_two": "أُضيف تمرينان.",
+      "generated_few": "أُضيفت {{count}} تمارين.",
+      "generated_many": "أُضيف {{count}} تمريناً.",
+      "generated_other": "أُضيف {{count}} تمرين."
+    }
   },
   "onboarding": {
     "title": "اختر نظام التقسيم",
@@ -281,5 +297,78 @@
     "setsLogged_few": "{{count}} مجموعات",
     "setsLogged_many": "{{count}} مجموعة",
     "setsLogged_other": "{{count}} مجموعة"
+  },
+  "restTimer": {
+    "title": "راحة",
+    "remaining": "راحة، متبقٍّ {{time}}",
+    "minus": "−{{s}} ث",
+    "plus": "+{{s}} ث",
+    "skip": "تخطٍّ",
+    "channelName": "مؤقت الراحة",
+    "doneTitle": "انتهت الراحة",
+    "doneBody": "حان وقت المجموعة التالية 💪",
+    "permissionTitle": "تنبيهك عند انتهاء الراحة؟",
+    "permissionMessage": "يمكن للتطبيق تنبيهك عند انتهاء وقت الراحة حتى لو كان الهاتف مقفلاً. لا يُرسَل أي شيء آخر.",
+    "notNow": "ليس الآن",
+    "allow": "سماح",
+    "settingsTitle": "مؤقت الراحة",
+    "defaultRest": "مدة الراحة الافتراضية",
+    "autoStart": "البدء تلقائياً",
+    "autoStartHint": "يبدأ بعد تأكيد كل مجموعة.",
+    "alerts": "الصوت والاهتزاز",
+    "alertsHint": "عند انتهاء الراحة.",
+    "restPerSet": "الراحة بين المجموعات",
+    "useDefault": "افتراضي"
+  },
+  "progress": {
+    "suggestionTitle": "هدف اليوم",
+    "apply": "تطبيق",
+    "suggestion": {
+      "increase": "جرّب {{weight}} اليوم، فقد وصلت إلى {{reps}} تكرار في كل المجموعات",
+      "buildReps": "ابقَ على {{weight}} وابنِ التكرارات أولاً: استهدف {{min}} أو أكثر في كل مجموعة",
+      "moreReps": "ابقَ على {{weight}} واستهدف تكرارات أكثر (حتى {{max}})"
+    },
+    "metricLabel": "مقياس الرسم",
+    "rangeLabel": "المدة",
+    "metric": {
+      "bestWeight": "أفضل وزن",
+      "estimated1RM": "1RM تقديري",
+      "volume": "الحجم"
+    },
+    "range": {
+      "1M": "شهر",
+      "3M": "3 أشهر",
+      "6M": "6 أشهر",
+      "all": "الكل"
+    },
+    "notEnoughTitle": "لا توجد بيانات كافية بعد",
+    "notEnoughMessage": "سجّل هذا التمرين في تمرينين على الأقل لترى تقدمك.",
+    "notEnoughInRange": "أقل من تمرينين في هذه المدة",
+    "stats": {
+      "heaviest": "أثقل وزن",
+      "best1RM": "أفضل 1RM تقديري",
+      "sessions": "التمارين",
+      "change": "التغيّر في أفضل وزن"
+    },
+    "lastVolume": "آخر تمرين: {{volume}}",
+    "sessionsTitle": "التمارين السابقة",
+    "chartLabel_zero": "رسم {{metric}}، بلا تمارين",
+    "chartLabel_one": "رسم {{metric}}، تمرين واحد",
+    "chartLabel_two": "رسم {{metric}}، تمرينان",
+    "chartLabel_few": "رسم {{metric}}، {{count}} تمارين",
+    "chartLabel_many": "رسم {{metric}}، {{count}} تمريناً",
+    "chartLabel_other": "رسم {{metric}}، {{count}} تمرين"
+  },
+  "records": {
+    "newPR": "رقم قياسي جديد 🏆",
+    "heaviestWeight": "أثقل وزن",
+    "best1RM": "أفضل 1RM تقديري",
+    "mostRepsAtWeight": "أكثر تكرارات بهذا الوزن",
+    "sessionTitle_zero": "🏆 لا أرقام قياسية",
+    "sessionTitle_one": "🏆 رقم قياسي واحد",
+    "sessionTitle_two": "🏆 رقمان قياسيان",
+    "sessionTitle_few": "🏆 {{count}} أرقام قياسية",
+    "sessionTitle_many": "🏆 {{count}} رقماً قياسياً",
+    "sessionTitle_other": "🏆 {{count}} رقم قياسي"
   }
 }

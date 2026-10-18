@@ -24,6 +24,8 @@ import {
 import { useAppStore } from '@/store/appStore';
 import { useTheme } from '@/theme';
 
+import { getSessionPRs } from '@/features/progress/progressService';
+
 import { exerciseHistoryHref } from './routes';
 
 export function SummaryScreen() {
@@ -32,6 +34,7 @@ export function SummaryScreen() {
   const language = useAppStore((s) => s.language);
   const { sessionId } = useLocalSearchParams<{ sessionId: string }>();
   const [summary] = useState(() => getSessionSummary(Number(sessionId)));
+  const [prs] = useState(() => getSessionPRs(Number(sessionId)));
   const done = () => router.dismissTo('/');
 
   if (!summary) {
@@ -72,6 +75,22 @@ export function SummaryScreen() {
         <StatTile label={t('summary.workingSets')} value={String(summary.workingSets)} />
         <StatTile label={t('summary.volume')} value={formatVolume(summary.volumeKg)} />
       </View>
+
+      {prs.length > 0 ? (
+        <Card style={{ borderColor: theme.colors.warning }}>
+          <AppText variant="subheading">{t('records.sessionTitle', { count: prs.length })}</AppText>
+          {prs.map(({ exercise, set, records }) => (
+            <View key={set.id} style={{ gap: theme.spacing.xxs }}>
+              <AppText variant="bodyStrong">
+                {exerciseName(exercise, language)} · {formatSet(set.weightKg, set.reps)}
+              </AppText>
+              <AppText variant="caption" color="warning">
+                {records.map((kind) => t(`records.${kind}`)).join(' · ')}
+              </AppText>
+            </View>
+          ))}
+        </Card>
+      ) : null}
 
       {summary.exercises.length > 0 ? (
         <AppText variant="subheading" style={{ marginTop: theme.spacing.sm }}>

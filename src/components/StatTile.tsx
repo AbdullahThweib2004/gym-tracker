@@ -1,20 +1,22 @@
 import { View } from 'react-native';
 
-import { useTheme } from '@/theme';
+import { useTheme, type ColorToken } from '@/theme';
 
 import { AppText } from './AppText';
 
 type StatTileProps = {
   label: string;
   value: string;
+  caption?: string;
+  valueColor?: ColorToken;
 };
 
-export function StatTile({ label, value }: StatTileProps) {
+export function StatTile({ label, value, caption, valueColor = 'textPrimary' }: StatTileProps) {
   const theme = useTheme();
   return (
     <View
       accessible
-      accessibilityLabel={`${label}: ${value}`}
+      accessibilityLabel={caption ? `${label}: ${value}, ${caption}` : `${label}: ${value}`}
       style={{
         flexGrow: 1,
         flexBasis: '45%',
@@ -27,7 +29,14 @@ export function StatTile({ label, value }: StatTileProps) {
       <AppText variant="label" color="textSecondary">
         {label}
       </AppText>
-      <AppText variant="subheading">{value}</AppText>
+      <AppText variant="subheading" color={valueColor}>
+        {value}
+      </AppText>
+      {caption ? (
+        <AppText variant="caption" color="textMuted">
+          {caption}
+        </AppText>
+      ) : null}
     </View>
   );
 }

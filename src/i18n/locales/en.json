@@ -147,7 +147,19 @@
     "changeSplit": "Change split",
     "changeSplitTitle": "Change your split?",
     "changeSplitMessage": "Your workout history is kept. You’ll pick a new split and a new program will be created.",
-    "changeSplitConfirm": "Continue"
+    "changeSplitConfirm": "Continue",
+    "dev": {
+      "title": "Developer tools",
+      "hint": "Only visible in development builds.",
+      "generate": "Generate demo history",
+      "clear": "Clear all workout history",
+      "clearTitle": "Clear all workout history?",
+      "clearMessage": "Every workout and set will be deleted. Your program is kept.",
+      "clearConfirm": "Clear history",
+      "cleared": "Workout history cleared.",
+      "generated_one": "Added {{count}} workout.",
+      "generated_other": "Added {{count}} workouts."
+    }
   },
   "onboarding": {
     "title": "Choose your split",
@@ -237,5 +249,70 @@
     "noSets": "No sets were logged.",
     "setsLogged_one": "{{count}} set",
     "setsLogged_other": "{{count}} sets"
+  },
+  "restTimer": {
+    "title": "Rest",
+    "remaining": "Rest, {{time}} left",
+    "minus": "−{{s}}s",
+    "plus": "+{{s}}s",
+    "skip": "Skip",
+    "channelName": "Rest timer",
+    "doneTitle": "Rest is over",
+    "doneBody": "Time for your next set 💪",
+    "permissionTitle": "Get notified when rest is over?",
+    "permissionMessage": "Gym Tracker can alert you when your rest ends, even when your phone is locked. Nothing else is ever sent.",
+    "notNow": "Not now",
+    "allow": "Allow",
+    "settingsTitle": "Rest timer",
+    "defaultRest": "Default rest",
+    "autoStart": "Start automatically",
+    "autoStartHint": "Starts after you confirm a set.",
+    "alerts": "Sound and vibration",
+    "alertsHint": "When rest ends.",
+    "restPerSet": "Rest between sets",
+    "useDefault": "Default"
+  },
+  "progress": {
+    "suggestionTitle": "Today’s target",
+    "apply": "Apply",
+    "suggestion": {
+      "increase": "Try {{weight}} today, you hit {{reps}} reps on all sets",
+      "buildReps": "Stay at {{weight}} and build reps first: aim for {{min}}+ on every set",
+      "moreReps": "Stay at {{weight}} and aim for more reps (up to {{max}})"
+    },
+    "metricLabel": "Chart metric",
+    "rangeLabel": "Time range",
+    "metric": {
+      "bestWeight": "Best weight",
+      "estimated1RM": "Est. 1RM",
+      "volume": "Volume"
+    },
+    "range": {
+      "1M": "1M",
+      "3M": "3M",
+      "6M": "6M",
+      "all": "All"
+    },
+    "notEnoughTitle": "Not enough data yet",
+    "notEnoughMessage": "Log this exercise in at least 2 workouts to see your progress.",
+    "notEnoughInRange": "Fewer than 2 workouts in this range",
+    "stats": {
+      "heaviest": "Heaviest weight",
+      "best1RM": "Best est. 1RM",
+      "sessions": "Workouts",
+      "change": "Change in best weight"
+    },
+    "lastVolume": "Last workout: {{volume}}",
+    "sessionsTitle": "Past workouts",
+    "chartLabel_one": "{{metric}} chart, {{count}} workout",
+    "chartLabel_other": "{{metric}} chart, {{count}} workouts"
+  },
+  "records": {
+    "newPR": "New PR 🏆",
+    "heaviestWeight": "Heaviest weight",
+    "best1RM": "Best est. 1RM",
+    "mostRepsAtWeight": "Most reps at this weight",
+    "sessionTitle_one": "🏆 {{count}} personal record",
+    "sessionTitle_other": "🏆 {{count}} personal records"
   }
 }

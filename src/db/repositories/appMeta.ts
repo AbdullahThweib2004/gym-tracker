@@ -9,6 +9,10 @@ export const META_KEYS = {
   defaultRestSeconds: 'defaultRestSeconds',
   lastBackupAt: 'lastBackupAt',
   directionReloadPending: 'directionReloadPending',
+  restTimer: 'restTimer',
+  autoStartRest: 'autoStartRest',
+  restAlerts: 'restAlerts',
+  restNotificationsAsked: 'restNotificationsAsked',
 } as const;
 
 export type MetaKey = (typeof META_KEYS)[keyof typeof META_KEYS];

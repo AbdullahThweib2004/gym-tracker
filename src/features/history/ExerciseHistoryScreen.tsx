@@ -12,7 +12,24 @@ import { getExerciseById } from '@/db/repositories/exercises';
 import { listExerciseHistory, type ExerciseHistoryEntry } from '@/db/repositories/sessionSets';
 import { ExerciseThumb } from '@/features/exercises/components/ExerciseThumb';
 import { sessionDetailHref } from '@/features/workout/routes';
-import { exerciseName, formatDate, formatSetCompact } from '@/i18n/format';
+import { SegmentedControl } from '@/components/SegmentedControl';
+import { StatTile } from '@/components/StatTile';
+import { ProgressChart } from '@/features/progress/components/ProgressChart';
+import {
+  buildSessionPoints,
+  computeProgressStats,
+  filterByRange,
+  type ProgressMetric,
+  type ProgressRange,
+} from '@/features/progress/progressSeries';
+import {
+  exerciseName,
+  formatDate,
+  formatSetCompact,
+  formatVolume,
+  formatWeight,
+  formatWeightChange,
+} from '@/i18n/format';
 import { useAppStore } from '@/store/appStore';
 import { useTheme } from '@/theme';
 
@@ -41,6 +58,11 @@ export function ExerciseHistoryScreen() {
     useCallback(() => setEntries(listExerciseHistory(exerciseId, { limit: 1000 })), [exerciseId]),
   );
   const groups = useMemo(() => groupBySession(entries), [entries]);
+  const [metric, setMetric] = useState<ProgressMetric>('bestWeight');
+  const [range, setRange] = useState<ProgressRange>('3M');
+  const allPoints = useMemo(() => buildSessionPoints(entries), [entries]);
+  const points = useMemo(() => filterByRange(allPoints, range, new Date()), [allPoints, range]);
+  const stats = useMemo(() => computeProgressStats(allPoints, points), [allPoints, points]);
 
   if (!exercise) {
     return (
@@ -74,6 +96,94 @@ export function ExerciseHistoryScreen() {
           paddingBottom: theme.spacing.xl,
           gap: theme.spacing.sm,
         }}
+        ListHeaderComponent={
+          allPoints.length === 0 ? undefined : (
+            <View style={{ gap: theme.spacing.md, marginBottom: theme.spacing.md }}>
+              <SegmentedControl
+                accessibilityLabel={t('progress.metricLabel')}
+                value={metric}
+                onChange={setMetric}
+                options={[
+                  { value: 'bestWeight', label: t('progress.metric.bestWeight') },
+                  { value: 'estimated1RM', label: t('progress.metric.estimated1RM') },
+                  { value: 'volume', label: t('progress.metric.volume') },
+                ]}
+              />
+              <SegmentedControl
+                accessibilityLabel={t('progress.rangeLabel')}
+                value={range}
+                onChange={setRange}
+                options={[
+                  { value: '1M', label: t('progress.range.1M') },
+                  { value: '3M', label: t('progress.range.3M') },
+                  { value: '6M', label: t('progress.range.6M') },
+                  { value: 'all', label: t('progress.range.all') },
+                ]}
+              />
+              <Card>
+                {allPoints.length < 2 ? (
+                  <EmptyState
+                    icon="trending-up-outline"
+                    title={t('progress.notEnoughTitle')}
+                    message={t('progress.notEnoughMessage')}
+                  />
+                ) : points.length < 2 ? (
+                  <EmptyState icon="calendar-outline" title={t('progress.notEnoughInRange')} />
+                ) : (
+                  <ProgressChart
+                    points={points}
+                    metric={metric}
+                    accessibilityLabel={t('progress.chartLabel', {
+                      metric: t(`progress.metric.${metric}`),
+                      count: points.length,
+                    })}
+                  />
+                )}
+              </Card>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: theme.spacing.sm }}>
+                <StatTile
+                  label={t('progress.stats.heaviest')}
+                  value={stats.heaviest ? formatWeight(stats.heaviest.weightKg) : '—'}
+                  caption={stats.heaviest ? formatDate(stats.heaviest.date, 'medium') : undefined}
+                />
+                <StatTile
+                  label={t('progress.stats.best1RM')}
+                  value={
+                    stats.best1RM === null ? '—' : formatWeight(Math.round(stats.best1RM * 2) / 2)
+                  }
+                />
+                <StatTile
+                  label={t('progress.stats.sessions')}
+                  value={String(stats.totalSessions)}
+                />
+                <StatTile
+                  label={t('progress.stats.change')}
+                  value={
+                    stats.bestWeightChange === null
+                      ? '—'
+                      : formatWeightChange(stats.bestWeightChange)
+                  }
+                  valueColor={
+                    stats.bestWeightChange === null || stats.bestWeightChange === 0
+                      ? 'textPrimary'
+                      : stats.bestWeightChange > 0
+                        ? 'success'
+                        : 'danger'
+                  }
+                  caption={t(`progress.range.${range}`)}
+                />
+              </View>
+              {metric === 'volume' && points.length > 0 ? (
+                <AppText variant="caption" color="textMuted">
+                  {t('progress.lastVolume', {
+                    volume: formatVolume(points[points.length - 1]!.volume),
+                  })}
+                </AppText>
+              ) : null}
+              <AppText variant="subheading">{t('progress.sessionsTitle')}</AppText>
+            </View>
+          )
+        }
         ListEmptyComponent={
           <EmptyState
             icon="barbell-outline"

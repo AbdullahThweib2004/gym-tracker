@@ -9,13 +9,30 @@ import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { Screen } from '@/components/Screen';
+import { Stepper } from '@/components/Stepper';
+import { ToggleRow } from '@/components/ToggleRow';
 import { LANGUAGES, type Language } from '@/constants/settings';
 import { getActiveProgramSummary } from '@/features/program/programService';
-import { dayLabel, splitLabel } from '@/i18n/format';
+import {
+  REST_ADJUST_SECONDS,
+  REST_MAX_SECONDS,
+  REST_MIN_SECONDS,
+} from '@/features/restTimer/restMath';
+import { useRestTimerStore } from '@/features/restTimer/restTimerStore';
+import { dayLabel, formatRestSeconds, splitLabel } from '@/i18n/format';
 import { switchLanguage } from '@/i18n/language';
 import { useAppStore } from '@/store/appStore';
 import { useTheme } from '@/theme';
 import { mirrorInRtl } from '@/utils/direction';
+
+// Type-only (erased at build time), so it doesn't pull the dev module into production.
+import type * as DevToolsModule from '@/features/dev/DevToolsSection';
+
+// Dev tools are required only in development, so production bundles don't include them.
+const DevToolsSection: typeof DevToolsModule.DevToolsSection | null = __DEV__
+  ? // eslint-disable-next-line @typescript-eslint/no-require-imports -- conditional so it's stripped from production
+    (require('@/features/dev/DevToolsSection') as typeof DevToolsModule).DevToolsSection
+  : null;
 
 export function SettingsScreen() {
   const { t } = useTranslation();
@@ -23,6 +40,8 @@ export function SettingsScreen() {
   const language = useAppStore((s) => s.language);
   const setLanguage = useAppStore((s) => s.setLanguage);
   const version = Constants.expoConfig?.version ?? '—';
+  const restSettings = useRestTimerStore((s) => s.settings);
+  const updateRestSettings = useRestTimerStore((s) => s.updateSettings);
   const [summary, setSummary] = useState(() => getActiveProgramSummary());
 
   useFocusEffect(
@@ -150,12 +169,40 @@ export function SettingsScreen() {
       </Card>
 
       <Card>
+        <AppText variant="subheading">{t('restTimer.settingsTitle')}</AppText>
+        <Stepper
+          label={t('restTimer.defaultRest')}
+          value={restSettings.defaultRestSeconds}
+          min={REST_MIN_SECONDS}
+          max={REST_MAX_SECONDS}
+          step={REST_ADJUST_SECONDS}
+          formatValue={formatRestSeconds}
+          onChange={(defaultRestSeconds) => updateRestSettings({ defaultRestSeconds })}
+          decrementLabel={t('common.decrease')}
+          incrementLabel={t('common.increase')}
+        />
+        <ToggleRow
+          label={t('restTimer.autoStart')}
+          hint={t('restTimer.autoStartHint')}
+          value={restSettings.autoStart}
+          onValueChange={(autoStart) => updateRestSettings({ autoStart })}
+        />
+        <ToggleRow
+          label={t('restTimer.alerts')}
+          hint={t('restTimer.alertsHint')}
+          value={restSettings.alerts}
+          onValueChange={(alerts) => updateRestSettings({ alerts })}
+        />
+      </Card>
+
+      <Card>
         <AppText variant="subheading">{t('settings.about')}</AppText>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
           <AppText color="textSecondary">{t('settings.version')}</AppText>
           <AppText>{version}</AppText>
         </View>
       </Card>
+      {DevToolsSection ? <DevToolsSection /> : null}
     </Screen>
   );
 }

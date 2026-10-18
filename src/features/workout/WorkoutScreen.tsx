@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { Alert, View } from 'react-native';
+import { Alert, ScrollView, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -12,9 +12,9 @@ import { EmptyState } from '@/components/EmptyState';
 import { Screen } from '@/components/Screen';
 import { ScreenHeader } from '@/components/ScreenHeader';
 import { ExerciseThumb } from '@/features/exercises/components/ExerciseThumb';
+import { RestTimerBar } from '@/features/restTimer/RestTimerBar';
 import { dayLabel, exerciseName, formatTarget } from '@/i18n/format';
 import { useAppStore } from '@/store/appStore';
-import { useWorkoutDraftStore } from '@/store/workoutDraftStore';
 import { useTheme } from '@/theme';
 import { mirrorInRtl } from '@/utils/direction';
 
@@ -31,7 +31,6 @@ export function WorkoutScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
   const language = useAppStore((s) => s.language);
-  const clearDrafts = useWorkoutDraftStore((s) => s.clearSession);
   const { sessionId: sessionParam } = useLocalSearchParams<{ sessionId: string }>();
   const sessionId = Number(sessionParam);
   const [data, setData] = useState<WorkoutData | null>(() => loadWorkout(sessionId));
@@ -58,7 +57,6 @@ export function WorkoutScreen() {
 
   const finish = () => {
     finishWorkout(session.id);
-    clearDrafts(session.id);
     router.replace(summaryHref(session.id));
   };
 
@@ -82,76 +80,81 @@ export function WorkoutScreen() {
         style: 'destructive',
         onPress: () => {
           discardWorkout(session.id);
-          clearDrafts(session.id);
           leave();
         },
       },
     ]);
 
   return (
-    <Screen scroll>
-      <ScreenHeader
-        title={title}
-        onBack={leave}
-        backLabel={t('common.back')}
-        trailing={<Button label={t('workout.finishShort')} onPress={confirmFinish} icon="flag" />}
-      />
-      {session.finishedAt ? null : (
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.sm }}>
-          <Ionicons name="timer-outline" size={18} color={theme.colors.primary} />
-          <ElapsedTimer since={session.startedAt} accessibilityLabel={t('workout.elapsed')} />
-        </View>
-      )}
+    <Screen padded={false}>
+      <ScrollView contentContainerStyle={{ padding: theme.spacing.lg, gap: theme.spacing.md }}>
+        <ScreenHeader
+          title={title}
+          onBack={leave}
+          backLabel={t('common.back')}
+          trailing={<Button label={t('workout.finishShort')} onPress={confirmFinish} icon="flag" />}
+        />
+        {session.finishedAt ? null : (
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.sm }}>
+            <Ionicons name="timer-outline" size={18} color={theme.colors.primary} />
+            <ElapsedTimer since={session.startedAt} accessibilityLabel={t('workout.elapsed')} />
+          </View>
+        )}
 
-      {items.map((item) => {
-        const name = exerciseName(item.exercise, language);
-        const progress = t('workout.progress', { done: item.workingSets, target: item.targetSets });
-        return (
-          <Card
-            key={item.exerciseId}
-            onPress={() => router.push(exerciseLogHref(session.id, item.exerciseId))}
-            accessibilityLabel={`${name}, ${progress}`}
-            style={item.isComplete ? { borderColor: theme.colors.success } : undefined}
-          >
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.md }}>
-              <ExerciseThumb muscleGroup={item.exercise.muscleGroup} />
-              <View style={{ flex: 1, gap: theme.spacing.xxs }}>
-                <AppText variant="bodyStrong" numberOfLines={2}>
-                  {name}
-                </AppText>
-                <AppText variant="caption" color={item.isComplete ? 'success' : 'textSecondary'}>
-                  {progress} ·{' '}
-                  {formatTarget(item.targetSets, item.targetRepsMin, item.targetRepsMax)}
-                </AppText>
+        {items.map((item) => {
+          const name = exerciseName(item.exercise, language);
+          const progress = t('workout.progress', {
+            done: item.workingSets,
+            target: item.targetSets,
+          });
+          return (
+            <Card
+              key={item.exerciseId}
+              onPress={() => router.push(exerciseLogHref(session.id, item.exerciseId))}
+              accessibilityLabel={`${name}, ${progress}`}
+              style={item.isComplete ? { borderColor: theme.colors.success } : undefined}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.md }}>
+                <ExerciseThumb muscleGroup={item.exercise.muscleGroup} />
+                <View style={{ flex: 1, gap: theme.spacing.xxs }}>
+                  <AppText variant="bodyStrong" numberOfLines={2}>
+                    {name}
+                  </AppText>
+                  <AppText variant="caption" color={item.isComplete ? 'success' : 'textSecondary'}>
+                    {progress} ·{' '}
+                    {formatTarget(item.targetSets, item.targetRepsMin, item.targetRepsMax)}
+                  </AppText>
+                </View>
+                {item.isComplete ? (
+                  <Ionicons name="checkmark-circle" size={26} color={theme.colors.success} />
+                ) : (
+                  <Ionicons
+                    name="chevron-forward"
+                    size={20}
+                    color={theme.colors.textSecondary}
+                    style={mirrorInRtl()}
+                  />
+                )}
               </View>
-              {item.isComplete ? (
-                <Ionicons name="checkmark-circle" size={26} color={theme.colors.success} />
-              ) : (
-                <Ionicons
-                  name="chevron-forward"
-                  size={20}
-                  color={theme.colors.textSecondary}
-                  style={mirrorInRtl()}
-                />
-              )}
-            </View>
-          </Card>
-        );
-      })}
+            </Card>
+          );
+        })}
 
-      <Button
-        label={t('workout.addExercise')}
-        variant="secondary"
-        icon="add"
-        onPress={() => router.push(addExerciseHref(session.id))}
-        fullWidth
-      />
-      <Button
-        label={t('workout.discardWorkout')}
-        variant="ghost"
-        onPress={confirmDiscard}
-        fullWidth
-      />
+        <Button
+          label={t('workout.addExercise')}
+          variant="secondary"
+          icon="add"
+          onPress={() => router.push(addExerciseHref(session.id))}
+          fullWidth
+        />
+        <Button
+          label={t('workout.discardWorkout')}
+          variant="ghost"
+          onPress={confirmDiscard}
+          fullWidth
+        />
+      </ScrollView>
+      <RestTimerBar />
     </Screen>
   );
 }

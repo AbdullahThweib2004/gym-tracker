@@ -244,3 +244,44 @@ export function listFinishedSessionsWithStats(
     volumeKg: Number.parseFloat(Number(volumeKg).toFixed(2)),
   }));
 }
+
+export type FinishedSessionInput = {
+  userProgramId: number | null;
+  programDayId: number | null;
+  dayKey: string;
+  date: string;
+  startedAt: string;
+  finishedAt: string;
+  sets: readonly {
+    exerciseId: number;
+    setNumber: number;
+    weightKg: number;
+    reps: number;
+    isWarmup: boolean;
+    createdAt: string;
+  }[];
+};
+
+/** Inserts already-finished sessions with their sets in one transaction (used for demo data). */
+export function insertFinishedSessions(sessions: readonly FinishedSessionInput[]): number {
+  return db.transaction((tx) => {
+    for (const { sets, ...values } of sessions) {
+      const session = tx
+        .insert(workoutSessions)
+        .values(values)
+        .returning({ id: workoutSessions.id })
+        .get();
+      if (sets.length > 0) {
+        tx.insert(sessionSets)
+          .values(sets.map((set) => ({ ...set, sessionId: session.id })))
+          .run();
+      }
+    }
+    return sessions.length;
+  });
+}
+
+/** Deletes every workout session; sets, extras and drafts go with them (cascade). */
+export function deleteAllSessions(executor: DbExecutor = db): void {
+  executor.delete(workoutSessions).run();
+}

@@ -2,8 +2,11 @@ import {
   appendRow,
   buildInitialRows,
   countWorkingSaved,
+  hasPendingEdits,
+  restoreRows,
   validateRow,
   workingOrdinals,
+  type SetRow,
 } from '../setRows';
 
 const last = [
@@ -111,5 +114,71 @@ describe('workingOrdinals', () => {
     expect(workingOrdinals([{ isWarmup: true }, { isWarmup: false }, { isWarmup: false }])).toEqual(
       [null, 1, 2],
     );
+  });
+});
+
+describe('restoreRows', () => {
+  const saved = [
+    { id: 1, setNumber: 1, weightKg: 60, reps: 10, isWarmup: false },
+    { id: 2, setNumber: 2, weightKg: 60, reps: 9, isWarmup: false },
+  ];
+  const row = (patch: Partial<SetRow>): SetRow => ({
+    key: Math.random().toString(36),
+    setId: null,
+    weightKg: null,
+    reps: null,
+    isWarmup: false,
+    state: 'suggested',
+    ...patch,
+  });
+
+  it('falls back to the initial rows without a draft', () => {
+    expect(restoreRows(null, saved, [], 3).map((r) => r.state)).toEqual([
+      'saved',
+      'saved',
+      'suggested',
+    ]);
+  });
+
+  it('keeps unconfirmed edits and takes confirmed values from the database', () => {
+    const draft = [
+      row({ setId: 1, weightKg: 999, reps: 1, state: 'saved' }),
+      row({ setId: 2, weightKg: 62.5, reps: 9, state: 'edited' }),
+      row({ weightKg: 65, reps: 6, state: 'edited' }),
+      row({ weightKg: 65, reps: 8 }),
+    ];
+    const rows = restoreRows(draft, saved, [], 3);
+    expect(rows.map((r) => [r.setId, r.weightKg, r.reps, r.state])).toEqual([
+      [1, 60, 10, 'saved'],
+      [2, 62.5, 9, 'edited'],
+      [null, 65, 6, 'edited'],
+      [null, 65, 8, 'suggested'],
+    ]);
+    expect(hasPendingEdits(rows)).toBe(true);
+  });
+
+  it('drops rows whose set was deleted and inserts saved sets missing from the draft', () => {
+    const draft = [
+      row({ setId: 99, weightKg: 1, reps: 1, state: 'saved' }),
+      row({ weightKg: 70, reps: 5, state: 'edited' }),
+    ];
+    const rows = restoreRows(draft, saved, [], 3);
+    expect(rows.map((r) => [r.setId, r.state])).toEqual([
+      [1, 'saved'],
+      [2, 'saved'],
+      [null, 'edited'],
+    ]);
+  });
+
+  it('never restores an unsaved row as saved', () => {
+    expect(restoreRows([row({ weightKg: 50, reps: 5, state: 'saved' })], [], [], 1)[0]?.state).toBe(
+      'edited',
+    );
+  });
+});
+
+describe('hasPendingEdits', () => {
+  it('is false when everything is saved or only suggested', () => {
+    expect(hasPendingEdits(buildInitialRows([], [{ weightKg: 1, reps: 1 }], 2))).toBe(false);
   });
 });

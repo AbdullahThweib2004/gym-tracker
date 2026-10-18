@@ -10,15 +10,33 @@ import { Card } from '@/components/Card';
 import { EmptyState } from '@/components/EmptyState';
 import { Screen } from '@/components/Screen';
 import { ScreenHeader } from '@/components/ScreenHeader';
-import { exerciseName, formatDate, formatSetsLine, formatTarget } from '@/i18n/format';
+import { suggestNextWeight } from '@/features/progress/overload';
+import { recordsForSet } from '@/features/progress/progressService';
+import type { RecordKind } from '@/features/progress/records';
+import { resolveRestSeconds } from '@/features/restTimer/restMath';
+import { RestTimerBar } from '@/features/restTimer/RestTimerBar';
+import { useRestTimerStore } from '@/features/restTimer/restTimerStore';
+import {
+  exerciseName,
+  formatDate,
+  formatSetsLine,
+  formatTarget,
+  formatWeight,
+} from '@/i18n/format';
 import { useAppStore } from '@/store/appStore';
-import { useWorkoutDraftStore } from '@/store/workoutDraftStore';
 import { useTheme } from '@/theme';
 
 import { SetRowView } from './components/SetRowView';
 import { exerciseHistoryHref, exerciseLogHref } from './routes';
-import { appendRow, buildInitialRows, validateRow, workingOrdinals, type SetRow } from './setRows';
-import { loadExerciseLog, removeSet, saveSet, setWarmup } from './workoutService';
+import { appendRow, restoreRows, validateRow, workingOrdinals, type SetRow } from './setRows';
+import {
+  loadDraftRows,
+  loadExerciseLog,
+  persistDraftRows,
+  removeSet,
+  saveSet,
+  setWarmup,
+} from './workoutService';
 
 type Invalid = Record<string, { weight: boolean; reps: boolean }>;
 
@@ -30,19 +48,27 @@ export function ExerciseLogScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
   const language = useAppStore((s) => s.language);
+  const restSettings = useRestTimerStore((s) => s.settings);
+  const startRest = useRestTimerStore((s) => s.start);
   const params = useLocalSearchParams<{ sessionId: string; exerciseId: string }>();
   const sessionId = Number(params.sessionId);
   const exerciseId = Number(params.exerciseId);
-  const storeRows = useWorkoutDraftStore((s) => s.setRows);
 
   const [data] = useState(() => loadExerciseLog(sessionId, exerciseId));
   const lastSets = data?.last?.sets ?? [];
-  const [rows, setRowsState] = useState<SetRow[]>(
-    () =>
-      useWorkoutDraftStore.getState().getRows(sessionId, exerciseId) ??
-      (data ? buildInitialRows(data.savedSets, lastSets, data.item.targetSets) : []),
+  // Unconfirmed edits come back from the persisted draft, confirmed sets from the database.
+  const [rows, setRowsState] = useState<SetRow[]>(() =>
+    data
+      ? restoreRows(
+          loadDraftRows(sessionId, exerciseId),
+          data.savedSets,
+          lastSets,
+          data.item.targetSets,
+        )
+      : [],
   );
   const [invalid, setInvalid] = useState<Invalid>({});
+  const [records, setRecords] = useState<Record<string, RecordKind[]>>({});
 
   if (!data) {
     return (
@@ -59,10 +85,16 @@ export function ExerciseLogScreen() {
 
   const { item, last, nextExerciseId } = data;
   const name = exerciseName(item.exercise, language);
+  const suggestion = suggestNextWeight(lastSets, item, item.exercise);
+  const canApply =
+    suggestion !== null &&
+    rows.some(
+      (row) => row.state === 'suggested' && !row.isWarmup && row.weightKg !== suggestion.weightKg,
+    );
 
   const setRows = (next: SetRow[]) => {
     setRowsState(next);
-    storeRows(sessionId, exerciseId, next);
+    persistDraftRows(sessionId, exerciseId, next);
   };
   const patchRow = (key: string, patch: Partial<SetRow>) =>
     setRows(rows.map((row) => (row.key === key ? { ...row, ...patch } : row)));
@@ -78,6 +110,17 @@ export function ExerciseLogScreen() {
     patchRow(row.key, { [field]: value, state: 'edited' });
   };
 
+  const applySuggestion = () => {
+    if (!suggestion) return;
+    setRows(
+      rows.map((row) =>
+        row.state === 'suggested' && !row.isWarmup
+          ? { ...row, weightKg: suggestion.weightKg }
+          : row,
+      ),
+    );
+  };
+
   const confirm = (index: number) => {
     const row = rows[index];
     if (!row) return;
@@ -88,6 +131,7 @@ export function ExerciseLogScreen() {
       return;
     }
     try {
+      const isNew = row.setId === null;
       const stored = saveSet({
         id: row.setId,
         sessionId,
@@ -104,7 +148,16 @@ export function ExerciseLogScreen() {
         reps: stored.reps,
         state: 'saved',
       });
+
+      const broken = recordsForSet(stored);
+      setRecords({ ...records, [row.key]: broken });
       haptic(Haptics.NotificationFeedbackType.Success);
+      if (broken.length > 0) {
+        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy).catch(() => undefined);
+      }
+      if (isNew && restSettings.autoStart) {
+        void startRest(resolveRestSeconds(item.restSeconds, restSettings.defaultRestSeconds));
+      }
     } catch (error) {
       haptic(Haptics.NotificationFeedbackType.Error);
       Alert.alert(t('workout.saveFailedTitle'), t('workout.saveFailedMessage'));
@@ -197,6 +250,39 @@ export function ExerciseLogScreen() {
             </AppText>
           </Card>
 
+          {suggestion ? (
+            <Card
+              style={{
+                borderColor:
+                  suggestion.reasonKey === 'increase' ? theme.colors.success : theme.colors.border,
+              }}
+            >
+              <AppText
+                variant="label"
+                color={suggestion.reasonKey === 'increase' ? 'success' : 'textSecondary'}
+              >
+                {t('progress.suggestionTitle')}
+              </AppText>
+              <AppText variant="body">
+                {t(`progress.suggestion.${suggestion.reasonKey}`, {
+                  weight: formatWeight(suggestion.weightKg),
+                  reps: item.targetRepsMax,
+                  min: item.targetRepsMin,
+                  max: item.targetRepsMax,
+                })}
+              </AppText>
+              {canApply ? (
+                <Button
+                  label={t('progress.apply')}
+                  variant="secondary"
+                  icon="checkmark-done"
+                  onPress={applySuggestion}
+                  style={{ alignSelf: 'flex-start' }}
+                />
+              ) : null}
+            </Card>
+          ) : null}
+
           <View
             style={{
               flexDirection: 'row',
@@ -223,6 +309,7 @@ export function ExerciseLogScreen() {
                 ordinal={ordinals[index] ?? null}
                 row={row}
                 invalid={invalid[row.key]}
+                records={records[row.key]}
                 onChangeWeight={(value) => change(row, 'weightKg', value)}
                 onChangeReps={(value) => change(row, 'reps', value)}
                 onConfirm={() => confirm(index)}
@@ -249,6 +336,7 @@ export function ExerciseLogScreen() {
           />
         </ScrollView>
 
+        <RestTimerBar />
         <View
           style={{
             padding: theme.spacing.lg,

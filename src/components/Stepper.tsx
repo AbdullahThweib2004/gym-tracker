@@ -13,6 +13,9 @@ type StepperProps = {
   onChange: (value: number) => void;
   decrementLabel: string;
   incrementLabel: string;
+  step?: number;
+  /** Display text for the value (defaults to the number). */
+  formatValue?: (value: number) => string;
 };
 
 export function Stepper({
@@ -23,6 +26,8 @@ export function Stepper({
   onChange,
   decrementLabel,
   incrementLabel,
+  step = 1,
+  formatValue = String,
 }: StepperProps) {
   const theme = useTheme();
   return (
@@ -50,7 +55,7 @@ export function Stepper({
         <IconButton
           icon="remove"
           size={18}
-          onPress={() => onChange(Math.max(min, value - 1))}
+          onPress={() => onChange(Math.max(min, value - step))}
           disabled={value <= min}
           accessibilityLabel={`${decrementLabel} ${label}`}
         />
@@ -58,14 +63,14 @@ export function Stepper({
           variant="subheading"
           align="center"
           accessibilityLiveRegion="polite"
-          style={{ minWidth: 36 }}
+          style={{ minWidth: 48 }}
         >
-          {value}
+          {formatValue(value)}
         </AppText>
         <IconButton
           icon="add"
           size={18}
-          onPress={() => onChange(Math.min(max, value + 1))}
+          onPress={() => onChange(Math.min(max, value + step))}
           disabled={value >= max}
           accessibilityLabel={`${incrementLabel} ${label}`}
         />

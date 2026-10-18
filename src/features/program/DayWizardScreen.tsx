@@ -229,6 +229,11 @@ export function DayWizardScreen() {
           if (editingIndex === null || !editing) return;
           setEntries(entries.map((e, i) => (i === editingIndex ? { ...e, ...targets } : e)));
         }}
+        restSeconds={editing?.restSeconds ?? null}
+        onChangeRest={(restSeconds) => {
+          if (editingIndex === null || !editing) return;
+          setEntries(entries.map((e, i) => (i === editingIndex ? { ...e, restSeconds } : e)));
+        }}
         onRemove={() => editingIndex !== null && removeAt(editingIndex)}
         onClose={() => setEditingIndex(null)}
       />

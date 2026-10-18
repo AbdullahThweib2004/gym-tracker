@@ -12,6 +12,7 @@ import { db, openDatabase } from '@/db/client';
 import migrations from '@/db/migrations/migrations';
 import { bootstrapApp } from '@/features/bootstrap/bootstrap';
 import { ErrorScreen } from '@/features/bootstrap/ErrorScreen';
+import { RestTimerWatcher } from '@/features/restTimer/RestTimerWatcher';
 import { useAppStore } from '@/store/appStore';
 import { colors } from '@/theme';
 
@@ -102,17 +103,20 @@ function MigratedApp() {
   if (!success || !isReady) return <LoadingState message={t('common.loading')} />;
 
   return (
-    <Stack
-      screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}
-    >
-      {/* Until a program is fully set up, only onboarding is reachable (and is the initial route). */}
-      <Stack.Protected guard={isSetupComplete}>
-        <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="workout" />
-        <Stack.Screen name="session/[sessionId]" />
-        <Stack.Screen name="exercise/[id]" />
-      </Stack.Protected>
-      <Stack.Screen name="onboarding" />
-    </Stack>
+    <>
+      <RestTimerWatcher />
+      <Stack
+        screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}
+      >
+        {/* Until a program is fully set up, only onboarding is reachable (and is the initial route). */}
+        <Stack.Protected guard={isSetupComplete}>
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="workout" />
+          <Stack.Screen name="session/[sessionId]" />
+          <Stack.Screen name="exercise/[id]" />
+        </Stack.Protected>
+        <Stack.Screen name="onboarding" />
+      </Stack>
+    </>
   );
 }

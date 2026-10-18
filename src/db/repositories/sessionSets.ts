@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, isNotNull, ne, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, isNotNull, lt, ne, sql } from 'drizzle-orm';
 
 import { db, type DbExecutor } from '../client';
 import { sessionSets, workoutSessions, type SessionSet } from '../schema';
@@ -220,4 +220,49 @@ export function countSetsForSession(sessionId: number, executor: DbExecutor = db
     .where(eq(sessionSets.sessionId, sessionId))
     .get();
   return row?.count ?? 0;
+}
+
+/** Every working set ever logged for an exercise, optionally minus one set. */
+export function listWorkingSetValues(
+  exerciseId: number,
+  { excludeSetId }: { excludeSetId?: number } = {},
+  executor: DbExecutor = db,
+): { sessionId: number; weightKg: number; reps: number }[] {
+  const conditions = [eq(sessionSets.exerciseId, exerciseId), eq(sessionSets.isWarmup, false)];
+  if (excludeSetId !== undefined) conditions.push(ne(sessionSets.id, excludeSetId));
+  return executor
+    .select({
+      sessionId: sessionSets.sessionId,
+      weightKg: sessionSets.weightKg,
+      reps: sessionSets.reps,
+    })
+    .from(sessionSets)
+    .where(and(...conditions))
+    .all();
+}
+
+/** Working sets of the given exercises from sessions that started before `beforeStartedAt`. */
+export function listPriorWorkingSets(
+  exerciseIds: readonly number[],
+  beforeStartedAt: string,
+  executor: DbExecutor = db,
+): { exerciseId: number; weightKg: number; reps: number; isWarmup: boolean }[] {
+  if (exerciseIds.length === 0) return [];
+  return executor
+    .select({
+      exerciseId: sessionSets.exerciseId,
+      weightKg: sessionSets.weightKg,
+      reps: sessionSets.reps,
+      isWarmup: sessionSets.isWarmup,
+    })
+    .from(sessionSets)
+    .innerJoin(workoutSessions, eq(sessionSets.sessionId, workoutSessions.id))
+    .where(
+      and(
+        inArray(sessionSets.exerciseId, [...exerciseIds]),
+        eq(sessionSets.isWarmup, false),
+        lt(workoutSessions.startedAt, beforeStartedAt),
+      ),
+    )
+    .all();
 }

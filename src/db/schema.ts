@@ -1,5 +1,13 @@
 import { sql } from 'drizzle-orm';
-import { index, integer, real, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
+import {
+  index,
+  integer,
+  primaryKey,
+  real,
+  sqliteTable,
+  text,
+  uniqueIndex,
+} from 'drizzle-orm/sqlite-core';
 
 import { EQUIPMENT, MUSCLE_GROUPS } from '@/constants/muscles';
 import {
@@ -143,6 +151,23 @@ export const sessionExtraExercises = sqliteTable(
   (t) => [uniqueIndex('session_extra_exercises_unique_idx').on(t.sessionId, t.exerciseId)],
 );
 
+/**
+ * Unconfirmed edits on the logging screen, per session + exercise, so they survive the app
+ * being killed. Confirmed sets live in session_sets; a draft only exists while edits are pending.
+ */
+export const setDrafts = sqliteTable(
+  'set_drafts',
+  {
+    sessionId: integer('session_id')
+      .notNull()
+      .references(() => workoutSessions.id, { onDelete: 'cascade' }),
+    exerciseId: integer('exercise_id').notNull(),
+    rowsJson: text('rows_json').notNull(),
+    updatedAt: text('updated_at').notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.sessionId, t.exerciseId] })],
+);
+
 export type AppMetaRow = typeof appMeta.$inferSelect;
 export type Exercise = typeof exercises.$inferSelect;
 export type NewExercise = typeof exercises.$inferInsert;
@@ -157,3 +182,4 @@ export type NewWorkoutSession = typeof workoutSessions.$inferInsert;
 export type SessionSet = typeof sessionSets.$inferSelect;
 export type NewSessionSet = typeof sessionSets.$inferInsert;
 export type SessionExtraExercise = typeof sessionExtraExercises.$inferSelect;
+export type SetDraft = typeof setDrafts.$inferSelect;

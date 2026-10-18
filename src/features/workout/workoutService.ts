@@ -1,6 +1,7 @@
 import { getExercisesByIds } from '@/db/repositories/exercises';
 import { listDayExercises } from '@/db/repositories/programDayExercises';
 import { addExtraExercises, listExtraExerciseIds } from '@/db/repositories/sessionExtraExercises';
+import { deleteDraft, deleteSessionDrafts, getDraft, saveDraft } from '@/db/repositories/setDrafts';
 import {
   deleteSet,
   getLastPerformance,
@@ -23,6 +24,8 @@ import type { Exercise, ProgramDay, SessionSet, UserProgram, WorkoutSession } fr
 import { getSplitDay } from '@/constants/splits';
 import type { MuscleGroup } from '@/constants/muscles';
 
+import { parseDraftRows } from './draftSchema';
+import { hasPendingEdits, type SetRow } from './setRows';
 import { buildWorkoutExercises, type WorkoutExerciseItem } from './workoutExercises';
 
 export type WorkoutItem = WorkoutExerciseItem & { exercise: Exercise };
@@ -129,9 +132,28 @@ export function startWorkout(program: UserProgram, day: ProgramDay): WorkoutSess
 export function finishWorkout(sessionId: number): void {
   const session = getSessionById(sessionId);
   if (session && !session.finishedAt) finishSession(sessionId);
+  deleteSessionDrafts(sessionId);
 }
 
-/** Deletes the session and (by cascade) its logged sets. */
+/** The persisted unconfirmed rows for an exercise, or null when there are none (or invalid). */
+export function loadDraftRows(sessionId: number, exerciseId: number): SetRow[] | null {
+  return parseDraftRows(getDraft(sessionId, exerciseId));
+}
+
+/**
+ * Persists the rows while they hold unconfirmed edits, so a killed app restores them.
+ * Once nothing is pending (all confirmed or just suggestions) the draft is removed.
+ */
+export function persistDraftRows(
+  sessionId: number,
+  exerciseId: number,
+  rows: readonly SetRow[],
+): void {
+  if (hasPendingEdits(rows)) saveDraft(sessionId, exerciseId, rows);
+  else deleteDraft(sessionId, exerciseId);
+}
+
+/** Deletes the session and (by cascade) its logged sets and drafts. */
 export function discardWorkout(sessionId: number): void {
   deleteSession(sessionId);
 }

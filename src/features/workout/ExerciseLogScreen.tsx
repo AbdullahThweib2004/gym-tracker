@@ -1,5 +1,13 @@
-import { useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import {
+  Alert,
+  AppState,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  View,
+} from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -25,10 +33,18 @@ import {
 } from '@/i18n/format';
 import { useAppStore } from '@/store/appStore';
 import { useTheme } from '@/theme';
+import { createDebouncer } from '@/utils/debounce';
 
 import { SetRowView } from './components/SetRowView';
 import { exerciseHistoryHref, exerciseLogHref } from './routes';
-import { appendRow, restoreRows, validateRow, workingOrdinals, type SetRow } from './setRows';
+import {
+  appendRow,
+  hasPendingEdits,
+  restoreRows,
+  validateRow,
+  workingOrdinals,
+  type SetRow,
+} from './setRows';
 import {
   loadDraftRows,
   loadExerciseLog,
@@ -68,6 +84,19 @@ export function ExerciseLogScreen() {
       : [],
   );
   const [invalid, setInvalid] = useState<Invalid>({});
+  // Draft writes are debounced so typing stays smooth; flushed on blur, unmount and backgrounding.
+  const [draftSaver] = useState(() =>
+    createDebouncer<SetRow[]>((next) => persistDraftRows(sessionId, exerciseId, next), 400),
+  );
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', (state) => {
+      if (state !== 'active') draftSaver.flush();
+    });
+    return () => {
+      sub.remove();
+      draftSaver.flush();
+    };
+  }, [draftSaver]);
   const [records, setRecords] = useState<Record<string, RecordKind[]>>({});
 
   if (!data) {
@@ -94,7 +123,9 @@ export function ExerciseLogScreen() {
 
   const setRows = (next: SetRow[]) => {
     setRowsState(next);
-    persistDraftRows(sessionId, exerciseId, next);
+    draftSaver.schedule(next);
+    // Nothing pending (e.g. a set was just confirmed): remove the draft right away.
+    if (!hasPendingEdits(next)) draftSaver.flush();
   };
   const patchRow = (key: string, patch: Partial<SetRow>) =>
     setRows(rows.map((row) => (row.key === key ? { ...row, ...patch } : row)));
@@ -315,6 +346,7 @@ export function ExerciseLogScreen() {
                 onConfirm={() => confirm(index)}
                 onEdit={() => patchRow(row.key, { state: 'edited' })}
                 onLongPress={() => openRowMenu(row, ordinals[index] ?? null)}
+                onBlur={draftSaver.flush}
               />
             ))}
           </View>

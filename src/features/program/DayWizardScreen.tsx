@@ -1,7 +1,7 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Alert, View } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
 import { AppText } from '@/components/AppText';
@@ -18,6 +18,8 @@ import { useAppStore } from '@/store/appStore';
 import { useProgramDraftStore, type DraftEntry } from '@/store/programDraftStore';
 import { useTheme } from '@/theme';
 import { moveItem } from '@/utils/list';
+
+import { newExerciseHref } from '@/features/exercises/routes';
 
 import { ExercisePicker } from './components/ExercisePicker';
 import { SelectedExercisesPanel } from './components/SelectedExercisesPanel';
@@ -50,7 +52,9 @@ export function DayWizardScreen() {
 
   const [context] = useState(() => getWizardContext(dayId));
   // Archived exercises are kept in the lookup so an existing selection still shows its name.
-  const [allExercises] = useState(() => listExercises({ includeArchived: true }));
+  const [allExercises, setAllExercises] = useState(() => listExercises({ includeArchived: true }));
+  // Reload when returning from the custom exercise form so new exercises show up.
+  useFocusEffect(useCallback(() => setAllExercises(listExercises({ includeArchived: true })), []));
   const pickable = useMemo(() => allExercises.filter((e) => !e.isArchived), [allExercises]);
   const exercisesById = useMemo(() => new Map(allExercises.map((e) => [e.id, e])), [allExercises]);
 
@@ -186,6 +190,7 @@ export function DayWizardScreen() {
           suggestedMuscleGroups={suggestedMuscleGroups}
           selectedIds={selectedIds}
           onToggle={toggle}
+          onCreate={() => router.push(newExerciseHref)}
         />
       </View>
 

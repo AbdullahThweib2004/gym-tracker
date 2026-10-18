@@ -101,6 +101,13 @@ export function WorkoutScreen() {
           </View>
         )}
 
+        {items.length === 0 ? (
+          <EmptyState
+            icon="barbell-outline"
+            title={t('workout.noExercisesTitle')}
+            message={t('workout.noExercisesMessage')}
+          />
+        ) : null}
         {items.map((item) => {
           const name = exerciseName(item.exercise, language);
           const progress = t('workout.progress', {
@@ -115,7 +122,7 @@ export function WorkoutScreen() {
               style={item.isComplete ? { borderColor: theme.colors.success } : undefined}
             >
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.md }}>
-                <ExerciseThumb muscleGroup={item.exercise.muscleGroup} />
+                <ExerciseThumb exercise={item.exercise} />
                 <View style={{ flex: 1, gap: theme.spacing.xxs }}>
                   <AppText variant="bodyStrong" numberOfLines={2}>
                     {name}

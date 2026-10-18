@@ -29,6 +29,9 @@ export function Screen({
           style={styles.flex}
           contentContainerStyle={[{ padding, gap: theme.spacing.md }, contentStyle]}
           keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="interactive"
+          // iOS: keep focused inputs above the keyboard (Android resizes the window instead).
+          automaticallyAdjustKeyboardInsets
         >
           {children}
         </ScrollView>

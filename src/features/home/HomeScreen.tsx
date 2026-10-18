@@ -3,7 +3,12 @@ import { Alert, Pressable, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
+import Ionicons from '@expo/vector-icons/Ionicons';
+
 import { AppText } from '@/components/AppText';
+import { Button } from '@/components/Button';
+import { Card } from '@/components/Card';
+import { IconButton } from '@/components/IconButton';
 import { EmptyState } from '@/components/EmptyState';
 import { Screen } from '@/components/Screen';
 import type { ProgramDay } from '@/db/schema';
@@ -17,7 +22,7 @@ import { discardWorkout, finishWorkout, startWorkout } from '../workout/workoutS
 
 import { DayCard } from './components/DayCard';
 import { ResumeBanner } from './components/ResumeBanner';
-import { loadHomeData, type HomeData } from './homeService';
+import { dismissBackupReminder, loadHomeData, type HomeData } from './homeService';
 
 export function HomeScreen() {
   const { t } = useTranslation();
@@ -36,7 +41,7 @@ export function HomeScreen() {
     );
   }
 
-  const { program, days, suggestedDayId, unfinished } = data;
+  const { program, days, suggestedDayId, unfinished, showBackupReminder } = data;
   const unfinishedName = unfinished
     ? unfinished.splitType
       ? dayLabel(unfinished.splitType, unfinished.session.dayKey)
@@ -114,6 +119,37 @@ export function HomeScreen() {
           </AppText>
         </Pressable>
       </View>
+
+      {showBackupReminder ? (
+        <Card>
+          <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: theme.spacing.sm }}>
+            <Ionicons name="cloud-upload-outline" size={22} color={theme.colors.warning} />
+            <View style={{ flex: 1, gap: theme.spacing.xxs }}>
+              <AppText variant="bodyStrong">{t('backup.reminderTitle')}</AppText>
+              <AppText variant="caption" color="textSecondary">
+                {t('backup.reminderMessage')}
+              </AppText>
+            </View>
+            <IconButton
+              icon="close"
+              size={18}
+              color="textSecondary"
+              accessibilityLabel={t('backup.reminderDismiss')}
+              onPress={() => {
+                dismissBackupReminder();
+                reload();
+              }}
+            />
+          </View>
+          <Button
+            label={t('backup.backUpNow')}
+            variant="secondary"
+            icon="share-outline"
+            onPress={() => router.push('/backup')}
+            style={{ alignSelf: 'flex-start' }}
+          />
+        </Card>
+      ) : null}
 
       {unfinished ? (
         <ResumeBanner

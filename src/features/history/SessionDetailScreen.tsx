@@ -121,7 +121,7 @@ export function SessionDetailScreen() {
               onPress={() => router.push(exerciseHistoryHref(exercise.id))}
               style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.md }}
             >
-              <ExerciseThumb muscleGroup={exercise.muscleGroup} size={36} />
+              <ExerciseThumb exercise={exercise} size={36} />
               <AppText variant="bodyStrong" color="primary" style={{ flex: 1 }}>
                 {name}
               </AppText>

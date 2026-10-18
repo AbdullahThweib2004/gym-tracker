@@ -6,6 +6,7 @@ import { db, type DbExecutor } from '../client';
 import {
   exercises,
   programDayExercises,
+  sessionExtraExercises,
   sessionSets,
   type Exercise,
   type NewExercise,
@@ -117,23 +118,39 @@ export function isExerciseInUse(id: number, executor: DbExecutor = db): boolean 
     .where(eq(programDayExercises.exerciseId, id))
     .limit(1)
     .get();
-  return Boolean(inPrograms);
+  if (inPrograms) return true;
+  const inSessions = executor
+    .select({ id: sessionExtraExercises.id })
+    .from(sessionExtraExercises)
+    .where(eq(sessionExtraExercises.exerciseId, id))
+    .limit(1)
+    .get();
+  return Boolean(inSessions);
+}
+
+/** True when any set (in any session) has been logged for the exercise. */
+export function hasLoggedSets(id: number, executor: DbExecutor = db): boolean {
+  return Boolean(
+    executor
+      .select({ id: sessionSets.id })
+      .from(sessionSets)
+      .where(eq(sessionSets.exerciseId, id))
+      .limit(1)
+      .get(),
+  );
 }
 
 /**
- * Deletes a custom exercise. Exercises referenced by history or a program are archived
- * instead so past workouts keep their data. Returns what happened.
+ * Deletes a custom exercise that nothing refers to. Exercises with logged sets (or used in a
+ * program or session) are not deleted — the caller can offer to archive them instead.
  */
 export function deleteCustomExercise(
   id: number,
   executor: DbExecutor = db,
-): 'deleted' | 'archived' | 'notCustom' {
+): 'deleted' | 'inUse' | 'notCustom' {
   const exercise = getExerciseById(id, executor);
   if (!exercise?.isCustom) return 'notCustom';
-  if (isExerciseInUse(id, executor)) {
-    setExerciseArchived(id, true, executor);
-    return 'archived';
-  }
+  if (isExerciseInUse(id, executor)) return 'inUse';
   executor.delete(exercises).where(eq(exercises.id, id)).run();
   return 'deleted';
 }

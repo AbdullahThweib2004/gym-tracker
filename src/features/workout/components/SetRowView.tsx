@@ -22,6 +22,8 @@ type SetRowViewProps = {
   onConfirm: () => void;
   onEdit: () => void;
   onLongPress: () => void;
+  /** Called when an input loses focus. */
+  onBlur?: () => void;
   /** Records this set broke when it was confirmed (shows the PR badge). */
   records?: readonly RecordKind[];
 };
@@ -35,6 +37,7 @@ export function SetRowView({
   onConfirm,
   onEdit,
   onLongPress,
+  onBlur,
   records,
 }: SetRowViewProps) {
   const { t } = useTranslation();
@@ -85,6 +88,7 @@ export function SetRowView({
           <NumberInput
             value={row.weightKg}
             onChange={onChangeWeight}
+            onBlur={onBlur}
             allowDecimal
             step={WEIGHT_STEP_KG}
             max={MAX_WEIGHT_KG}
@@ -102,6 +106,7 @@ export function SetRowView({
           <NumberInput
             value={row.reps}
             onChange={onChangeReps}
+            onBlur={onBlur}
             step={1}
             max={MAX_REPS}
             compact

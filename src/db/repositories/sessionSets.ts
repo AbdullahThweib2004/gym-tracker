@@ -213,15 +213,6 @@ export function listExerciseHistory(
   return rows.map(({ set, date, sessionStartedAt }) => ({ ...set, date, sessionStartedAt }));
 }
 
-export function countSetsForSession(sessionId: number, executor: DbExecutor = db): number {
-  const row = executor
-    .select({ count: sql<number>`count(*)` })
-    .from(sessionSets)
-    .where(eq(sessionSets.sessionId, sessionId))
-    .get();
-  return row?.count ?? 0;
-}
-
 /** Every working set ever logged for an exercise, optionally minus one set. */
 export function listWorkingSetValues(
   exerciseId: number,

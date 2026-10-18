@@ -114,6 +114,8 @@ function MigratedApp() {
           <Stack.Screen name="workout" />
           <Stack.Screen name="session/[sessionId]" />
           <Stack.Screen name="exercise/[id]" />
+          <Stack.Screen name="exercises" />
+          <Stack.Screen name="backup" />
         </Stack.Protected>
         <Stack.Screen name="onboarding" />
       </Stack>

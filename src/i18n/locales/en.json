@@ -117,7 +117,9 @@
     "unloggedMessage_one": "{{count}} exercise has no sets logged.",
     "unloggedMessage_other": "{{count}} exercises have no sets logged.",
     "addSelected_one": "Add {{count}} exercise",
-    "addSelected_other": "Add {{count}} exercises"
+    "addSelected_other": "Add {{count}} exercises",
+    "noExercisesTitle": "No exercises in this workout",
+    "noExercisesMessage": "Add an exercise below to start logging."
   },
   "history": {
     "title": "History",
@@ -159,7 +161,8 @@
       "cleared": "Workout history cleared.",
       "generated_one": "Added {{count}} workout.",
       "generated_other": "Added {{count}} workouts."
-    }
+    },
+    "data": "Your data"
   },
   "onboarding": {
     "title": "Choose your split",
@@ -208,7 +211,40 @@
     "selectedInGroup_other": "{{count}} selected",
     "notFound": "Exercise not found",
     "noHistoryTitle": "No history yet",
-    "noHistoryMessage": "Finished workouts with this exercise will show up here."
+    "noHistoryMessage": "Finished workouts with this exercise will show up here.",
+    "create": "Create",
+    "createShort": "Create",
+    "createTitle": "New exercise",
+    "showArchived": "Show archived",
+    "nameEn": "Name (English)",
+    "nameAr": "Name (Arabic)",
+    "nameEnPlaceholder": "e.g. Hammer Strength Row",
+    "nameArPlaceholder": "مثال: تجديف هامر",
+    "nameRequired": "Enter a name in at least one language.",
+    "nameFallbackHint": "Leave one empty to use the other name in both languages.",
+    "muscleGroup": "Muscle group",
+    "equipmentLabel": "Equipment",
+    "builtInHint": "Built-in exercise. You can add a photo of your gym’s machine; the name and details stay the same.",
+    "archive": "Archive",
+    "unarchive": "Unarchive",
+    "delete": "Delete exercise",
+    "deleteTitle": "Delete this exercise?",
+    "deleteMessage": "This can’t be undone.",
+    "inUseTitle": "This exercise is in use",
+    "inUseMessage": "It has logged sets or is part of a program or workout, so it can’t be deleted. Archive it to hide it from pickers while keeping your history.",
+    "photo": {
+      "hint": "Add a photo of the machine at your gym. It stays on this phone.",
+      "take": "Take photo",
+      "choose": "Choose photo",
+      "remove": "Remove photo",
+      "deniedTitle": "Permission needed",
+      "denied": {
+        "camera": "Allow camera access in Settings to take a photo.",
+        "library": "Allow photo access in Settings to choose a photo."
+      },
+      "failedTitle": "Couldn’t save the photo",
+      "failedMessage": "Please try again."
+    }
   },
   "languages": {
     "en": "English",
@@ -314,5 +350,43 @@
     "mostRepsAtWeight": "Most reps at this weight",
     "sessionTitle_one": "🏆 {{count}} personal record",
     "sessionTitle_other": "🏆 {{count}} personal records"
+  },
+  "backup": {
+    "title": "Backup & restore",
+    "exportTitle": "Back up",
+    "export": "Export backup",
+    "lastBackup": "Last backup: {{date}}",
+    "neverBackedUp": "You haven’t made a backup yet.",
+    "sharingUnavailable": "Sharing isn’t available on this device.",
+    "exportFailed": "The backup couldn’t be created. Please try again.",
+    "photosNotIncluded": "Exercise photos are not included in the backup. After restoring, exercises show their muscle icon until you add photos again.",
+    "importTitle": "Restore",
+    "importHint": "Choose a Gym Tracker backup file (.json). You’ll see what it contains before anything changes.",
+    "chooseFile": "Choose backup file",
+    "invalidTitle": "Can’t use this file",
+    "errors": {
+      "invalidJson": "This file isn’t valid JSON.",
+      "notABackup": "This isn’t a Gym Tracker backup.",
+      "newerSchema": "This backup was made by a newer version of the app (data version {{file}}; this app supports up to {{app}}). Update the app, then try again.",
+      "invalidData": "The backup is damaged or incomplete (problem at {{path}}).",
+      "unreadable": "The file couldn’t be read."
+    },
+    "previewTitle": "Backup from {{date}}",
+    "preview": {
+      "sessions": "Workouts",
+      "sets": "Sets",
+      "customExercises": "Custom exercises",
+      "range": "Dates",
+      "noSessions": "No workouts"
+    },
+    "restore": "Restore this backup",
+    "confirmTitle": "Replace all data?",
+    "confirmMessage": "This replaces all current data (program, workouts, exercises and settings) with the backup. The app will restart.",
+    "restoreFailedTitle": "Restore failed",
+    "restoreFailedMessage": "Nothing was changed. Your current data is safe.",
+    "reminderTitle": "Back up your workouts",
+    "reminderMessage": "Your history lives only on this phone. Export a backup so you don’t lose it.",
+    "reminderDismiss": "Dismiss backup reminder",
+    "backUpNow": "Back up now"
   }
 }

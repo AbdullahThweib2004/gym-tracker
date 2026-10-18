@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { View } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/Button';
@@ -8,6 +8,7 @@ import { Screen } from '@/components/Screen';
 import { ScreenHeader } from '@/components/ScreenHeader';
 import { listExercises } from '@/db/repositories/exercises';
 import type { Exercise } from '@/db/schema';
+import { newExerciseHref } from '@/features/exercises/routes';
 import { ExercisePicker } from '@/features/program/components/ExercisePicker';
 import { useTheme } from '@/theme';
 
@@ -20,7 +21,8 @@ export function AddExerciseScreen() {
   const { sessionId: sessionParam } = useLocalSearchParams<{ sessionId: string }>();
   const sessionId = Number(sessionParam);
   const [workout] = useState(() => loadWorkout(sessionId));
-  const [all] = useState(() => listExercises());
+  const [all, setAll] = useState(() => listExercises());
+  useFocusEffect(useCallback(() => setAll(listExercises()), []));
   const [selected, setSelected] = useState<number[]>([]);
 
   const available = useMemo(() => {
@@ -55,6 +57,7 @@ export function AddExerciseScreen() {
           suggestedMuscleGroups={workout?.suggestedMuscleGroups ?? []}
           selectedIds={selectedIds}
           onToggle={toggle}
+          onCreate={() => router.push(newExerciseHref)}
         />
       </View>
       <View

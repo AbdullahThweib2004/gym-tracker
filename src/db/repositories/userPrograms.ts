@@ -12,10 +12,6 @@ export function getActiveProgram(executor: DbExecutor = db): UserProgram | undef
   return executor.select().from(userPrograms).where(eq(userPrograms.isActive, true)).get();
 }
 
-export function hasActiveProgram(executor: DbExecutor = db): boolean {
-  return getActiveProgram(executor) !== undefined;
-}
-
 export function getProgramById(id: number, executor: DbExecutor = db): UserProgram | undefined {
   return executor.select().from(userPrograms).where(eq(userPrograms.id, id)).get();
 }
@@ -36,17 +32,6 @@ export function createProgram(
     .values({ splitType, isActive: activate, createdAt: new Date().toISOString() })
     .returning()
     .get();
-}
-
-export function setActiveProgram(id: number): void {
-  db.transaction((tx) => {
-    tx.update(userPrograms).set({ isActive: false }).run();
-    tx.update(userPrograms).set({ isActive: true }).where(eq(userPrograms.id, id)).run();
-  });
-}
-
-export function deactivateAllPrograms(executor: DbExecutor = db): void {
-  executor.update(userPrograms).set({ isActive: false }).run();
 }
 
 /** Deletes a program and its days. Logged sessions are kept (their program link is nulled). */

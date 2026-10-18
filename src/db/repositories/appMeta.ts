@@ -13,6 +13,7 @@ export const META_KEYS = {
   autoStartRest: 'autoStartRest',
   restAlerts: 'restAlerts',
   restNotificationsAsked: 'restNotificationsAsked',
+  backupReminderDismissedAt: 'backupReminderDismissedAt',
 } as const;
 
 export type MetaKey = (typeof META_KEYS)[keyof typeof META_KEYS];

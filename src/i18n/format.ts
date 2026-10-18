@@ -7,7 +7,7 @@ import { formatNumber } from '@/utils/number';
 import i18n, { currentLanguage } from './index';
 
 /** BCP-47 locale for Intl. Arabic uses Latin digits, which most Arab gym-goers prefer for numbers. */
-export function intlLocale(language: Language = currentLanguage()): string {
+function intlLocale(language: Language = currentLanguage()): string {
   return language === 'ar' ? 'ar-u-nu-latn' : 'en';
 }
 

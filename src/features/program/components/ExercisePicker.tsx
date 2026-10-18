@@ -4,6 +4,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useTranslation } from 'react-i18next';
 
 import { AppText } from '@/components/AppText';
+import { Button } from '@/components/Button';
 import { Chip } from '@/components/Chip';
 import { SearchBar } from '@/components/SearchBar';
 import { EQUIPMENT, type Equipment, type MuscleGroup } from '@/constants/muscles';
@@ -32,6 +33,8 @@ type ExercisePickerProps = {
   suggestedMuscleGroups: readonly MuscleGroup[];
   selectedIds: ReadonlySet<number>;
   onToggle: (exercise: Exercise) => void;
+  /** Shows a "+ Create" button (e.g. to open the custom exercise form). */
+  onCreate?: () => void;
 };
 
 export function ExercisePicker({
@@ -39,6 +42,7 @@ export function ExercisePicker({
   suggestedMuscleGroups,
   selectedIds,
   onToggle,
+  onCreate,
 }: ExercisePickerProps) {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -102,12 +106,24 @@ export function ExercisePicker({
 
   return (
     <View style={{ flex: 1, gap: theme.spacing.sm }}>
-      <SearchBar
-        value={query}
-        onChangeText={setQuery}
-        placeholder={t('exercises.search')}
-        clearLabel={t('exercises.clearSearch')}
-      />
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.sm }}>
+        <View style={{ flex: 1 }}>
+          <SearchBar
+            value={query}
+            onChangeText={setQuery}
+            placeholder={t('exercises.search')}
+            clearLabel={t('exercises.clearSearch')}
+          />
+        </View>
+        {onCreate ? (
+          <Button
+            label={t('exercises.createShort')}
+            icon="add"
+            variant="secondary"
+            onPress={onCreate}
+          />
+        ) : null}
+      </View>
       <View>
         <ScrollView
           horizontal
@@ -210,7 +226,7 @@ export function ExercisePicker({
                 backgroundColor: pressed ? theme.colors.surface : theme.colors.transparent,
               })}
             >
-              <ExerciseThumb muscleGroup={item.muscleGroup} size={40} />
+              <ExerciseThumb exercise={item} size={40} />
               <View style={{ flex: 1 }}>
                 <AppText variant="body" numberOfLines={2}>
                   {name}

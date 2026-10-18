@@ -85,7 +85,7 @@ export function ExerciseHistoryScreen() {
           subtitle={`${t(`muscleGroups.${exercise.muscleGroup}`)} · ${t(`equipment.${exercise.equipment}`)}`}
           onBack={() => router.back()}
           backLabel={t('common.back')}
-          trailing={<ExerciseThumb muscleGroup={exercise.muscleGroup} />}
+          trailing={<ExerciseThumb exercise={exercise} />}
         />
       </View>
       <FlatList

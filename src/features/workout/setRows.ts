@@ -25,7 +25,7 @@ export type SavedSet = {
 };
 
 let keySeed = 0;
-export const newRowKey = () => `row-${Date.now().toString(36)}-${(keySeed++).toString(36)}`;
+const newRowKey = () => `row-${Date.now().toString(36)}-${(keySeed++).toString(36)}`;
 
 function suggestedRow(values: SetValues | null): SetRow {
   return {

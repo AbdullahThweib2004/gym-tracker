@@ -6,7 +6,7 @@ import { mirrorInRtl } from '@/utils/direction';
 
 import { AppText } from './AppText';
 
-const DIRECTIONAL_ICON = /^(arrow|chevron)-(forward|back)/;
+const DIRECTIONAL_ICON = /^(arrow|chevron)-(forward|back)|^arrow-(undo|redo)/;
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
 

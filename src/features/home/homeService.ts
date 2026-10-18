@@ -1,16 +1,20 @@
+import { getMeta, META_KEYS, setMeta } from '@/db/repositories/appMeta';
 import { listDayExercises } from '@/db/repositories/programDayExercises';
 import { listProgramDays } from '@/db/repositories/programDays';
 import { getActiveProgram, getProgramById } from '@/db/repositories/userPrograms';
 import {
+  countFinishedSessions,
   getLastFinishedSession,
   getLastSessionForDay,
   getUnfinishedSession,
 } from '@/db/repositories/workoutSessions';
 import type { Exercise, ProgramDay, UserProgram, WorkoutSession } from '@/db/schema';
 
+import { shouldShowBackupReminder } from '@/features/backup/backupReminder';
+
 import { suggestNextDayId } from './nextDay';
 
-export const PREVIEW_EXERCISE_COUNT = 3;
+const PREVIEW_EXERCISE_COUNT = 3;
 
 export type HomeDay = {
   day: ProgramDay;
@@ -31,6 +35,7 @@ export type HomeData = {
   days: HomeDay[];
   suggestedDayId: number | null;
   unfinished: UnfinishedWorkout | null;
+  showBackupReminder: boolean;
 };
 
 export function loadHomeData(): HomeData | null {
@@ -67,5 +72,16 @@ export function loadHomeData(): HomeData | null {
       lastFinished?.programDayId,
     ),
     unfinished,
+    showBackupReminder: shouldShowBackupReminder({
+      lastBackupAt: getMeta(META_KEYS.lastBackupAt),
+      dismissedAt: getMeta(META_KEYS.backupReminderDismissedAt),
+      finishedSessions: countFinishedSessions(),
+      now: new Date(),
+    }),
   };
+}
+
+/** Hides the backup reminder for the next 14 days. */
+export function dismissBackupReminder(): void {
+  setMeta(META_KEYS.backupReminderDismissedAt, new Date().toISOString());
 }

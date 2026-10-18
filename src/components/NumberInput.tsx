@@ -36,6 +36,7 @@ type NumberInputProps = {
   /** Tighter layout for rows with several inputs. */
   compact?: boolean;
   onFocus?: () => void;
+  onBlur?: () => void;
 };
 
 const toText = (value: number | null) => (value === null ? '' : formatNumber(value));
@@ -58,6 +59,7 @@ export function NumberInput({
   editable = true,
   compact = false,
   onFocus,
+  onBlur,
 }: NumberInputProps) {
   const theme = useTheme();
   const [text, setText] = useState(() => toText(value));
@@ -82,6 +84,7 @@ export function NumberInput({
   const handleBlur = () => {
     const parsed = parseNumericInput(text, allowDecimal);
     setText(toText(parsed === null ? null : clamp(parsed, min, max)));
+    onBlur?.();
   };
 
   const bump = (direction: 1 | -1) => {

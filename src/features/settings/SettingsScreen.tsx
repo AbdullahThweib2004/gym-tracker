@@ -12,6 +12,7 @@ import { Screen } from '@/components/Screen';
 import { Stepper } from '@/components/Stepper';
 import { ToggleRow } from '@/components/ToggleRow';
 import { LANGUAGES, type Language } from '@/constants/settings';
+import { exerciseLibraryHref } from '@/features/exercises/routes';
 import { getActiveProgramSummary } from '@/features/program/programService';
 import {
   REST_ADJUST_SECONDS,
@@ -166,6 +167,24 @@ export function SettingsScreen() {
             );
           })}
         </View>
+      </Card>
+
+      <Card>
+        <AppText variant="subheading">{t('settings.data')}</AppText>
+        <Button
+          label={t('exercises.title')}
+          variant="secondary"
+          icon="barbell-outline"
+          onPress={() => router.push(exerciseLibraryHref)}
+          fullWidth
+        />
+        <Button
+          label={t('backup.title')}
+          variant="secondary"
+          icon="cloud-upload-outline"
+          onPress={() => router.push('/backup')}
+          fullWidth
+        />
       </Card>
 
       <Card>

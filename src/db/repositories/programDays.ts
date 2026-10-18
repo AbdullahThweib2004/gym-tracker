@@ -44,7 +44,3 @@ export function reorderProgramDays(orderedIds: readonly number[]): void {
     });
   });
 }
-
-export function deleteProgramDay(id: number, executor: DbExecutor = db): void {
-  executor.delete(programDays).where(eq(programDays.id, id)).run();
-}

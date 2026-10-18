@@ -108,7 +108,7 @@ export function SummaryScreen() {
             onPress={() => router.push(exerciseHistoryHref(exercise.id))}
             style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.md }}
           >
-            <ExerciseThumb muscleGroup={exercise.muscleGroup} size={36} />
+            <ExerciseThumb exercise={exercise} size={36} />
             <View style={{ flex: 1 }}>
               <AppText variant="bodyStrong">{exerciseName(exercise, language)}</AppText>
               <AppText variant="caption" color="textSecondary">

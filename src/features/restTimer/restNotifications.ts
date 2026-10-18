@@ -22,7 +22,6 @@ export async function configureRestNotifications(): Promise<void> {
   if (Platform.OS === 'android') {
     await Notifications.setNotificationChannelAsync(CHANNEL_ID, {
       name: i18n.t('restTimer.channelName'),
-      // eslint-disable-next-line import/namespace -- re-exported enum the plugin cannot follow; TS checks it
       importance: Notifications.AndroidImportance.HIGH,
       vibrationPattern: [0, 400, 200, 400],
       sound: 'default',

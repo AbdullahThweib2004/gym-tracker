@@ -12,3 +12,8 @@ export const MAX_REPS = 999;
 export const DEFAULT_TARGET_SETS = 3;
 export const DEFAULT_TARGET_REPS_MIN = 8;
 export const DEFAULT_TARGET_REPS_MAX = 12;
+
+export const TARGET_SETS_MIN = 1;
+export const TARGET_SETS_MAX = 10;
+export const TARGET_REPS_MIN = 1;
+export const TARGET_REPS_MAX = 50;

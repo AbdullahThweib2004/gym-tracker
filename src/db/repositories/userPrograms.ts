@@ -3,7 +3,10 @@ import { desc, eq } from 'drizzle-orm';
 import type { SplitKey } from '@/constants/splits';
 
 import { db, type DbExecutor } from '../client';
-import { programDays, userPrograms, type UserProgram } from '../schema';
+import { userPrograms, type ProgramDay, type UserProgram } from '../schema';
+
+import { countExercisesPerDay } from './programDayExercises';
+import { createProgramDays, listProgramDays } from './programDays';
 
 export function getActiveProgram(executor: DbExecutor = db): UserProgram | undefined {
   return executor.select().from(userPrograms).where(eq(userPrograms.isActive, true)).get();
@@ -52,22 +55,33 @@ export function deleteProgram(id: number, executor: DbExecutor = db): void {
 }
 
 /**
- * Creates a program for a split with all its days and makes it the only active program,
- * in a single transaction.
+ * Creates a program for a split with all its days (in order) and makes it the only active
+ * program, in a single transaction. Older programs and their history are kept, except
+ * `deleteProgramId` (an abandoned, never-used setup) which is removed in the same transaction.
  */
 export function createProgramWithDays(
   splitType: SplitKey,
   dayKeys: readonly string[],
-): UserProgram {
+  { deleteProgramId }: { deleteProgramId?: number } = {},
+): { program: UserProgram; days: ProgramDay[] } {
   return db.transaction((tx) => {
+    if (deleteProgramId !== undefined) deleteProgram(deleteProgramId, tx);
     const program = createProgram(splitType, { activate: true }, tx);
-    if (dayKeys.length > 0) {
-      tx.insert(programDays)
-        .values(
-          dayKeys.map((dayKey, orderIndex) => ({ userProgramId: program.id, dayKey, orderIndex })),
-        )
-        .run();
-    }
-    return program;
+    const days = createProgramDays(program.id, dayKeys, tx);
+    return { program, days };
   });
+}
+
+/** True when the program has at least one day and every day has at least one exercise. */
+export function isProgramSetupComplete(programId: number, executor: DbExecutor = db): boolean {
+  const days = listProgramDays(programId, executor);
+  if (days.length === 0) return false;
+  const counts = countExercisesPerDay(programId, executor);
+  return days.every((day) => (counts.get(day.id) ?? 0) > 0);
+}
+
+/** True when there is an active program whose setup is complete. */
+export function hasCompleteActiveProgram(executor: DbExecutor = db): boolean {
+  const program = getActiveProgram(executor);
+  return program ? isProgramSetupComplete(program.id, executor) : false;
 }

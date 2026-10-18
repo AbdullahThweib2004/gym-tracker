@@ -1,7 +1,7 @@
 import '@/i18n';
 
-import { useEffect, useState } from 'react';
-import { DarkTheme, Stack, ThemeProvider } from 'expo-router';
+import { useEffect, useRef, useState } from 'react';
+import { DarkTheme, router, Stack, ThemeProvider } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
 import { useTranslation } from 'react-i18next';
@@ -44,7 +44,9 @@ function AppGate() {
   const { success, error: migrationError } = useMigrations(db, migrations);
   const [bootError, setBootError] = useState<Error | null>(null);
   const isReady = useAppStore((s) => s.isReady);
-  const hasActiveProgram = useAppStore((s) => s.hasActiveProgram);
+  const isSetupComplete = useAppStore((s) => s.isSetupComplete);
+  // null until the app is ready, so the initial value from bootstrap isn't seen as a change.
+  const wasSetupComplete = useRef<boolean | null>(null);
 
   useEffect(() => {
     if (!success) return;
@@ -52,6 +54,14 @@ function AppGate() {
       setBootError(err instanceof Error ? err : new Error(String(err)));
     });
   }, [success]);
+
+  // When setup finishes, go home. This runs after the Stack below has re-rendered with the new
+  // guard, so the tabs route is already reachable (navigating from the wizard would race it).
+  useEffect(() => {
+    if (!isReady) return;
+    if (wasSetupComplete.current === false && isSetupComplete) router.replace('/');
+    wasSetupComplete.current = isSetupComplete;
+  }, [isReady, isSetupComplete]);
 
   const error = migrationError ?? bootError;
   if (error) {
@@ -70,12 +80,12 @@ function AppGate() {
     <Stack
       screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}
     >
-      <Stack.Protected guard={hasActiveProgram}>
+      {/* Until a program is fully set up, only onboarding is reachable (and is the initial route). */}
+      <Stack.Protected guard={isSetupComplete}>
         <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="workout/[sessionId]" />
       </Stack.Protected>
-      <Stack.Protected guard={!hasActiveProgram}>
-        <Stack.Screen name="onboarding" />
-      </Stack.Protected>
+      <Stack.Screen name="onboarding" />
     </Stack>
   );
 }

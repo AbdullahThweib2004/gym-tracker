@@ -129,3 +129,12 @@ export function countFinishedSessions(executor: DbExecutor = db): number {
     .get();
   return row?.count ?? 0;
 }
+
+export function countSessionsForProgram(userProgramId: number, executor: DbExecutor = db): number {
+  const row = executor
+    .select({ count: sql<number>`count(*)` })
+    .from(workoutSessions)
+    .where(eq(workoutSessions.userProgramId, userProgramId))
+    .get();
+  return row?.count ?? 0;
+}

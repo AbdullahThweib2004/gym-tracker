@@ -4,6 +4,7 @@ import { db, type DbExecutor } from '../client';
 import {
   exercises,
   programDayExercises,
+  programDays,
   type Exercise,
   type NewProgramDayExercise,
   type ProgramDayExercise,
@@ -56,10 +57,25 @@ export function addDayExercise(
     .get();
 }
 
-/** Replaces all exercises of a day with the given ordered list (used by the day editor). */
+export type DayExerciseEntry = { exerciseId: number } & DayExerciseTargets;
+
+/**
+ * Replaces all exercises of one day with the given ordered list, atomically. Other days and
+ * logged history are untouched (history references exercises, not program rows).
+ */
+export function replaceDayExercises(
+  programDayId: number,
+  entries: readonly DayExerciseEntry[],
+): void {
+  db.transaction((tx) => {
+    setDayExercises(programDayId, entries, tx);
+  });
+}
+
+/** Replaces all exercises of a day. Prefer `replaceDayExercises` unless already in a transaction. */
 export function setDayExercises(
   programDayId: number,
-  entries: readonly ({ exerciseId: number } & DayExerciseTargets)[],
+  entries: readonly DayExerciseEntry[],
   executor: DbExecutor = db,
 ): void {
   executor
@@ -94,4 +110,19 @@ export function reorderDayExercises(orderedIds: readonly number[]): void {
 
 export function removeDayExercise(id: number, executor: DbExecutor = db): void {
   executor.delete(programDayExercises).where(eq(programDayExercises.id, id)).run();
+}
+
+/** Exercise count per program day id for one program. Days without exercises are absent. */
+export function countExercisesPerDay(
+  userProgramId: number,
+  executor: DbExecutor = db,
+): Map<number, number> {
+  const rows = executor
+    .select({ dayId: programDayExercises.programDayId, count: sql<number>`count(*)` })
+    .from(programDayExercises)
+    .innerJoin(programDays, eq(programDayExercises.programDayId, programDays.id))
+    .where(eq(programDays.userProgramId, userProgramId))
+    .groupBy(programDayExercises.programDayId)
+    .all();
+  return new Map(rows.map((row) => [row.dayId, row.count]));
 }

@@ -6,17 +6,18 @@ type AppState = {
   /** True once migrations, seeding and language setup have completed. */
   isReady: boolean;
   language: Language;
-  hasActiveProgram: boolean;
-  setReady: (state: { language: Language; hasActiveProgram: boolean }) => void;
+  /** True when there is an active program and every one of its days has exercises. */
+  isSetupComplete: boolean;
+  setReady: (state: { language: Language; isSetupComplete: boolean }) => void;
   setLanguage: (language: Language) => void;
-  setHasActiveProgram: (value: boolean) => void;
+  setSetupComplete: (value: boolean) => void;
 };
 
 export const useAppStore = create<AppState>()((set) => ({
   isReady: false,
   language: 'en',
-  hasActiveProgram: false,
-  setReady: ({ language, hasActiveProgram }) => set({ isReady: true, language, hasActiveProgram }),
+  isSetupComplete: false,
+  setReady: ({ language, isSetupComplete }) => set({ isReady: true, language, isSetupComplete }),
   setLanguage: (language) => set({ language }),
-  setHasActiveProgram: (hasActiveProgram) => set({ hasActiveProgram }),
+  setSetupComplete: (isSetupComplete) => set({ isSetupComplete }),
 }));

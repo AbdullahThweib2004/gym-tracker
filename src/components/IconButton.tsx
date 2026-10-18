@@ -1,7 +1,8 @@
-import { I18nManager, Pressable, type ViewStyle } from 'react-native';
+import { Pressable, type ViewStyle } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 import { useTheme, type ColorToken } from '@/theme';
+import { mirrorInRtl } from '@/utils/direction';
 
 type IconButtonProps = {
   icon: keyof typeof Ionicons.glyphMap;
@@ -56,7 +57,7 @@ export function IconButton({
         name={icon}
         size={size}
         color={theme.colors[color]}
-        style={directional && I18nManager.isRTL ? { transform: [{ scaleX: -1 }] } : undefined}
+        style={directional ? mirrorInRtl() : undefined}
       />
     </Pressable>
   );

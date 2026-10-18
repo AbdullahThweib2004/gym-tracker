@@ -1,4 +1,4 @@
-import { hasActiveProgram } from '@/db/repositories/userPrograms';
+import { hasCompleteActiveProgram } from '@/db/repositories/userPrograms';
 import { seedDatabase } from '@/db/seed';
 import { initLanguage, reloadApp } from '@/i18n/language';
 import { useAppStore } from '@/store/appStore';
@@ -14,5 +14,5 @@ export async function bootstrapApp(): Promise<void> {
     await reloadApp();
     return;
   }
-  useAppStore.getState().setReady({ language, hasActiveProgram: hasActiveProgram() });
+  useAppStore.getState().setReady({ language, isSetupComplete: hasCompleteActiveProgram() });
 }

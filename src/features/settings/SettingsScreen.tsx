@@ -1,15 +1,21 @@
+import { useCallback, useState } from 'react';
 import { Alert, Pressable, View } from 'react-native';
 import Constants from 'expo-constants';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { router, useFocusEffect } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
 import { AppText } from '@/components/AppText';
+import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { Screen } from '@/components/Screen';
 import { LANGUAGES, type Language } from '@/constants/settings';
+import { getActiveProgramSummary } from '@/features/program/programService';
+import { dayLabel, splitLabel } from '@/i18n/format';
 import { switchLanguage } from '@/i18n/language';
 import { useAppStore } from '@/store/appStore';
 import { useTheme } from '@/theme';
+import { mirrorInRtl } from '@/utils/direction';
 
 export function SettingsScreen() {
   const { t } = useTranslation();
@@ -17,6 +23,13 @@ export function SettingsScreen() {
   const language = useAppStore((s) => s.language);
   const setLanguage = useAppStore((s) => s.setLanguage);
   const version = Constants.expoConfig?.version ?? '—';
+  const [summary, setSummary] = useState(() => getActiveProgramSummary());
+
+  useFocusEffect(
+    useCallback(() => {
+      setSummary(getActiveProgramSummary());
+    }, []),
+  );
 
   const confirmLanguage = (next: Language) => {
     if (next === language) return;
@@ -37,8 +50,70 @@ export function SettingsScreen() {
     );
   };
 
+  const confirmChangeSplit = () =>
+    Alert.alert(t('settings.changeSplitTitle'), t('settings.changeSplitMessage'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      { text: t('settings.changeSplitConfirm'), onPress: () => router.push('/onboarding') },
+    ]);
+
+  const editDay = (dayId: number) =>
+    router.push({
+      pathname: '/onboarding/day/[dayId]',
+      params: { dayId: String(dayId), mode: 'edit' },
+    });
+
   return (
     <Screen scroll edges={[]}>
+      {summary ? (
+        <Card>
+          <AppText variant="subheading">{t('settings.myProgram')}</AppText>
+          <AppText color="textSecondary">{splitLabel(summary.program.splitType)}</AppText>
+          <View style={{ marginTop: theme.spacing.xs }}>
+            {summary.days.map(({ day, exerciseCount }) => {
+              const name = dayLabel(summary.program.splitType, day.dayKey);
+              return (
+                <Pressable
+                  key={day.id}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('settings.editDay', { day: name })}
+                  onPress={() => editDay(day.id)}
+                  style={({ pressed }) => ({
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: theme.spacing.md,
+                    paddingVertical: theme.spacing.md,
+                    paddingHorizontal: theme.spacing.sm,
+                    borderRadius: theme.radius.md,
+                    backgroundColor: pressed
+                      ? theme.colors.surfaceElevated
+                      : theme.colors.transparent,
+                  })}
+                >
+                  <View style={{ flex: 1 }}>
+                    <AppText variant="bodyStrong">{name}</AppText>
+                    <AppText variant="caption" color="textSecondary">
+                      {t('home.exerciseCount', { count: exerciseCount })}
+                    </AppText>
+                  </View>
+                  <Ionicons
+                    name="chevron-forward"
+                    size={18}
+                    color={theme.colors.textSecondary}
+                    style={mirrorInRtl()}
+                  />
+                </Pressable>
+              );
+            })}
+          </View>
+          <Button
+            label={t('settings.changeSplit')}
+            variant="secondary"
+            icon="swap-horizontal"
+            onPress={confirmChangeSplit}
+          />
+        </Card>
+      ) : null}
+
       <Card>
         <AppText variant="subheading">{t('settings.language')}</AppText>
         <AppText variant="caption" color="textSecondary">
@@ -73,6 +148,7 @@ export function SettingsScreen() {
           })}
         </View>
       </Card>
+
       <Card>
         <AppText variant="subheading">{t('settings.about')}</AppText>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>

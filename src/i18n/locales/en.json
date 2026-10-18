@@ -25,6 +25,17 @@
       "migrationTitle": "Couldn't prepare the database",
       "migrationMessage": "Your data is safe. Close and reopen the app. If this keeps happening, reinstall it.",
       "details": "Details: {{message}}"
+    },
+    "time": {
+      "justNow": "just now",
+      "today": "today",
+      "yesterday": "yesterday",
+      "minutesAgo_one": "{{count}} minute ago",
+      "minutesAgo_other": "{{count}} minutes ago",
+      "hoursAgo_one": "{{count}} hour ago",
+      "hoursAgo_other": "{{count}} hours ago",
+      "daysAgo_one": "{{count}} day ago",
+      "daysAgo_other": "{{count}} days ago"
     }
   },
   "tabs": {
@@ -36,7 +47,25 @@
     "title": "Today",
     "activeProgram": "Current program",
     "noProgram": "No program yet",
-    "comingSoon": "Your next workout will appear here."
+    "editProgram": "Edit program",
+    "inProgress": "Workout in progress",
+    "startedAgo": "Started {{when}}",
+    "resume": "Resume",
+    "discard": "Discard",
+    "discardTitle": "Discard this workout?",
+    "discardMessage": "All sets logged in this workout will be deleted. This can’t be undone.",
+    "whatToday": "What are you training today?",
+    "upNext": "Up next",
+    "lastDone": "Last done: {{when}}",
+    "notDoneYet": "Not done yet",
+    "otherInProgressTitle": "Another workout is in progress",
+    "otherInProgressMessage": "{{day}} is still open. Finish or discard it before starting a new one.",
+    "finishIt": "Finish it",
+    "discardIt": "Discard it",
+    "exerciseCount_one": "{{count}} exercise",
+    "exerciseCount_other": "{{count}} exercises",
+    "andMore_one": "+{{count}} more",
+    "andMore_other": "+{{count}} more"
   },
   "workout": {
     "title": "Workout",
@@ -47,7 +76,12 @@
     "addSet": "Add set",
     "set": "Set {{number}}",
     "warmup": "Warm-up",
-    "finish": "Finish workout"
+    "finish": "Finish workout",
+    "notFound": "Workout not found",
+    "finishTitle": "Finish workout?",
+    "finishMessage": "It will be saved to your history.",
+    "startedAt": "Started at {{time}}",
+    "placeholder": "Set logging is coming next. For now you can finish or discard this workout."
   },
   "history": {
     "title": "History",
@@ -62,18 +96,59 @@
     "changeLanguageMessage": "The app will restart to switch to {{language}}.",
     "restart": "Restart",
     "version": "Version",
-    "about": "About"
+    "about": "About",
+    "myProgram": "My program",
+    "editDay": "Edit {{day}}",
+    "changeSplit": "Change split",
+    "changeSplitTitle": "Change your split?",
+    "changeSplitMessage": "Your workout history is kept. You’ll pick a new split and a new program will be created.",
+    "changeSplitConfirm": "Continue"
   },
   "onboarding": {
-    "title": "Welcome to Gym Tracker",
-    "subtitle": "Pick a training split to get started.",
-    "placeholder": "Program setup is coming next."
+    "title": "Choose your split",
+    "changeTitle": "Change split",
+    "splitExplainer": "A split is how you divide your training across the week. Each day focuses on certain muscles, and you rotate through the days in order.",
+    "continueSetup": "Continue setting up {{split}}",
+    "continue": "Continue",
+    "confirmTitle": "Start {{split}}?",
+    "confirmMessage": "Next, you’ll pick the exercises for each day.",
+    "confirmChangeMessage": "Your workout history is kept. A new program will be created and you’ll pick exercises for each day.",
+    "start": "Start",
+    "wizard": {
+      "progress": "Day {{current}} of {{total}}",
+      "editSubtitle": "Edit this day’s exercises",
+      "showSelected": "Show",
+      "hideSelected": "Hide",
+      "pickAtLeastOne": "Pick at least one exercise for this day.",
+      "finish": "Finish",
+      "remove": "Remove",
+      "removeNamed": "Remove {{name}}",
+      "moveUp": "Move {{name}} up",
+      "moveDown": "Move {{name}} down",
+      "editTargetsFor": "Edit sets and reps for {{name}}",
+      "targetSummary": "{{sets}} sets × {{min}}–{{max}} reps",
+      "targetSets": "Sets",
+      "repsMin": "Min reps",
+      "repsMax": "Max reps",
+      "dayNotFound": "This day no longer exists",
+      "discardTitle": "Discard changes?",
+      "discardMessage": "Your changes to this day won’t be saved.",
+      "discard": "Discard",
+      "selectedCount_one": "{{count}} selected",
+      "selectedCount_other": "{{count}} selected"
+    }
   },
   "exercises": {
     "title": "Exercises",
     "search": "Search exercises",
     "custom": "Custom",
-    "archived": "Archived"
+    "archived": "Archived",
+    "clearSearch": "Clear search",
+    "allEquipment": "All",
+    "noResults": "No exercises match your search.",
+    "otherMuscles": "Other muscles",
+    "selectedInGroup_one": "{{count}} selected",
+    "selectedInGroup_other": "{{count}} selected"
   },
   "languages": {
     "en": "English",

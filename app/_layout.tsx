@@ -26,6 +26,9 @@ import { RestTimerWatcher } from '@/features/restTimer/RestTimerWatcher';
 import { useAppStore } from '@/store/appStore';
 import { colors, fonts } from '@/theme';
 
+// Type-only (erased at build time), so it doesn't pull the dev module into production.
+import type * as DemoHooksModule from '@/features/dev/demoHooks';
+
 // Keep the native splash up until the fonts are ready, so text never flashes in the wrong font.
 void SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
@@ -79,6 +82,12 @@ const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.background },
 });
 
+// Dev only (stripped from production): hooks for the demo capture script in scripts/demo.
+const registerDemoHooks: typeof DemoHooksModule.registerDemoHooks | null = __DEV__
+  ? // eslint-disable-next-line @typescript-eslint/no-require-imports -- conditional so it's stripped from production
+    (require('@/features/dev/demoHooks') as typeof DemoHooksModule).registerDemoHooks
+  : null;
+
 const toError = (err: unknown) => (err instanceof Error ? err : new Error(String(err)));
 
 /** Opens the database before anything (migrations included) can query it. */
@@ -119,6 +128,10 @@ function MigratedApp() {
     if (!success) return;
     bootstrapApp().catch((err: unknown) => setBootError(toError(err)));
   }, [success]);
+
+  useEffect(() => {
+    if (isReady) registerDemoHooks?.();
+  }, [isReady]);
 
   // When setup finishes, go home. This runs after the Stack below has re-rendered with the new
   // guard, so the tabs route is already reachable (navigating from the wizard would race it).

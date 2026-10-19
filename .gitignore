@@ -48,3 +48,6 @@ example
 
 # test coverage
 coverage/
+
+# demo capture output (videos and intermediate files)
+media-out/

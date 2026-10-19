@@ -1,4 +1,8 @@
-import { clearWorkoutHistory, generateDemoHistory } from '@/features/dev/devService';
+import {
+  clearWorkoutHistory,
+  generateDemoHistory,
+  loadDemoProgram,
+} from '@/features/dev/devService';
 import { chooseSplit, saveDayEntries } from '@/features/program/programService';
 import { suggestNextWeight } from '@/features/progress/overload';
 import { getSessionPRs, recordsForSet } from '@/features/progress/progressService';
@@ -17,7 +21,9 @@ import type * as ShimModule from '@/test/expoSqliteShim';
 
 import { openDatabase } from '../client';
 import { listExercises } from '../repositories/exercises';
+import { listDayExercises } from '../repositories/programDayExercises';
 import { listProgramDays } from '../repositories/programDays';
+import { getActiveProgram, listPrograms } from '../repositories/userPrograms';
 import { listExerciseHistory } from '../repositories/sessionSets';
 import { getDraft, saveDraft } from '../repositories/setDrafts';
 import { listFinishedSessionsWithStats } from '../repositories/workoutSessions';
@@ -212,5 +218,17 @@ describe('demo history (dev)', () => {
     clearWorkoutHistory();
     expect(listFinishedSessionsWithStats()).toEqual([]);
     expect(listProgramDays(days[0]!.userProgramId)).toHaveLength(3);
+  });
+
+  it('loads a complete Push / Pull / Legs demo program with history', () => {
+    setUp();
+    const added = loadDemoProgram();
+    const program = getActiveProgram()!;
+    const days = listProgramDays(program.id);
+    expect(program.splitType).toBe('ppl');
+    expect(listPrograms()).toHaveLength(1);
+    expect(days.map((day) => listDayExercises(day.id).length)).toEqual([5, 5, 5]);
+    expect(listDayExercises(days[2]!.id)[0]?.exercise.key).toBe('back-squat');
+    expect(added).toBe(8 * days.length);
   });
 });

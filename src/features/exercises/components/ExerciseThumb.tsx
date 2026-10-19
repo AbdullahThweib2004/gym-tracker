@@ -100,7 +100,7 @@ export function ExerciseThumb({
               borderRadius: theme.radius.pill,
               alignItems: 'center',
               justifyContent: 'center',
-              backgroundColor: theme.colors.primarySoft,
+              backgroundColor: theme.colors.primaryMuted,
             }}
           >
             <MaterialCommunityIcons

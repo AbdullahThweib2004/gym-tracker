@@ -5,14 +5,14 @@ Dark, high-contrast and energetic, built for one-handed use between sets. All va
 
 ## Color
 
-| Token                                              | Use                                                                                                          |
-| -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `background` `#0B0D10`                             | Screen background                                                                                            |
-| `surface` → `surfaceElevated` → `surfaceHighlight` | Cards, inputs, pressed/selected states. Elevation = a lighter surface + a 1 px `border`, never heavy shadows |
-| `primary` `#C6F432` (electric lime)                | The **only** accent: primary actions, progress, confirmed sets, selection. Text on it uses `onPrimary`       |
-| `primarySoft`                                      | Tinted background for highlighted cards (e.g. "Today", suggestions)                                          |
-| `success` / `warning` / `danger` (+ `…Soft`)       | Semantic states only (saved, PRs and warnings, destructive actions)                                          |
-| `textPrimary` / `textSecondary` / `textMuted`      | Text hierarchy; muted is still ≥ 4.5:1 on every surface                                                      |
+| Token                                              | Use                                                                                                                   |
+| -------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `background` `#0A0A0A`                             | Screen background (near black)                                                                                        |
+| `surface` → `surfaceElevated` → `surfaceHighlight` | Cards, inputs, pressed/selected states. Elevation = a lighter surface + a 1 px `border`, never heavy shadows          |
+| `primary` `#FF6B00` (orange)                       | The **only** brand accent: primary actions, active tab, selection, progress, charts, PRs. Text on it uses `onPrimary` |
+| `primaryMuted` (orange at 15%)                     | Tinted background for selected and accent states                                                                      |
+| `success` / `warning` / `danger` (+ `…Soft`)       | Semantic states only: green confirmed sets, yellow warnings (never orange), red destructive actions                   |
+| `textPrimary` / `textSecondary` / `textMuted`      | Text hierarchy; muted is still ≥ 4.5:1 on every surface                                                               |
 
 All text/background pairs meet WCAG AA (4.5:1); most exceed 7:1.
 

@@ -82,7 +82,7 @@ const TimelineCard = memo(function TimelineCard({
             borderRadius: theme.radius.pill,
             backgroundColor: theme.colors.primary,
             borderWidth: 3,
-            borderColor: theme.colors.primarySoft,
+            borderColor: theme.colors.primaryMuted,
           }}
         />
         {!isLast ? (

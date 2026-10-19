@@ -39,7 +39,7 @@ export function EmptyState({
           borderRadius: theme.radius.pill,
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: theme.colors.primarySoft,
+          backgroundColor: theme.colors.primaryMuted,
           marginBottom: theme.spacing.sm,
         }}
       >

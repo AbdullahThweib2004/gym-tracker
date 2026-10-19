@@ -48,7 +48,7 @@ function RestPill({ expanded, onToggle }: { expanded: boolean; onToggle: () => v
         borderRadius: theme.radius.pill,
         borderWidth: 1,
         borderColor: theme.colors.primary,
-        backgroundColor: theme.colors.primarySoft,
+        backgroundColor: theme.colors.primaryMuted,
       }}
     >
       <Svg width={RING} height={RING} style={{ transform: [{ rotate: '-90deg' }] }}>

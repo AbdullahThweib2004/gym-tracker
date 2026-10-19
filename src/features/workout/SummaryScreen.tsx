@@ -60,7 +60,7 @@ export function SummaryScreen() {
       <View
         style={{ alignItems: 'center', gap: theme.spacing.xs, marginVertical: theme.spacing.lg }}
       >
-        <Ionicons name="trophy" size={48} color={theme.colors.warning} />
+        <Ionicons name="trophy" size={48} color={theme.colors.primary} />
         <AppText variant="title" align="center" accessibilityRole="header">
           {t('summary.title')}
         </AppText>
@@ -77,7 +77,7 @@ export function SummaryScreen() {
       </View>
 
       {prs.length > 0 ? (
-        <Card style={{ borderColor: theme.colors.warning }}>
+        <Card tone="accent">
           <AppText variant="subheading">{t('records.sessionTitle', { count: prs.length })}</AppText>
           {prs.map(({ exercise, set, records }) => (
             <View key={set.id} style={{ gap: theme.spacing.xs }}>

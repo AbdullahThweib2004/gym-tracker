@@ -84,8 +84,8 @@ export const SetCard = memo(function SetCard({
             paddingHorizontal: theme.spacing.lg,
             borderRadius: theme.radius.lg,
             borderWidth: 1,
-            borderColor: theme.colors.border,
-            backgroundColor: done ? theme.colors.surface : theme.colors.background,
+            borderColor: done ? theme.colors.successSoft : theme.colors.border,
+            backgroundColor: done ? theme.colors.successSoft : theme.colors.background,
           }}
         >
           <View
@@ -95,13 +95,13 @@ export const SetCard = memo(function SetCard({
               borderRadius: theme.radius.pill,
               alignItems: 'center',
               justifyContent: 'center',
-              backgroundColor: done ? theme.colors.primary : theme.colors.transparent,
+              backgroundColor: done ? theme.colors.success : theme.colors.transparent,
               borderWidth: done ? 0 : 1.5,
               borderColor: theme.colors.borderStrong,
             }}
           >
             {done ? (
-              <Ionicons name="checkmark" size={18} color={theme.colors.onPrimary} />
+              <Ionicons name="checkmark" size={18} color={theme.colors.onSemantic} />
             ) : (
               <AppText variant="label" color="textMuted">
                 {ordinal ?? t('workout.warmupShort')}
@@ -122,7 +122,7 @@ export const SetCard = memo(function SetCard({
             <Ionicons
               name="trophy"
               size={18}
-              color={theme.colors.warning}
+              color={theme.colors.primary}
               accessibilityLabel={t('records.newPR')}
             />
           ) : null}

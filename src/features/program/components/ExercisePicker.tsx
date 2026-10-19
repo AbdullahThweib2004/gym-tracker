@@ -63,7 +63,7 @@ const GridCard = memo(function GridCard({
         borderRadius: theme.radius.lg,
         borderWidth: selected ? 2 : 1,
         borderColor: selected ? theme.colors.primary : theme.colors.border,
-        backgroundColor: selected ? theme.colors.primarySoft : theme.colors.surface,
+        backgroundColor: selected ? theme.colors.primaryMuted : theme.colors.surface,
       }}
     >
       <ExerciseThumb exercise={exercise} fill showAddPhotoHint radius={theme.radius.md} />

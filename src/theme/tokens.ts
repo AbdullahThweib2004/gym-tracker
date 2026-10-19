@@ -4,34 +4,35 @@
  */
 
 export const colors = {
-  // Surfaces: elevation comes from progressively lighter surfaces plus hairline borders.
-  background: '#0B0D10',
-  surface: '#14171C',
-  surfaceElevated: '#1C2027',
-  surfaceHighlight: '#252A33',
-  border: '#2A2F38',
-  borderStrong: '#3A404B',
+  // Surfaces: near-black, elevation from progressively lighter greys plus hairline borders.
+  background: '#0A0A0A',
+  surface: '#141414',
+  surfaceElevated: '#1C1C1C',
+  surfaceHighlight: '#262626',
+  border: '#2A2A2A',
+  borderStrong: '#3A3A3A',
 
-  // The one accent: primary actions, progress and "done".
-  primary: '#C6F432',
-  primaryPressed: '#AEDB1F',
-  primarySoft: '#1C2410',
-  onPrimary: '#0B0D10',
+  // The one brand accent (orange): primary actions, selection, progress and records.
+  primary: '#FF6B00',
+  primaryPressed: '#E05E00',
+  /** Orange tint for selected states and accent backgrounds. */
+  primaryMuted: 'rgba(255, 107, 0, 0.15)',
+  onPrimary: '#0A0A0A',
 
-  // Semantic colors.
-  success: '#34D399',
-  successSoft: '#0E2A20',
-  warning: '#FFB547',
-  warningSoft: '#2C2111',
-  danger: '#FF6363',
-  dangerSoft: '#2E1517',
-  onSemantic: '#0B0D10',
+  // Semantic colors, each clearly distinct from the orange.
+  success: '#22C55E',
+  successSoft: 'rgba(34, 197, 94, 0.12)',
+  warning: '#FACC15',
+  warningSoft: 'rgba(250, 204, 21, 0.12)',
+  danger: '#F56565',
+  dangerSoft: 'rgba(245, 101, 101, 0.15)',
+  onSemantic: '#0A0A0A',
 
-  textPrimary: '#F4F6F8',
-  textSecondary: '#A9B0BB',
-  textMuted: '#8E959F',
+  textPrimary: '#FFFFFF',
+  textSecondary: '#A3A3A3',
+  textMuted: '#959595',
 
-  overlay: 'rgba(0, 0, 0, 0.65)',
+  overlay: 'rgba(0, 0, 0, 0.7)',
   shimmer: 'rgba(255, 255, 255, 0.07)',
   transparent: 'transparent',
 } as const;

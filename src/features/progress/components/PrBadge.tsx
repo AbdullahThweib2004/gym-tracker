@@ -45,13 +45,19 @@ export function PrBadge({ records }: PrBadgeProps) {
           paddingHorizontal: theme.spacing.md,
           paddingVertical: theme.spacing.xs,
           borderRadius: theme.radius.pill,
-          backgroundColor: theme.colors.warning,
+          backgroundColor: theme.colors.primary,
+          // Orange glow.
+          shadowColor: theme.colors.primary,
+          shadowOpacity: 0.6,
+          shadowRadius: theme.spacing.md,
+          shadowOffset: { width: 0, height: 0 },
+          elevation: 6,
         }}
       >
-        <AppText variant="label" color="background">
+        <AppText variant="label" color="onPrimary">
           {t('records.newPR')}
         </AppText>
-        <AppText variant="label" color="background">
+        <AppText variant="label" color="onPrimary">
           {kinds}
         </AppText>
       </View>

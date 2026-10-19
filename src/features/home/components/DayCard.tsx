@@ -64,7 +64,7 @@ export const DayCard = memo(function DayCard({
             borderRadius: theme.radius.pill,
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: theme.colors.primarySoft,
+            backgroundColor: theme.colors.primaryMuted,
           }}
         >
           <Ionicons

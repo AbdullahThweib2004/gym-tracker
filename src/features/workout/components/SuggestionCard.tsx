@@ -38,7 +38,7 @@ export function SuggestionCard({
         borderRadius: theme.radius.lg,
         borderWidth: 1,
         borderColor: increase ? theme.colors.primary : theme.colors.border,
-        backgroundColor: increase ? theme.colors.primarySoft : theme.colors.surface,
+        backgroundColor: increase ? theme.colors.primaryMuted : theme.colors.surface,
       }}
     >
       <View

@@ -33,7 +33,7 @@ export function Card({
   const theme = useTheme();
   const tones: Record<CardTone, { bg: string; border: string }> = {
     default: { bg: theme.colors.surface, border: theme.colors.border },
-    accent: { bg: theme.colors.primarySoft, border: theme.colors.primary },
+    accent: { bg: theme.colors.primaryMuted, border: theme.colors.primary },
     warning: { bg: theme.colors.warningSoft, border: theme.colors.warning },
     success: { bg: theme.colors.successSoft, border: theme.colors.success },
   };

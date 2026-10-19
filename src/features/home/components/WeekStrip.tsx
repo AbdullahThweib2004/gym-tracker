@@ -35,7 +35,7 @@ export const WeekStrip = memo(function WeekStrip({ days, goal }: WeekStripProps)
         <Ionicons
           name={reached ? 'flame' : 'flame-outline'}
           size={18}
-          color={reached ? theme.colors.warning : theme.colors.textSecondary}
+          color={reached ? theme.colors.primary : theme.colors.textSecondary}
         />
         <AppText variant="bodyStrong" style={{ flex: 1 }}>
           {t('home.weekTitle')}

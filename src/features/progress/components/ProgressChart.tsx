@@ -77,9 +77,9 @@ export function ProgressChart({
           color={theme.colors.primary}
           dataPointsColor={theme.colors.primary}
           startFillColor={theme.colors.primary}
-          endFillColor={theme.colors.background}
+          endFillColor={theme.colors.primary}
           startOpacity={0.35}
-          endOpacity={0.02}
+          endOpacity={0}
           rulesColor={theme.colors.border}
           rulesType="solid"
           xAxisColor={theme.colors.border}

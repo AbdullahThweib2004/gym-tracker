@@ -3,6 +3,7 @@ import * as Notifications from 'expo-notifications';
 
 import { getMeta, META_KEYS, setMeta } from '@/db/repositories/appMeta';
 import i18n from '@/i18n';
+import { colors } from '@/theme';
 
 const CHANNEL_ID = 'rest-timer';
 const supported = Platform.OS !== 'web';
@@ -25,6 +26,7 @@ export async function configureRestNotifications(): Promise<void> {
       importance: Notifications.AndroidImportance.HIGH,
       vibrationPattern: [0, 400, 200, 400],
       sound: 'default',
+      lightColor: colors.primary,
     });
   }
 }

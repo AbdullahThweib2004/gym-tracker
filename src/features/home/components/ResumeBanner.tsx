@@ -28,12 +28,12 @@ export function ResumeBanner({ dayName, startedAt, onResume, onDiscard }: Resume
         paddingStart: theme.spacing.lg,
         borderRadius: theme.radius.lg,
         borderWidth: 1,
-        borderColor: theme.colors.warning,
-        backgroundColor: theme.colors.warningSoft,
+        borderColor: theme.colors.primary,
+        backgroundColor: theme.colors.surfaceElevated,
       }}
     >
       <View style={{ flex: 1, gap: theme.spacing.xs }}>
-        <AppText variant="label" color="warning">
+        <AppText variant="label" color="primary">
           {t('home.inProgress')}
         </AppText>
         <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: theme.spacing.sm }}>
@@ -43,7 +43,7 @@ export function ResumeBanner({ dayName, startedAt, onResume, onDiscard }: Resume
           <ElapsedTimer
             since={startedAt}
             variant="bodyStrong"
-            color="warning"
+            color="primary"
             accessibilityLabel={t('workout.elapsed')}
           />
         </View>

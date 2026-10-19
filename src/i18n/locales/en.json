@@ -1,12 +1,9 @@
 {
   "common": {
-    "appName": "Gym Tracker",
     "loading": "Loading…",
-    "ok": "OK",
     "cancel": "Cancel",
     "save": "Save",
     "delete": "Delete",
-    "edit": "Edit",
     "done": "Done",
     "retry": "Try again",
     "back": "Back",
@@ -21,19 +18,13 @@
       "setValue": "{{weight}} × {{reps}}"
     },
     "errors": {
-      "title": "Something went wrong",
       "migrationTitle": "Couldn't prepare the database",
       "migrationMessage": "Your data is safe. Close and reopen the app. If this keeps happening, reinstall it.",
       "details": "Details: {{message}}"
     },
     "time": {
-      "justNow": "just now",
       "today": "today",
       "yesterday": "yesterday",
-      "minutesAgo_one": "{{count}} minute ago",
-      "minutesAgo_other": "{{count}} minutes ago",
-      "hoursAgo_one": "{{count}} hour ago",
-      "hoursAgo_other": "{{count}} hours ago",
       "daysAgo_one": "{{count}} day ago",
       "daysAgo_other": "{{count}} days ago"
     },
@@ -49,17 +40,14 @@
     "settings": "Settings"
   },
   "home": {
-    "title": "Today",
     "activeProgram": "Current program",
     "noProgram": "No program yet",
     "editProgram": "Edit program",
     "inProgress": "Workout in progress",
-    "startedAgo": "Started {{when}}",
     "resume": "Resume",
     "discard": "Discard",
     "discardTitle": "Discard this workout?",
     "discardMessage": "All sets logged in this workout will be deleted. This can’t be undone.",
-    "whatToday": "What are you training today?",
     "upNext": "Up next",
     "lastDone": "Last done: {{when}}",
     "notDoneYet": "Not done yet",
@@ -78,13 +66,11 @@
     "otherDays": "Other days"
   },
   "workout": {
-    "title": "Workout",
     "finish": "Finish workout",
     "finishShort": "Finish",
     "elapsed": "Elapsed time",
     "notFound": "Workout not found",
     "progress": "{{done}}/{{target}} sets",
-    "target": "Target {{target}}",
     "addExercise": "Add exercise to this session",
     "addExerciseTitle": "Add exercises",
     "addExerciseHint": "Only for this workout. Your program stays the same.",
@@ -93,7 +79,6 @@
     "finishAnyway": "Finish anyway",
     "lastTime": "Last time",
     "firstTime": "First time, set your starting weight",
-    "setShort": "Set",
     "weight": "Weight",
     "weightKg": "Weight (kg)",
     "reps": "Reps",
@@ -108,16 +93,12 @@
     "increaseWeight": "Increase weight by 2.5 kg",
     "decreaseReps": "Decrease reps",
     "increaseReps": "Increase reps",
-    "confirmSet": "Save {{set}}",
-    "editSet": "Edit {{set}}",
-    "rowHint": "Long press for warm-up or delete",
     "savedRowHint": "Saved. Tap to edit, long press for more",
     "rowOptions": "Warm-up or delete",
     "markWarmup": "Mark as warm-up",
     "markWorking": "Mark as working set",
     "deleteSet": "Delete set",
     "invalidSet": "Enter a weight of 0 or more and at least 1 rep.",
-    "rowsHelp": "Grey numbers are last time’s. Tap ✓ to save a set. Long press a set for warm-up or delete.",
     "saveFailedTitle": "Couldn’t save the set",
     "saveFailedMessage": "Nothing was lost. Please try again.",
     "unloggedMessage_one": "{{count}} exercise has no sets logged.",
@@ -141,7 +122,6 @@
     "allDone": "All exercises done 💪"
   },
   "history": {
-    "title": "History",
     "emptyTitle": "No workouts yet",
     "emptyMessage": "Finished workouts will show up here.",
     "thisWeek": "This week",
@@ -149,7 +129,6 @@
     "deleteSession": "Delete workout",
     "deleteSessionTitle": "Delete this workout?",
     "deleteSessionMessage": "The workout and all its sets will be deleted. This can’t be undone.",
-    "deleteSetTitle": "Delete this set?",
     "deleteSetMessage": "This can’t be undone.",
     "openExerciseHistory": "Opens this exercise’s history",
     "editSetHint": "Edit or delete this set",
@@ -157,7 +136,6 @@
     "workoutCount_other": "{{count}} workouts"
   },
   "settings": {
-    "title": "Settings",
     "language": "Language",
     "languageHint": "The app restarts to apply the text direction.",
     "changeLanguageTitle": "Change language?",
@@ -203,8 +181,6 @@
     "wizard": {
       "progress": "Day {{current}} of {{total}}",
       "editSubtitle": "Edit this day’s exercises",
-      "showSelected": "Show",
-      "hideSelected": "Hide",
       "pickAtLeastOne": "Pick at least one exercise for this day.",
       "finish": "Finish",
       "remove": "Remove",
@@ -234,9 +210,6 @@
     "clearSearch": "Clear search",
     "allEquipment": "All",
     "noResults": "No exercises match your search.",
-    "otherMuscles": "Other muscles",
-    "selectedInGroup_one": "{{count}} selected",
-    "selectedInGroup_other": "{{count}} selected",
     "notFound": "Exercise not found",
     "noHistoryTitle": "No history yet",
     "noHistoryMessage": "Finished workouts with this exercise will show up here.",
@@ -325,7 +298,6 @@
     "setsLogged_other": "{{count}} sets"
   },
   "restTimer": {
-    "title": "Rest",
     "remaining": "Rest, {{time}} left",
     "minus": "−{{s}}s",
     "plus": "+{{s}}s",

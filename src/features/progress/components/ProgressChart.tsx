@@ -4,7 +4,7 @@ import { LineChart } from 'react-native-gifted-charts';
 
 import { AppText } from '@/components/AppText';
 import { formatDate, formatGroupedNumber } from '@/i18n/format';
-import { useTheme } from '@/theme';
+import { useReduceMotion, useTheme } from '@/theme';
 
 import {
   chartBaseline,
@@ -31,6 +31,7 @@ export function ProgressChart({
   formatValue,
 }: ProgressChartProps) {
   const theme = useTheme();
+  const reduceMotion = useReduceMotion();
   const [width, setWidth] = useState(0);
   const values = points.map((p) => metricValue(p, metric));
   const labelStyle = {
@@ -71,7 +72,7 @@ export function ProgressChart({
           noOfSections={4}
           curved
           areaChart
-          isAnimated
+          isAnimated={!reduceMotion}
           thickness={3}
           color={theme.colors.primary}
           dataPointsColor={theme.colors.primary}

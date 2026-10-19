@@ -3,7 +3,7 @@ import { Animated, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { AppText } from '@/components/AppText';
-import { useTheme } from '@/theme';
+import { useReduceMotion, useTheme } from '@/theme';
 
 import type { RecordKind } from '../records';
 
@@ -13,15 +13,21 @@ type PrBadgeProps = { records: readonly RecordKind[] };
 export function PrBadge({ records }: PrBadgeProps) {
   const { t } = useTranslation();
   const theme = useTheme();
+  const reduceMotion = useReduceMotion();
   const [scale] = useState(() => new Animated.Value(0.4));
   const [opacity] = useState(() => new Animated.Value(0));
 
   useEffect(() => {
+    if (reduceMotion) {
+      scale.setValue(1);
+      opacity.setValue(1);
+      return;
+    }
     Animated.parallel([
       Animated.spring(scale, { toValue: 1, friction: 4, tension: 120, useNativeDriver: true }),
       Animated.timing(opacity, { toValue: 1, duration: 180, useNativeDriver: true }),
     ]).start();
-  }, [scale, opacity]);
+  }, [scale, opacity, reduceMotion]);
 
   const kinds = records.map((kind) => t(`records.${kind}`)).join(' · ');
   return (

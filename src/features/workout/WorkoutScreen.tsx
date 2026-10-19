@@ -3,6 +3,7 @@ import { ScrollView, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import Animated, { FadeIn, LinearTransition } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppText } from '@/components/AppText';
@@ -18,7 +19,7 @@ import { ExerciseThumb } from '@/features/exercises/components/ExerciseThumb';
 import { RestTimerDock } from '@/features/restTimer/RestTimerDock';
 import { dayLabel, exerciseName, formatTarget } from '@/i18n/format';
 import { useAppStore } from '@/store/appStore';
-import { useTheme } from '@/theme';
+import { useReduceMotion, useTheme } from '@/theme';
 import { mirrorInRtl } from '@/utils/direction';
 
 import { addExerciseHref, exerciseLogHref, summaryHref } from './routes';
@@ -34,6 +35,7 @@ import {
 export function WorkoutScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
+  const reduceMotion = useReduceMotion();
   const language = useAppStore((s) => s.language);
   const { sessionId: sessionParam } = useLocalSearchParams<{ sessionId: string }>();
   const sessionId = Number(sessionParam);
@@ -190,53 +192,64 @@ export function WorkoutScreen() {
               target: item.targetSets,
             });
             return (
-              <Card
+              <Animated.View
                 key={item.exerciseId}
-                onPress={() => router.push(exerciseLogHref(session.id, item.exerciseId))}
-                accessibilityLabel={`${name}, ${progress}`}
-                style={{ paddingVertical: theme.spacing.md }}
+                layout={reduceMotion ? undefined : LinearTransition.duration(theme.motion.normal)}
+                entering={reduceMotion ? undefined : FadeIn.duration(theme.motion.normal)}
               >
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.md }}>
-                  <ExerciseThumb exercise={item.exercise} size={52} />
-                  <View style={{ flex: 1, gap: theme.spacing.xs }}>
-                    <AppText variant="bodyStrong" numberOfLines={2}>
-                      {name}
-                    </AppText>
-                    <View
-                      style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.sm }}
-                    >
-                      <View style={{ flex: 1 }}>
-                        <ProgressBar
-                          value={
-                            item.targetSets ? Math.min(1, item.workingSets / item.targetSets) : 0
-                          }
-                          height={4}
-                          color={item.isComplete ? 'primary' : 'textSecondary'}
-                        />
-                      </View>
-                      <AppText
-                        variant="label"
-                        color={item.isComplete ? 'primary' : 'textSecondary'}
+                <Card
+                  onPress={() => router.push(exerciseLogHref(session.id, item.exerciseId))}
+                  accessibilityLabel={`${name}, ${progress}`}
+                  style={{ paddingVertical: theme.spacing.md }}
+                >
+                  <View
+                    style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.md }}
+                  >
+                    <ExerciseThumb exercise={item.exercise} size={52} />
+                    <View style={{ flex: 1, gap: theme.spacing.xs }}>
+                      <AppText variant="bodyStrong" numberOfLines={2}>
+                        {name}
+                      </AppText>
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          gap: theme.spacing.sm,
+                        }}
                       >
-                        {item.workingSets}/{item.targetSets}
+                        <View style={{ flex: 1 }}>
+                          <ProgressBar
+                            value={
+                              item.targetSets ? Math.min(1, item.workingSets / item.targetSets) : 0
+                            }
+                            height={4}
+                            color={item.isComplete ? 'primary' : 'textSecondary'}
+                          />
+                        </View>
+                        <AppText
+                          variant="label"
+                          color={item.isComplete ? 'primary' : 'textSecondary'}
+                        >
+                          {item.workingSets}/{item.targetSets}
+                        </AppText>
+                      </View>
+                      <AppText variant="label" color="textMuted">
+                        {formatTarget(item.targetSets, item.targetRepsMin, item.targetRepsMax)}
                       </AppText>
                     </View>
-                    <AppText variant="label" color="textMuted">
-                      {formatTarget(item.targetSets, item.targetRepsMin, item.targetRepsMax)}
-                    </AppText>
+                    {item.isComplete ? (
+                      <Ionicons name="checkmark-circle" size={28} color={theme.colors.primary} />
+                    ) : (
+                      <Ionicons
+                        name="chevron-forward"
+                        size={20}
+                        color={theme.colors.textMuted}
+                        style={mirrorInRtl()}
+                      />
+                    )}
                   </View>
-                  {item.isComplete ? (
-                    <Ionicons name="checkmark-circle" size={28} color={theme.colors.primary} />
-                  ) : (
-                    <Ionicons
-                      name="chevron-forward"
-                      size={20}
-                      color={theme.colors.textMuted}
-                      style={mirrorInRtl()}
-                    />
-                  )}
-                </View>
-              </Card>
+                </Card>
+              </Animated.View>
             );
           })}
         </View>

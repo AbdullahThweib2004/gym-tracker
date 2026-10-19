@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { AppState, View } from 'react-native';
+import { Alert, AppState, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -177,6 +177,8 @@ export function ExerciseLogPanel({ sessionId, exerciseId, onSetsChanged }: Exerc
       onSetsChanged();
     } catch (error) {
       haptic('error');
+      // Data safety: say so if a set could not be saved (the row keeps its values to retry).
+      Alert.alert(t('workout.saveFailedTitle'), t('workout.saveFailedMessage'));
       console.error(error);
     }
   };

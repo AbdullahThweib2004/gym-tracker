@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
-import { FlatList, View } from 'react-native';
+import { View } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
@@ -97,13 +98,12 @@ export function ExerciseHistoryScreen() {
           }
         />
       </View>
-      <FlatList
+      <FlashList
         data={groups}
         keyExtractor={(group) => String(group.sessionId)}
         contentContainerStyle={{
           paddingHorizontal: theme.spacing.lg,
           paddingBottom: theme.spacing.xl,
-          gap: theme.spacing.sm,
         }}
         ListHeaderComponent={
           <View style={{ gap: theme.spacing.md, marginBottom: theme.spacing.md }}>
@@ -219,26 +219,28 @@ export function ExerciseHistoryScreen() {
           />
         }
         renderItem={({ item }) => (
-          <Card
-            onPress={() => router.push(sessionDetailHref(item.sessionId))}
-            accessibilityLabel={formatDate(item.date, 'long')}
-          >
-            <AppText variant="caption" color="textSecondary">
-              {formatDate(item.date, 'long')}
-            </AppText>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: theme.spacing.sm }}>
-              {item.sets.map((set) => (
-                <AppText
-                  key={set.id}
-                  variant="bodyStrong"
-                  color={set.isWarmup ? 'textMuted' : 'textPrimary'}
-                >
-                  {set.isWarmup ? `${t('workout.warmupShort')} ` : ''}
-                  {formatSetCompact(set.weightKg, set.reps)}
-                </AppText>
-              ))}
-            </View>
-          </Card>
+          <View style={{ paddingBottom: theme.spacing.sm }}>
+            <Card
+              onPress={() => router.push(sessionDetailHref(item.sessionId))}
+              accessibilityLabel={formatDate(item.date, 'long')}
+            >
+              <AppText variant="caption" color="textSecondary">
+                {formatDate(item.date, 'long')}
+              </AppText>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: theme.spacing.sm }}>
+                {item.sets.map((set) => (
+                  <AppText
+                    key={set.id}
+                    variant="bodyStrong"
+                    color={set.isWarmup ? 'textMuted' : 'textPrimary'}
+                  >
+                    {set.isWarmup ? `${t('workout.warmupShort')} ` : ''}
+                    {formatSetCompact(set.weightKg, set.reps)}
+                  </AppText>
+                ))}
+              </View>
+            </Card>
+          </View>
         )}
       />
     </Screen>

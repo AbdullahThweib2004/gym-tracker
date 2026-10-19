@@ -4,7 +4,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { router, useFocusEffect } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 
 import { ActionSheet } from '@/components/ActionSheet';
 import { AppText } from '@/components/AppText';
@@ -20,7 +20,7 @@ import type { ProgramDay } from '@/db/schema';
 import { dayLabel, splitLabel } from '@/i18n/format';
 import { formatDaysAgo } from '@/i18n/relative';
 import { useAppStore } from '@/store/appStore';
-import { useReduceMotion, useTheme } from '@/theme';
+import { useLayoutTransition, useReduceMotion, useTheme } from '@/theme';
 
 import { workoutHref } from '../workout/routes';
 import { discardWorkout, finishWorkout, startWorkout } from '../workout/workoutService';
@@ -34,6 +34,7 @@ export function HomeScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
   const reduceMotion = useReduceMotion();
+  const layout = useLayoutTransition();
   const language = useAppStore((s) => s.language);
   const weekStartsOn = WEEK_STARTS_ON[language];
   const [data, setData] = useState<HomeData | null>(() => loadHomeData(weekStartsOn));
@@ -60,7 +61,6 @@ export function HomeScreen() {
       ? dayLabel(unfinished.splitType, unfinished.session.dayKey)
       : unfinished.session.dayKey
     : '';
-  const layout = reduceMotion ? undefined : LinearTransition.duration(theme.motion.normal);
 
   const begin = (day: ProgramDay) => {
     const session = startWorkout(program, day);

@@ -3,7 +3,7 @@ import { Alert, AppState, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 
 import { ActionSheet } from '@/components/ActionSheet';
 import { AppText } from '@/components/AppText';
@@ -18,7 +18,7 @@ import { resolveRestSeconds } from '@/features/restTimer/restMath';
 import { useRestTimerStore } from '@/features/restTimer/restTimerStore';
 import { exerciseName, formatDate, formatSetsLine, formatTarget } from '@/i18n/format';
 import { useAppStore } from '@/store/appStore';
-import { useReduceMotion, useTheme } from '@/theme';
+import { useLayoutTransition, useReduceMotion, useTheme } from '@/theme';
 import { createDebouncer } from '@/utils/debounce';
 
 import { SetCard, type SetCardMode } from './components/SetCard';
@@ -56,6 +56,7 @@ export function ExerciseLogPanel({ sessionId, exerciseId, onSetsChanged }: Exerc
   const { t } = useTranslation();
   const theme = useTheme();
   const reduceMotion = useReduceMotion();
+  const layout = useLayoutTransition();
   const language = useAppStore((s) => s.language);
   const restSettings = useRestTimerStore((s) => s.settings);
   const startRest = useRestTimerStore((s) => s.start);
@@ -106,7 +107,6 @@ export function ExerciseLogPanel({ sessionId, exerciseId, onSetsChanged }: Exerc
   const activeKey =
     rows.find((r) => r.key === chosenKey && r.state !== 'saved')?.key ??
     rows.find((r) => r.state !== 'saved')?.key;
-  const layout = reduceMotion ? undefined : LinearTransition.duration(theme.motion.normal);
 
   const setRows = (next: SetRow[]) => {
     setRowsState(next);

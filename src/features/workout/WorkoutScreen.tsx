@@ -3,7 +3,7 @@ import { ScrollView, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import Animated, { FadeIn, LinearTransition } from 'react-native-reanimated';
+import Animated, { FadeIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppText } from '@/components/AppText';
@@ -19,7 +19,7 @@ import { ExerciseThumb } from '@/features/exercises/components/ExerciseThumb';
 import { RestTimerDock } from '@/features/restTimer/RestTimerDock';
 import { dayLabel, exerciseName, formatTarget } from '@/i18n/format';
 import { useAppStore } from '@/store/appStore';
-import { useReduceMotion, useTheme } from '@/theme';
+import { useLayoutTransition, useReduceMotion, useTheme } from '@/theme';
 import { mirrorInRtl } from '@/utils/direction';
 
 import { addExerciseHref, exerciseLogHref, summaryHref } from './routes';
@@ -36,6 +36,7 @@ export function WorkoutScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
   const reduceMotion = useReduceMotion();
+  const layout = useLayoutTransition();
   const language = useAppStore((s) => s.language);
   const { sessionId: sessionParam } = useLocalSearchParams<{ sessionId: string }>();
   const sessionId = Number(sessionParam);
@@ -194,7 +195,7 @@ export function WorkoutScreen() {
             return (
               <Animated.View
                 key={item.exerciseId}
-                layout={reduceMotion ? undefined : LinearTransition.duration(theme.motion.normal)}
+                layout={layout}
                 entering={reduceMotion ? undefined : FadeIn.duration(theme.motion.normal)}
               >
                 <Card

@@ -1,6 +1,7 @@
 import { theme } from './tokens';
 
 export * from './tokens';
+export { useLayoutTransition } from './useLayoutTransition';
 export { useReduceMotion } from './useReduceMotion';
 
 /**

@@ -1,6 +1,6 @@
 import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import Animated, { FadeOut, LinearTransition } from 'react-native-reanimated';
+import Animated, { FadeOut } from 'react-native-reanimated';
 
 import { AppText } from '@/components/AppText';
 import { IconButton } from '@/components/IconButton';
@@ -11,7 +11,7 @@ import { ExerciseThumb } from '@/features/exercises/components/ExerciseThumb';
 import { exerciseName } from '@/i18n/format';
 import { useAppStore } from '@/store/appStore';
 import type { DraftEntry } from '@/store/programDraftStore';
-import { useReduceMotion, useTheme } from '@/theme';
+import { useLayoutTransition, useReduceMotion, useTheme } from '@/theme';
 
 type SelectedSummaryButtonProps = {
   entries: readonly DraftEntry[];
@@ -97,6 +97,7 @@ export function SelectedExercisesSheet({
   const { t } = useTranslation();
   const theme = useTheme();
   const reduceMotion = useReduceMotion();
+  const layout = useLayoutTransition();
   const language = useAppStore((s) => s.language);
 
   return (
@@ -116,7 +117,7 @@ export function SelectedExercisesSheet({
           return (
             <Animated.View
               key={entry.exerciseId}
-              layout={reduceMotion ? undefined : LinearTransition.duration(theme.motion.normal)}
+              layout={layout}
               exiting={reduceMotion ? undefined : FadeOut.duration(theme.motion.fast)}
               style={{
                 gap: theme.spacing.xs,

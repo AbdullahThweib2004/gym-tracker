@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { View } from 'react-native';
-import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import Svg, { Circle } from 'react-native-svg';
 import { useTranslation } from 'react-i18next';
 
@@ -8,7 +8,7 @@ import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
 import { PressableScale } from '@/components/PressableScale';
 import { formatClock, ltr } from '@/i18n/format';
-import { useReduceMotion, useTheme } from '@/theme';
+import { useLayoutTransition, useReduceMotion, useTheme } from '@/theme';
 
 import { REST_ADJUST_SECONDS, remainingFraction, remainingMs } from './restMath';
 import { useRestTimerStore } from './restTimerStore';
@@ -92,6 +92,7 @@ export function RestTimerDock({ trailing }: RestTimerDockProps) {
   const { t } = useTranslation();
   const theme = useTheme();
   const reduceMotion = useReduceMotion();
+  const layout = useLayoutTransition();
   const active = useRestTimerStore((s) => s.timer !== null);
   const adjust = useRestTimerStore((s) => s.adjust);
   const stop = useRestTimerStore((s) => s.stop);
@@ -102,7 +103,7 @@ export function RestTimerDock({ trailing }: RestTimerDockProps) {
 
   return (
     <Animated.View
-      layout={reduceMotion ? undefined : LinearTransition.duration(theme.motion.normal)}
+      layout={layout}
       style={{
         gap: theme.spacing.sm,
         padding: theme.spacing.lg,

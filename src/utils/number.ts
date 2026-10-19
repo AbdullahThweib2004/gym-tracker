@@ -52,3 +52,15 @@ export function clamp(value: number, min: number, max: number): number {
 export function formatNumber(value: number, maxFractionDigits = 2): string {
   return Number.parseFloat(value.toFixed(maxFractionDigits)).toString();
 }
+
+/** Width of one tabular digit as a fraction of the font size (IBM Plex Sans Arabic: 600/1000). */
+const DIGIT_WIDTH_EM = 0.6;
+
+/**
+ * Largest font size (between min and max) at which `chars` tabular characters fit in `width`,
+ * so long values like "102.5" shrink instead of being cut off.
+ */
+export function fitFontSize(width: number, chars: number, max: number, min: number): number {
+  if (width <= 0 || chars <= 0) return max;
+  return clamp(Math.floor(width / (chars * DIGIT_WIDTH_EM)), min, max);
+}

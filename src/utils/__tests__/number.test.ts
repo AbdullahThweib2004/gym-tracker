@@ -1,5 +1,6 @@
 import {
   clamp,
+  fitFontSize,
   formatNumber,
   normalizeNumericText,
   parseNumericInput,
@@ -58,5 +59,21 @@ describe('clamp and formatNumber', () => {
     expect(formatNumber(60)).toBe('60');
     expect(formatNumber(62.5)).toBe('62.5');
     expect(formatNumber(1.005, 1)).toBe('1');
+  });
+});
+
+describe('fitFontSize', () => {
+  it('keeps the largest size when the text fits', () => {
+    expect(fitFontSize(61, 2, 44, 22)).toBe(44);
+  });
+
+  it('shrinks long values to fit the available width', () => {
+    expect(fitFontSize(61, 4, 44, 22)).toBe(25);
+    expect(fitFontSize(61, 4, 44, 22) * 4 * 0.6).toBeLessThanOrEqual(61);
+  });
+
+  it('never goes below the minimum, and ignores unmeasured layouts', () => {
+    expect(fitFontSize(61, 7, 44, 22)).toBe(22);
+    expect(fitFontSize(0, 4, 44, 22)).toBe(44);
   });
 });

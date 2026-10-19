@@ -4,6 +4,7 @@ import { StyleSheet, TextInput, View } from 'react-native';
 import { useTheme } from '@/theme';
 import {
   clamp,
+  fitFontSize,
   formatNumber,
   parseNumericInput,
   roundToStep,
@@ -101,6 +102,14 @@ export function NumberInput({
 
   const big = size === 'big';
   const stepperSize = big ? 24 : 18;
+  // Big numbers shrink to fit the space between the steppers instead of being cut off.
+  const [inputWidth, setInputWidth] = useState(0);
+  const bigFontSize = fitFontSize(
+    inputWidth,
+    (text || placeholder || '').length,
+    theme.typography.numberLarge.fontSize,
+    theme.typography.numberSmall.fontSize,
+  );
 
   return (
     <View style={{ gap: theme.spacing.xs, alignItems: big ? 'stretch' : undefined }}>
@@ -144,10 +153,12 @@ export function NumberInput({
           placeholderTextColor={theme.colors.textMuted}
           selectTextOnFocus
           accessibilityLabel={accessibilityLabel}
+          onLayout={big ? (e) => setInputWidth(e.nativeEvent.layout.width) : undefined}
           style={[
             styles.input,
             compact && styles.compactInput,
             big ? theme.typography.numberLarge : theme.typography.subheading,
+            big && { fontSize: bigFontSize },
             {
               color: muted ? theme.colors.textMuted : theme.colors.textPrimary,
               paddingVertical: big ? 0 : theme.spacing.sm,

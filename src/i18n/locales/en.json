@@ -40,7 +40,6 @@
     "settings": "Settings"
   },
   "home": {
-    "activeProgram": "Current program",
     "noProgram": "No program yet",
     "editProgram": "Edit program",
     "inProgress": "Workout in progress",
@@ -48,7 +47,6 @@
     "discard": "Discard",
     "discardTitle": "Discard this workout?",
     "discardMessage": "All sets logged in this workout will be deleted. This can’t be undone.",
-    "upNext": "Up next",
     "lastDone": "Last done: {{when}}",
     "notDoneYet": "Not done yet",
     "otherInProgressTitle": "Another workout is in progress",
@@ -59,11 +57,10 @@
     "exerciseCount_other": "{{count}} exercises",
     "andMore_one": "+{{count}} more",
     "andMore_other": "+{{count}} more",
-    "todayDay": "Today: {{day}}",
     "startWorkout": "Start workout",
     "weekTitle": "This week",
     "weekProgress": "{{done}} of {{goal}} workouts",
-    "otherDays": "Other days"
+    "chooseDayTitle": "What are you training today?"
   },
   "workout": {
     "finish": "Finish workout",

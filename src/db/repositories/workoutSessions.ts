@@ -66,16 +66,6 @@ export function deleteSession(id: number, executor: DbExecutor = db): void {
   executor.delete(workoutSessions).where(eq(workoutSessions.id, id)).run();
 }
 
-/** The most recent finished session of any day — used to suggest the next day in the split. */
-export function getLastFinishedSession(executor: DbExecutor = db): WorkoutSession | undefined {
-  return executor
-    .select()
-    .from(workoutSessions)
-    .where(isNotNull(workoutSessions.finishedAt))
-    .orderBy(desc(workoutSessions.finishedAt))
-    .get();
-}
-
 export function getLastSessionForDay(
   programDayId: number,
   executor: DbExecutor = db,

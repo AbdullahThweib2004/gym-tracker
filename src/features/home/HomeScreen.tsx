@@ -27,7 +27,6 @@ import { discardWorkout, finishWorkout, startWorkout } from '../workout/workoutS
 
 import { DayCard } from './components/DayCard';
 import { ResumeBanner } from './components/ResumeBanner';
-import { TodayCard } from './components/TodayCard';
 import { WeekStrip } from './components/WeekStrip';
 import { dismissBackupReminder, loadHomeData, type HomeData } from './homeService';
 
@@ -55,14 +54,12 @@ export function HomeScreen() {
     );
   }
 
-  const { program, days, suggestedDayId, unfinished, showBackupReminder, week } = data;
+  const { program, days, unfinished, showBackupReminder, week } = data;
   const unfinishedName = unfinished
     ? unfinished.splitType
       ? dayLabel(unfinished.splitType, unfinished.session.dayKey)
       : unfinished.session.dayKey
     : '';
-  const suggested = days.find((d) => d.day.id === suggestedDayId) ?? days[0];
-  const others = days.filter((d) => d !== suggested);
   const layout = reduceMotion ? undefined : LinearTransition.duration(theme.motion.normal);
 
   const begin = (day: ProgramDay) => {
@@ -101,37 +98,40 @@ export function HomeScreen() {
           paddingBottom: theme.spacing.xxxl,
         }}
       >
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.md }}>
-          <View style={{ flex: 1, gap: theme.spacing.xs }}>
-            <AppText variant="label" color="textSecondary">
-              {t('home.activeProgram')}
-            </AppText>
-            <AppText variant="heading" accessibilityRole="header" numberOfLines={1}>
+        <View style={{ gap: theme.spacing.xs }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.md }}>
+            <AppText variant="label" color="textSecondary" numberOfLines={1} style={{ flex: 1 }}>
               {splitLabel(program.splitType)}
             </AppText>
+            <PressableScale
+              accessibilityRole="link"
+              onPress={() => router.navigate('/settings')}
+              hitSlop={theme.spacing.sm}
+              style={{ minHeight: theme.touchTarget, justifyContent: 'center' }}
+            >
+              <AppText variant="caption" color="primary">
+                {t('home.editProgram')}
+              </AppText>
+            </PressableScale>
           </View>
-          <PressableScale
-            accessibilityRole="link"
-            onPress={() => router.navigate('/settings')}
-            hitSlop={theme.spacing.sm}
-            style={{ minHeight: theme.touchTarget, justifyContent: 'center' }}
-          >
-            <AppText variant="caption" color="primary">
-              {t('home.editProgram')}
-            </AppText>
-          </PressableScale>
+          <AppText variant="title" accessibilityRole="header">
+            {t('home.chooseDayTitle')}
+          </AppText>
         </View>
 
-        {suggested ? (
-          <TodayCard
-            dayName={dayLabel(program.splitType, suggested.day.dayKey)}
-            exercises={suggested.previewExercises}
-            exerciseCount={suggested.exerciseCount}
-            lastDone={suggested.lastDoneDate ? formatDaysAgo(suggested.lastDoneDate) : null}
-            isInProgress={unfinished?.session.programDayId === suggested.day.id}
-            onStart={() => openDay(suggested.day)}
-          />
-        ) : null}
+        <Animated.View layout={layout} style={{ gap: theme.spacing.md }}>
+          {days.map(({ day, exerciseCount, previewExercises, lastDoneDate }) => (
+            <DayCard
+              key={day.id}
+              name={dayLabel(program.splitType, day.dayKey)}
+              exercises={previewExercises}
+              exerciseCount={exerciseCount}
+              lastDone={lastDoneDate ? formatDaysAgo(lastDoneDate) : null}
+              isInProgress={unfinished?.session.programDayId === day.id}
+              onPress={() => openDay(day)}
+            />
+          ))}
+        </Animated.View>
 
         <WeekStrip days={week} goal={days.length} />
 
@@ -168,24 +168,6 @@ export function HomeScreen() {
                 style={{ alignSelf: 'flex-start' }}
               />
             </Card>
-          </Animated.View>
-        ) : null}
-
-        {others.length > 0 ? (
-          <Animated.View layout={layout} style={{ gap: theme.spacing.sm }}>
-            <AppText variant="label" color="textSecondary">
-              {t('home.otherDays')}
-            </AppText>
-            {others.map(({ day, exerciseCount, previewExercises, lastDoneDate }) => (
-              <DayCard
-                key={day.id}
-                name={dayLabel(program.splitType, day.dayKey)}
-                exercises={previewExercises}
-                exerciseCount={exerciseCount}
-                lastDone={lastDoneDate ? formatDaysAgo(lastDoneDate) : null}
-                onPress={() => openDay(day)}
-              />
-            ))}
           </Animated.View>
         ) : null}
       </ScrollView>

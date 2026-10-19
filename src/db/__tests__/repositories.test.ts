@@ -131,26 +131,26 @@ describe('editing a single day', () => {
 });
 
 describe('home data', () => {
-  it('suggests the first day, then the day after the last finished one, wrapping around', () => {
+  it('lists every program day in order with when each was last done', () => {
     const { program, days } = setUpPpl();
-    const [push, pull, legs] = days;
-    expect(loadHomeData()?.suggestedDayId).toBe(push!.id);
-
-    finishWorkout(startWorkout(program, push!).id);
-    expect(loadHomeData()?.suggestedDayId).toBe(pull!.id);
+    const [push, , legs] = days;
+    expect(loadHomeData()?.days.map((d) => d.day.id)).toEqual(days.map((d) => d.id));
 
     finishWorkout(startWorkout(program, legs!).id);
-    expect(loadHomeData()?.suggestedDayId).toBe(push!.id);
+    const data = loadHomeData();
+    expect(data?.days.map((d) => d.day.id)).toEqual(days.map((d) => d.id));
+    expect(data?.days.find((d) => d.day.id === legs!.id)?.lastDoneDate).not.toBeNull();
+    expect(data?.days.find((d) => d.day.id === push!.id)?.lastDoneDate).toBeNull();
+    expect(data).not.toHaveProperty('suggestedDayId');
   });
 
-  it('ignores unfinished sessions for the suggestion and reports them as resumable', () => {
+  it('reports unfinished sessions as resumable without marking the day as done', () => {
     const { program, days } = setUpPpl();
     const [push, pull] = days;
     finishWorkout(startWorkout(program, push!).id);
     const open = startWorkout(program, pull!);
 
     const data = loadHomeData();
-    expect(data?.suggestedDayId).toBe(pull!.id);
     expect(data?.unfinished?.session.id).toBe(open.id);
     expect(data?.unfinished?.splitType).toBe('ppl');
     expect(data?.days.find((d) => d.day.id === push!.id)?.lastDoneDate).not.toBeNull();
@@ -166,12 +166,5 @@ describe('home data', () => {
     expect(getSessionById(session.id)).toBeUndefined();
     expect(listSetsForSession(session.id)).toEqual([]);
     expect(getUnfinishedSession()?.id).not.toBe(session.id);
-  });
-
-  it('suggests the first day when the last finished session belongs to an old program', () => {
-    const { program: old, days: oldDays } = setUpPpl();
-    finishWorkout(startWorkout(old, oldDays[0]!).id);
-    const { days } = setUpPpl();
-    expect(loadHomeData()?.suggestedDayId).toBe(days[0]!.id);
   });
 });

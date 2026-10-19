@@ -4,7 +4,6 @@ import { listProgramDays } from '@/db/repositories/programDays';
 import { getActiveProgram, getProgramById } from '@/db/repositories/userPrograms';
 import {
   countFinishedSessions,
-  getLastFinishedSession,
   getLastSessionForDay,
   getUnfinishedSession,
   listFinishedSessionDatesSince,
@@ -16,7 +15,6 @@ import { shouldShowBackupReminder } from '@/features/backup/backupReminder';
 import { startOfWeek, type WeekStart } from '@/features/history/weekGroups';
 import { toIsoDate } from '@/utils/date';
 
-import { suggestNextDayId } from './nextDay';
 import { weekActivity, type WeekDayActivity } from './weekActivity';
 
 const PREVIEW_EXERCISE_COUNT = 6;
@@ -38,7 +36,6 @@ export type UnfinishedWorkout = {
 export type HomeData = {
   program: UserProgram;
   days: HomeDay[];
-  suggestedDayId: number | null;
   unfinished: UnfinishedWorkout | null;
   showBackupReminder: boolean;
   /** This week's days with whether a workout was finished on each. */
@@ -59,7 +56,6 @@ export function loadHomeData(weekStartsOn: WeekStart = 1): HomeData | null {
     };
   });
 
-  const lastFinished = getLastFinishedSession();
   const unfinishedSession = getUnfinishedSession();
   const unfinished = unfinishedSession
     ? {
@@ -74,10 +70,6 @@ export function loadHomeData(weekStartsOn: WeekStart = 1): HomeData | null {
   return {
     program,
     days,
-    suggestedDayId: suggestNextDayId(
-      days.map((d) => d.day),
-      lastFinished?.programDayId,
-    ),
     unfinished,
     week: weekActivity(
       listFinishedSessionDatesSince(toIsoDate(startOfWeek(new Date(), weekStartsOn))),

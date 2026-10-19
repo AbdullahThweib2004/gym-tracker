@@ -44,7 +44,6 @@
     "settings": "الإعدادات"
   },
   "home": {
-    "activeProgram": "البرنامج الحالي",
     "noProgram": "لا يوجد برنامج بعد",
     "editProgram": "تعديل البرنامج",
     "inProgress": "تمرين قيد التنفيذ",
@@ -52,7 +51,6 @@
     "discard": "تجاهل",
     "discardTitle": "تجاهل هذا التمرين؟",
     "discardMessage": "سيتم حذف كل المجموعات المسجلة في هذا التمرين، ولا يمكن التراجع.",
-    "upNext": "التالي",
     "lastDone": "آخر مرة: {{when}}",
     "notDoneYet": "لم يُنفَّذ بعد",
     "otherInProgressTitle": "يوجد تمرين آخر قيد التنفيذ",
@@ -71,11 +69,10 @@
     "andMore_few": "+{{count}} أخرى",
     "andMore_many": "+{{count}} أخرى",
     "andMore_other": "+{{count}} أخرى",
-    "todayDay": "اليوم: {{day}}",
     "startWorkout": "ابدأ التمرين",
     "weekTitle": "هذا الأسبوع",
     "weekProgress": "{{done}} من {{goal}} تمارين",
-    "otherDays": "أيام أخرى"
+    "chooseDayTitle": "شو بدك تلعب اليوم؟"
   },
   "workout": {
     "finish": "إنهاء التمرين",

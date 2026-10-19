@@ -1,5 +1,10 @@
 # Gym Tracker
 
+<p align="center">
+  <img src="docs/screenshots/home.png" width="300" alt="Home: choose the day you are training" />
+  <img src="docs/screenshots/workout.png" width="300" alt="Logging a set with last time's numbers and the rest timer" />
+</p>
+
 A personal, offline gym workout tracker for iOS and Android, in English and Arabic. Pick a training split, choose the exercises for each day, and log weight and reps for every set. When you start an exercise you immediately see what you lifted last time, with the inputs already filled in.
 
 ## Features
@@ -15,12 +20,6 @@ A personal, offline gym workout tracker for iOS and Android, in English and Arab
 - **Exercise library**: about 100 built-in exercises with English and Arabic gym names and start/end position images, custom exercises, and your own photos of the machines at your gym.
 - **Backup and restore**: export everything to a JSON file and restore it on any device.
 - **English and Arabic** with full right-to-left layout, dark theme.
-
-## Screenshots
-
-| Home                               | Logging                                        | Progress                                         | History                                  |
-| ---------------------------------- | ---------------------------------------------- | ------------------------------------------------ | ---------------------------------------- |
-| ![Home](docs/screenshots/home.png) | ![Logging a set](docs/screenshots/logging.png) | ![Progress chart](docs/screenshots/progress.png) | ![History](docs/screenshots/history.png) |
 
 ## Tech stack
 
@@ -47,6 +46,8 @@ src/
   utils/              Pure helpers (dates, numbers, search, debounce…)
 assets/               App icon, splash and their SVG sources
 docs/screenshots/     README screenshots
+scripts/demo/         Demo video and screenshot capture (Playwright + ffmpeg, dev only)
+patches/              patch-package fixes applied on npm install
 ```
 
 Business logic (progression, PRs, 1RM, volume, pre-fill, backup format) lives in pure functions with unit tests. Repository tests run against a real in-memory SQLite database with the real migrations.
@@ -69,6 +70,8 @@ npm run typecheck    # tsc --noEmit
 npm run lint         # eslint
 npm test             # jest
 npm run db:generate  # generate a migration after changing src/db/schema.ts
+npm run demo:capture # record the demo flow on the web build (needs ffmpeg)
+npm run demo:compose # framed demo videos in media-out/ and the README screenshots
 ```
 
 In development builds, Settings has a **Developer tools** section that can generate 8 weeks of demo history or clear all workout history. It is not included in production builds.
@@ -133,10 +136,6 @@ Exercise images: [free-exercise-db](https://github.com/yuhonas/free-exercise-db)
 - **النسخ الاحتياطي والاستعادة**: تصدير كل البيانات إلى ملف JSON واستعادتها على أي جهاز.
 - **العربية والإنجليزية** مع دعم كامل للاتجاه من اليمين لليسار، وواجهة داكنة.
 
-### لقطات الشاشة
-
-انظر الجدول في القسم الإنجليزي أعلاه (الصور في `docs/screenshots/`).
-
 ### التقنيات المستخدمة
 
 Expo SDK 57 وReact Native وTypeScript وexpo-router، وقاعدة بيانات SQLite محلية عبر Drizzle ORM، وZustand لحالة التطبيق، وi18next للترجمة، وreact-native-gifted-charts للرسوم، وJest وESLint وPrettier للجودة.
@@ -149,6 +148,7 @@ Expo SDK 57 وReact Native وTypeScript وexpo-router، وقاعدة بيانا�
 - `src/features/`: منطق وشاشات كل ميزة (البرنامج، التمرين، السجل، التقدم، مؤقت الراحة، التمارين، النسخ الاحتياطي…).
 - `src/i18n/`: إعداد الترجمة ونصوص العربية والإنجليزية.
 - `src/theme/` و`src/utils/` و`src/store/`: الألوان والأدوات المساعدة وحالة التطبيق.
+- `scripts/demo/`: تسجيل فيديو العرض ولقطات الشاشة (أداة تطوير فقط).
 
 ### البدء
 

@@ -7,14 +7,19 @@ import {
   getLastFinishedSession,
   getLastSessionForDay,
   getUnfinishedSession,
+  listFinishedSessionDatesSince,
 } from '@/db/repositories/workoutSessions';
 import type { Exercise, ProgramDay, UserProgram, WorkoutSession } from '@/db/schema';
 
 import { shouldShowBackupReminder } from '@/features/backup/backupReminder';
 
-import { suggestNextDayId } from './nextDay';
+import { startOfWeek, type WeekStart } from '@/features/history/weekGroups';
+import { toIsoDate } from '@/utils/date';
 
-const PREVIEW_EXERCISE_COUNT = 3;
+import { suggestNextDayId } from './nextDay';
+import { weekActivity, type WeekDayActivity } from './weekActivity';
+
+const PREVIEW_EXERCISE_COUNT = 6;
 
 export type HomeDay = {
   day: ProgramDay;
@@ -36,9 +41,11 @@ export type HomeData = {
   suggestedDayId: number | null;
   unfinished: UnfinishedWorkout | null;
   showBackupReminder: boolean;
+  /** This week's days with whether a workout was finished on each. */
+  week: WeekDayActivity[];
 };
 
-export function loadHomeData(): HomeData | null {
+export function loadHomeData(weekStartsOn: WeekStart = 1): HomeData | null {
   const program = getActiveProgram();
   if (!program) return null;
 
@@ -72,6 +79,11 @@ export function loadHomeData(): HomeData | null {
       lastFinished?.programDayId,
     ),
     unfinished,
+    week: weekActivity(
+      listFinishedSessionDatesSince(toIsoDate(startOfWeek(new Date(), weekStartsOn))),
+      new Date(),
+      weekStartsOn,
+    ),
     showBackupReminder: shouldShowBackupReminder({
       lastBackupAt: getMeta(META_KEYS.lastBackupAt),
       dismissedAt: getMeta(META_KEYS.backupReminderDismissedAt),

@@ -35,13 +35,14 @@ export function dayLabel(
   return language === 'ar' ? day.labelAr : day.labelEn;
 }
 
-export type DateStyle = 'short' | 'medium' | 'long' | 'weekday';
+export type DateStyle = 'short' | 'medium' | 'long' | 'weekday' | 'weekdayNarrow';
 
 const DATE_OPTIONS: Record<DateStyle, Intl.DateTimeFormatOptions> = {
   short: { day: 'numeric', month: 'short' },
   medium: { day: 'numeric', month: 'short', year: 'numeric' },
   long: { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' },
   weekday: { weekday: 'short', day: 'numeric', month: 'short' },
+  weekdayNarrow: { weekday: 'narrow' },
 };
 
 export function formatDate(

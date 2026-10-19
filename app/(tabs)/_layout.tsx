@@ -42,7 +42,11 @@ export default function TabsLayout() {
     >
       <Tabs.Screen
         name="index"
-        options={{ title: t('tabs.home'), tabBarIcon: tabIcon('home', 'home-outline') }}
+        options={{
+          title: t('tabs.home'),
+          headerShown: false,
+          tabBarIcon: tabIcon('home', 'home-outline'),
+        }}
       />
       <Tabs.Screen
         name="history"

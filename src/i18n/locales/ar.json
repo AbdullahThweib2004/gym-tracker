@@ -90,7 +90,12 @@
     "andMore_two": "+{{count}} أخرى",
     "andMore_few": "+{{count}} أخرى",
     "andMore_many": "+{{count}} أخرى",
-    "andMore_other": "+{{count}} أخرى"
+    "andMore_other": "+{{count}} أخرى",
+    "todayDay": "اليوم: {{day}}",
+    "startWorkout": "ابدأ التمرين",
+    "weekTitle": "هذا الأسبوع",
+    "weekProgress": "{{done}} من {{goal}} تمارين",
+    "otherDays": "أيام أخرى"
   },
   "workout": {
     "title": "التمرين",
@@ -148,7 +153,20 @@
     "addSelected_many": "إضافة {{count}} تمريناً",
     "addSelected_other": "إضافة {{count}} تمرين",
     "noExercisesTitle": "لا توجد تمارين في هذه الجلسة",
-    "noExercisesMessage": "أضف تمريناً من الأسفل لبدء التسجيل."
+    "noExercisesMessage": "أضف تمريناً من الأسفل لبدء التسجيل.",
+    "noValues": "غير محدد",
+    "logged": "مسجّلة",
+    "pendingRowHint": "اضغط لتسجيل هذه المجموعة",
+    "prefilled": "مقترح",
+    "logSet": "سجّل المجموعة",
+    "updateSet": "تحديث المجموعة",
+    "logSetHint": "يحفظ هذه المجموعة فوراً",
+    "exerciseOf": "التمرين {{current}} من {{total}}",
+    "exercisesDone": "{{done}}/{{total}} تمارين",
+    "previousExercise": "التمرين السابق",
+    "startHere": "ابدأ من هنا",
+    "upNext": "التالي",
+    "allDone": "أنهيت كل التمارين 💪"
   },
   "history": {
     "title": "السجل",
@@ -364,7 +382,9 @@
     "alerts": "الصوت والاهتزاز",
     "alertsHint": "عند انتهاء الراحة.",
     "restPerSet": "الراحة بين المجموعات",
-    "useDefault": "افتراضي"
+    "useDefault": "افتراضي",
+    "expandHint": "يعرض −15 ث و+15 ث وتخطٍّ",
+    "collapseHint": "يخفي أزرار المؤقت"
   },
   "progress": {
     "suggestionTitle": "هدف اليوم",

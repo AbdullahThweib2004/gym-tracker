@@ -1,11 +1,12 @@
 import { useCallback, useState } from 'react';
-import { Alert, View } from 'react-native';
+import { View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
 import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
+import { ConfirmSheet } from '@/components/ConfirmSheet';
 import { Screen } from '@/components/Screen';
 import { ScreenHeader } from '@/components/ScreenHeader';
 import { SPLIT_KEYS, SPLITS, type SplitKey } from '@/constants/splits';
@@ -41,17 +42,8 @@ export function ChooseSplitScreen() {
     openDay(firstDayId);
   };
 
-  const confirm = (key: SplitKey) => {
-    const name = splitLabel(key);
-    Alert.alert(
-      t('onboarding.confirmTitle', { split: name }),
-      isSetupComplete ? t('onboarding.confirmChangeMessage') : t('onboarding.confirmMessage'),
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        { text: t('onboarding.start'), onPress: () => start(key) },
-      ],
-    );
-  };
+  const [pending, setPending] = useState<SplitKey | null>(null);
+  const confirm = (key: SplitKey) => setPending(key);
 
   return (
     <Screen scroll>
@@ -83,6 +75,17 @@ export function ChooseSplitScreen() {
           <SplitCard key={key} split={SPLITS[key]} onSelect={() => confirm(key)} />
         ))}
       </View>
+      <ConfirmSheet
+        visible={pending !== null}
+        title={pending ? t('onboarding.confirmTitle', { split: splitLabel(pending) }) : ''}
+        message={
+          isSetupComplete ? t('onboarding.confirmChangeMessage') : t('onboarding.confirmMessage')
+        }
+        confirmLabel={t('onboarding.start')}
+        cancelLabel={t('common.cancel')}
+        onClose={() => setPending(null)}
+        onConfirm={() => pending && start(pending)}
+      />
     </Screen>
   );
 }

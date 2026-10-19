@@ -153,3 +153,19 @@ export function restoreRows(
   }
   return rows;
 }
+
+/**
+ * After a set is logged, later rows that are still empty suggestions get the same values, so
+ * the next set is one tap away even without history. Rows with values are left alone.
+ */
+export function fillEmptySuggestions(
+  rows: readonly SetRow[],
+  afterIndex: number,
+  values: { weightKg: number; reps: number },
+): SetRow[] {
+  return rows.map((row, index) =>
+    index > afterIndex && row.state === 'suggested' && row.weightKg === null && row.reps === null
+      ? { ...row, weightKg: values.weightKg, reps: values.reps }
+      : row,
+  );
+}

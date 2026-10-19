@@ -1,13 +1,25 @@
-import { useCallback, useEffect, useRef, type ReactNode } from 'react';
-import { View } from 'react-native';
+import { useEffect, useState, type ReactNode } from 'react';
 import {
-  BottomSheetBackdrop,
-  BottomSheetModal,
-  BottomSheetScrollView,
-  BottomSheetView,
-  type BottomSheetBackdropProps,
-} from '@gorhom/bottom-sheet';
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  useWindowDimensions,
+  View,
+} from 'react-native';
+import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
+import Animated, {
+  Easing,
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withTiming,
+} from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 
 import { useReduceMotion, useTheme } from '@/theme';
 
@@ -18,39 +30,73 @@ type SheetProps = {
   onClose: () => void;
   title?: string;
   children: ReactNode;
-  /** Use for long content; otherwise the sheet sizes to its content. */
+  /** Use for long content; the sheet then scrolls within 85% of the screen height. */
   scrollable?: boolean;
 };
 
+/** Distance (pt) or speed that dismisses the sheet when dragged down. */
+const DISMISS_DISTANCE = 120;
+const DISMISS_VELOCITY = 900;
+
 /**
- * Themed bottom sheet (declarative): open while `visible`, swipe down or tap the backdrop to
- * close. Requires BottomSheetModalProvider at the root.
+ * Themed bottom sheet: slides up over a dimmed backdrop; drag the handle area down, tap the
+ * backdrop or use Back (Android) to close. Built on Modal + Reanimated + Gesture Handler, so
+ * it works in Expo Go on iOS, Android and web. Fades instead of sliding with Reduce Motion.
  */
 export function Sheet({ visible, onClose, title, children, scrollable = false }: SheetProps) {
   const theme = useTheme();
+  const { t } = useTranslation();
   const reduceMotion = useReduceMotion();
   const insets = useSafeAreaInsets();
-  const ref = useRef<BottomSheetModal>(null);
+  const { height: screenHeight } = useWindowDimensions();
+  // Stay mounted while the closing animation runs.
+  const [mounted, setMounted] = useState(visible);
+  if (visible && !mounted) setMounted(true);
+  const translateY = useSharedValue(screenHeight);
+  const backdrop = useSharedValue(0);
 
   useEffect(() => {
-    if (visible) ref.current?.present();
-    else ref.current?.dismiss();
-  }, [visible]);
+    if (visible) {
+      backdrop.set(withTiming(1, { duration: theme.motion.normal }));
+      translateY.set(
+        reduceMotion
+          ? withTiming(0, { duration: theme.motion.fast })
+          : withSpring(0, theme.motion.spring),
+      );
+    } else if (mounted) {
+      backdrop.set(withTiming(0, { duration: theme.motion.fast }));
+      translateY.set(
+        withTiming(
+          reduceMotion ? 0 : screenHeight,
+          { duration: theme.motion.normal, easing: Easing.in(Easing.cubic) },
+          () => runOnJS(setMounted)(false),
+        ),
+      );
+    }
+  }, [visible, mounted, reduceMotion, screenHeight, translateY, backdrop, theme.motion]);
 
-  const renderBackdrop = useCallback(
-    (props: BottomSheetBackdropProps) => (
-      <BottomSheetBackdrop
-        {...props}
-        appearsOnIndex={0}
-        disappearsOnIndex={-1}
-        pressBehavior="close"
-        opacity={0.6}
-      />
-    ),
-    [],
-  );
+  const drag = Gesture.Pan()
+    .activeOffsetY(8)
+    .onUpdate((event) => {
+      translateY.set(Math.max(0, event.translationY));
+    })
+    .onEnd((event) => {
+      if (event.translationY > DISMISS_DISTANCE || event.velocityY > DISMISS_VELOCITY) {
+        runOnJS(onClose)();
+      } else {
+        translateY.set(withSpring(0, theme.motion.spring));
+      }
+    });
 
-  const body = (
+  const sheetStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: translateY.get() }],
+    opacity: reduceMotion ? backdrop.get() : 1,
+  }));
+  const backdropStyle = useAnimatedStyle(() => ({ opacity: backdrop.get() }));
+
+  if (!mounted) return null;
+
+  const content = (
     <View
       style={{
         paddingHorizontal: theme.spacing.xl,
@@ -68,24 +114,81 @@ export function Sheet({ visible, onClose, title, children, scrollable = false }:
   );
 
   return (
-    <BottomSheetModal
-      ref={ref}
-      onDismiss={onClose}
-      backdropComponent={renderBackdrop}
-      enableDynamicSizing
-      animateOnMount={!reduceMotion}
-      keyboardBehavior="interactive"
-      keyboardBlurBehavior="restore"
-      android_keyboardInputMode="adjustResize"
-      backgroundStyle={{ backgroundColor: theme.colors.surface, borderRadius: theme.radius.xl }}
-      handleIndicatorStyle={{ backgroundColor: theme.colors.borderStrong, width: 40 }}
-      accessibilityLabel={title}
+    <Modal
+      visible
+      transparent
+      animationType="none"
+      statusBarTranslucent
+      navigationBarTranslucent
+      onRequestClose={onClose}
     >
-      {scrollable ? (
-        <BottomSheetScrollView keyboardShouldPersistTaps="handled">{body}</BottomSheetScrollView>
-      ) : (
-        <BottomSheetView>{body}</BottomSheetView>
-      )}
-    </BottomSheetModal>
+      {/* A Modal is a separate native window, so it needs its own gesture root. */}
+      <GestureHandlerRootView style={styles.fill}>
+        <Animated.View
+          style={[
+            StyleSheet.absoluteFill,
+            { backgroundColor: theme.colors.overlay },
+            backdropStyle,
+          ]}
+        >
+          <Pressable
+            style={styles.fill}
+            onPress={onClose}
+            accessibilityRole="button"
+            accessibilityLabel={t('common.close')}
+          />
+        </Animated.View>
+        <KeyboardAvoidingView
+          style={styles.bottom}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          pointerEvents="box-none"
+        >
+          <Animated.View
+            accessibilityViewIsModal
+            style={[
+              {
+                maxHeight: screenHeight * 0.85,
+                backgroundColor: theme.colors.surface,
+                borderTopStartRadius: theme.radius.xl,
+                borderTopEndRadius: theme.radius.xl,
+                borderWidth: 1,
+                borderBottomWidth: 0,
+                borderColor: theme.colors.border,
+              },
+              sheetStyle,
+            ]}
+          >
+            <GestureDetector gesture={drag}>
+              <View
+                style={{
+                  alignItems: 'center',
+                  paddingTop: theme.spacing.md,
+                  paddingBottom: theme.spacing.lg,
+                }}
+              >
+                <View
+                  style={{
+                    width: 40,
+                    height: 5,
+                    borderRadius: theme.radius.pill,
+                    backgroundColor: theme.colors.borderStrong,
+                  }}
+                />
+              </View>
+            </GestureDetector>
+            {scrollable ? (
+              <ScrollView keyboardShouldPersistTaps="handled">{content}</ScrollView>
+            ) : (
+              content
+            )}
+          </Animated.View>
+        </KeyboardAvoidingView>
+      </GestureHandlerRootView>
+    </Modal>
   );
 }
+
+const styles = StyleSheet.create({
+  fill: { flex: 1 },
+  bottom: { flex: 1, justifyContent: 'flex-end' },
+});

@@ -2,6 +2,7 @@ import {
   appendRow,
   buildInitialRows,
   countWorkingSaved,
+  fillEmptySuggestions,
   hasPendingEdits,
   restoreRows,
   validateRow,
@@ -180,5 +181,19 @@ describe('restoreRows', () => {
 describe('hasPendingEdits', () => {
   it('is false when everything is saved or only suggested', () => {
     expect(hasPendingEdits(buildInitialRows([], [{ weightKg: 1, reps: 1 }], 2))).toBe(false);
+  });
+});
+
+describe('fillEmptySuggestions', () => {
+  it('fills only later empty suggestions with the logged values', () => {
+    const rows = buildInitialRows([], [], 3);
+    const withSecond = rows.map((r, i) => (i === 2 ? { ...r, weightKg: 50, reps: 5 } : r));
+    const next = fillEmptySuggestions(withSecond, 0, { weightKg: 60, reps: 10 });
+    expect(next.map((r) => [r.weightKg, r.reps])).toEqual([
+      [null, null],
+      [60, 10],
+      [50, 5],
+    ]);
+    expect(next[1]?.state).toBe('suggested');
   });
 });

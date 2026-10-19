@@ -70,7 +70,12 @@
     "exerciseCount_one": "{{count}} exercise",
     "exerciseCount_other": "{{count}} exercises",
     "andMore_one": "+{{count}} more",
-    "andMore_other": "+{{count}} more"
+    "andMore_other": "+{{count}} more",
+    "todayDay": "Today: {{day}}",
+    "startWorkout": "Start workout",
+    "weekTitle": "This week",
+    "weekProgress": "{{done}} of {{goal}} workouts",
+    "otherDays": "Other days"
   },
   "workout": {
     "title": "Workout",
@@ -120,7 +125,20 @@
     "addSelected_one": "Add {{count}} exercise",
     "addSelected_other": "Add {{count}} exercises",
     "noExercisesTitle": "No exercises in this workout",
-    "noExercisesMessage": "Add an exercise below to start logging."
+    "noExercisesMessage": "Add an exercise below to start logging.",
+    "noValues": "Not set",
+    "logged": "logged",
+    "pendingRowHint": "Tap to log this set",
+    "prefilled": "Suggested",
+    "logSet": "Log set",
+    "updateSet": "Update set",
+    "logSetHint": "Saves this set right away",
+    "exerciseOf": "Exercise {{current}} of {{total}}",
+    "exercisesDone": "{{done}}/{{total}} exercises",
+    "previousExercise": "Previous exercise",
+    "startHere": "Start here",
+    "upNext": "Up next",
+    "allDone": "All exercises done 💪"
   },
   "history": {
     "title": "History",
@@ -316,7 +334,9 @@
     "alerts": "Sound and vibration",
     "alertsHint": "When rest ends.",
     "restPerSet": "Rest between sets",
-    "useDefault": "Default"
+    "useDefault": "Default",
+    "expandHint": "Shows −15 s, +15 s and Skip",
+    "collapseHint": "Hides the timer controls"
   },
   "progress": {
     "suggestionTitle": "Today’s target",

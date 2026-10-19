@@ -1,106 +1,81 @@
-import { useEffect, useState } from 'react';
-import {
-  Alert,
-  AppState,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  ScrollView,
-  View,
-} from 'react-native';
-import * as Haptics from 'expo-haptics';
+import { useCallback, useState } from 'react';
+import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import Animated, {
+  FadeIn,
+  FadeOut,
+  SlideInLeft,
+  SlideInRight,
+  SlideOutLeft,
+  SlideOutRight,
+} from 'react-native-reanimated';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
-import { Card } from '@/components/Card';
+import { ElapsedTimer } from '@/components/ElapsedTimer';
 import { EmptyState } from '@/components/EmptyState';
+import { haptic } from '@/components/haptics';
+import { IconButton } from '@/components/IconButton';
+import { ProgressBar } from '@/components/ProgressBar';
 import { Screen } from '@/components/Screen';
-import { ScreenHeader } from '@/components/ScreenHeader';
-import { ExerciseMotion } from '@/features/exercises/components/ExerciseMotion';
-import { suggestNextWeight } from '@/features/progress/overload';
-import { recordsForSet } from '@/features/progress/progressService';
-import type { RecordKind } from '@/features/progress/records';
-import { resolveRestSeconds } from '@/features/restTimer/restMath';
-import { RestTimerBar } from '@/features/restTimer/RestTimerBar';
-import { useRestTimerStore } from '@/features/restTimer/restTimerStore';
-import {
-  exerciseName,
-  formatDate,
-  formatSetsLine,
-  formatTarget,
-  formatWeight,
-} from '@/i18n/format';
-import { useAppStore } from '@/store/appStore';
-import { useTheme } from '@/theme';
-import { createDebouncer } from '@/utils/debounce';
+import { RestTimerDock } from '@/features/restTimer/RestTimerDock';
+import { useReduceMotion, useTheme } from '@/theme';
+import { isRtl } from '@/utils/direction';
 
-import { SetRowView } from './components/SetRowView';
-import { exerciseHistoryHref, exerciseLogHref } from './routes';
-import {
-  appendRow,
-  hasPendingEdits,
-  restoreRows,
-  validateRow,
-  workingOrdinals,
-  type SetRow,
-} from './setRows';
-import {
-  loadDraftRows,
-  loadExerciseLog,
-  persistDraftRows,
-  removeSet,
-  saveSet,
-  setWarmup,
-} from './workoutService';
+import { ExerciseLogPanel } from './ExerciseLogPanel';
+import { loadWorkout, type WorkoutData } from './workoutService';
 
-type Invalid = Record<string, { weight: boolean; reps: boolean }>;
+/** Horizontal distance (pt) a swipe needs to change exercise. */
+const SWIPE_DISTANCE = 60;
 
-const haptic = (type: Haptics.NotificationFeedbackType) => {
-  void Haptics.notificationAsync(type).catch(() => undefined);
-};
-
+/**
+ * The workout pager: one exercise at a time, front and center. Swipe (mirrored in RTL) or use
+ * the buttons to move between exercises; a progress bar shows the whole workout.
+ */
 export function ExerciseLogScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
-  const language = useAppStore((s) => s.language);
-  const restSettings = useRestTimerStore((s) => s.settings);
-  const startRest = useRestTimerStore((s) => s.start);
+  const reduceMotion = useReduceMotion();
   const params = useLocalSearchParams<{ sessionId: string; exerciseId: string }>();
   const sessionId = Number(params.sessionId);
-  const exerciseId = Number(params.exerciseId);
+  const [workout, setWorkout] = useState<WorkoutData | null>(() => loadWorkout(sessionId));
+  const items = workout?.items ?? [];
+  const [index, setIndex] = useState(() =>
+    Math.max(
+      0,
+      items.findIndex((i) => i.exerciseId === Number(params.exerciseId)),
+    ),
+  );
+  const [direction, setDirection] = useState<1 | -1>(1);
 
-  const [data] = useState(() => loadExerciseLog(sessionId, exerciseId));
-  const lastSets = data?.last?.sets ?? [];
-  // Unconfirmed edits come back from the persisted draft, confirmed sets from the database.
-  const [rows, setRowsState] = useState<SetRow[]>(() =>
-    data
-      ? restoreRows(
-          loadDraftRows(sessionId, exerciseId),
-          data.savedSets,
-          lastSets,
-          data.item.targetSets,
-        )
-      : [],
-  );
-  const [invalid, setInvalid] = useState<Invalid>({});
-  // Draft writes are debounced so typing stays smooth; flushed on blur, unmount and backgrounding.
-  const [draftSaver] = useState(() =>
-    createDebouncer<SetRow[]>((next) => persistDraftRows(sessionId, exerciseId, next), 400),
-  );
-  useEffect(() => {
-    const sub = AppState.addEventListener('change', (state) => {
-      if (state !== 'active') draftSaver.flush();
+  const refresh = useCallback(() => setWorkout(loadWorkout(sessionId)), [sessionId]);
+
+  const go = (delta: 1 | -1) => {
+    const next = index + delta;
+    const target = items[next];
+    if (!target) return;
+    haptic('selection');
+    setDirection(delta);
+    setIndex(next);
+    router.setParams({ exerciseId: String(target.exerciseId) });
+  };
+
+  // Swiping towards the reading direction's start goes forward (left in LTR, right in RTL).
+  const swipe = Gesture.Pan()
+    .activeOffsetX([-24, 24])
+    .failOffsetY([-14, 14])
+    .runOnJS(true)
+    .onEnd((event) => {
+      const dx = isRtl() ? -event.translationX : event.translationX;
+      if (dx < -SWIPE_DISTANCE) go(1);
+      else if (dx > SWIPE_DISTANCE) go(-1);
     });
-    return () => {
-      sub.remove();
-      draftSaver.flush();
-    };
-  }, [draftSaver]);
-  const [records, setRecords] = useState<Record<string, RecordKind[]>>({});
 
-  if (!data) {
+  const current = items[index];
+  if (!workout || !current) {
     return (
       <Screen>
         <EmptyState
@@ -113,285 +88,101 @@ export function ExerciseLogScreen() {
     );
   }
 
-  const { item, last, nextExerciseId } = data;
-  const name = exerciseName(item.exercise, language);
-  const suggestion = suggestNextWeight(lastSets, item, item.exercise);
-  const canApply =
-    suggestion !== null &&
-    rows.some(
-      (row) => row.state === 'suggested' && !row.isWarmup && row.weightKg !== suggestion.weightKg,
-    );
-
-  const setRows = (next: SetRow[]) => {
-    setRowsState(next);
-    draftSaver.schedule(next);
-    // Nothing pending (e.g. a set was just confirmed): remove the draft right away.
-    if (!hasPendingEdits(next)) draftSaver.flush();
-  };
-  const patchRow = (key: string, patch: Partial<SetRow>) =>
-    setRows(rows.map((row) => (row.key === key ? { ...row, ...patch } : row)));
-
-  const clearInvalid = (key: string) => {
-    if (!invalid[key]) return;
-    const { [key]: _removed, ...rest } = invalid;
-    setInvalid(rest);
-  };
-
-  const change = (row: SetRow, field: 'weightKg' | 'reps', value: number | null) => {
-    clearInvalid(row.key);
-    patchRow(row.key, { [field]: value, state: 'edited' });
-  };
-
-  const applySuggestion = () => {
-    if (!suggestion) return;
-    setRows(
-      rows.map((row) =>
-        row.state === 'suggested' && !row.isWarmup
-          ? { ...row, weightKg: suggestion.weightKg }
-          : row,
-      ),
-    );
-  };
-
-  const confirm = (index: number) => {
-    const row = rows[index];
-    if (!row) return;
-    const result = validateRow(row);
-    if (!result.ok) {
-      setInvalid({ ...invalid, [row.key]: { weight: result.weight, reps: result.reps } });
-      haptic(Haptics.NotificationFeedbackType.Error);
-      return;
-    }
-    try {
-      const isNew = row.setId === null;
-      const stored = saveSet({
-        id: row.setId,
-        sessionId,
-        exerciseId,
-        setNumber: index + 1,
-        weightKg: result.weightKg,
-        reps: result.reps,
-        isWarmup: row.isWarmup,
-      });
-      clearInvalid(row.key);
-      patchRow(row.key, {
-        setId: stored.id,
-        weightKg: stored.weightKg,
-        reps: stored.reps,
-        state: 'saved',
-      });
-
-      const broken = recordsForSet(stored);
-      setRecords({ ...records, [row.key]: broken });
-      haptic(Haptics.NotificationFeedbackType.Success);
-      if (broken.length > 0) {
-        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy).catch(() => undefined);
-      }
-      if (isNew && restSettings.autoStart) {
-        void startRest(resolveRestSeconds(item.restSeconds, restSettings.defaultRestSeconds));
-      }
-    } catch (error) {
-      haptic(Haptics.NotificationFeedbackType.Error);
-      Alert.alert(t('workout.saveFailedTitle'), t('workout.saveFailedMessage'));
-      console.error(error);
-    }
-  };
-
-  const remove = (row: SetRow) => {
-    const remaining = rows.filter((r) => r.key !== row.key);
-    if (row.setId !== null) {
-      removeSet(
-        row.setId,
-        remaining.flatMap((r, position) =>
-          r.setId === null ? [] : [{ id: r.setId, setNumber: position + 1 }],
-        ),
-      );
-    }
-    clearInvalid(row.key);
-    setRows(remaining);
-  };
-
-  const toggleWarmup = (row: SetRow) => {
-    const isWarmup = !row.isWarmup;
-    if (row.setId !== null && row.state === 'saved') setWarmup(row.setId, isWarmup);
-    patchRow(row.key, { isWarmup });
-  };
-
-  const ordinals = workingOrdinals(rows);
-
-  const openRowMenu = (row: SetRow, ordinal: number | null) => {
-    void Haptics.selectionAsync().catch(() => undefined);
-    Alert.alert(
-      ordinal === null ? t('workout.warmup') : t('workout.set', { number: ordinal }),
-      undefined,
-      [
-        {
-          text: row.isWarmup ? t('workout.markWorking') : t('workout.markWarmup'),
-          onPress: () => toggleWarmup(row),
-        },
-        { text: t('workout.deleteSet'), style: 'destructive', onPress: () => remove(row) },
-        { text: t('common.cancel'), style: 'cancel' },
-      ],
-    );
-  };
-
-  const goNext = () => {
-    if (nextExerciseId === null) router.back();
-    else router.replace(exerciseLogHref(sessionId, nextExerciseId));
-  };
+  const done = items.filter((i) => i.isComplete).length;
+  const forwardFromEnd = (direction === 1) !== isRtl();
+  const entering = reduceMotion ? FadeIn : forwardFromEnd ? SlideInRight : SlideInLeft;
+  const exiting = reduceMotion ? FadeOut : forwardFromEnd ? SlideOutLeft : SlideOutRight;
+  const isLast = index === items.length - 1;
 
   return (
-    <Screen padded={false}>
+    <SafeAreaView
+      edges={['top', 'bottom']}
+      style={{ flex: 1, backgroundColor: theme.colors.background }}
+    >
+      <View
+        style={{
+          paddingHorizontal: theme.spacing.lg,
+          paddingTop: theme.spacing.sm,
+          gap: theme.spacing.md,
+        }}
+      >
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.sm }}>
+          <IconButton
+            icon="arrow-back"
+            variant="tonal"
+            directional
+            onPress={() => router.back()}
+            accessibilityLabel={t('workout.backToWorkout')}
+          />
+          <AppText variant="bodyStrong" style={{ flex: 1 }} align="center">
+            {t('workout.exerciseOf', { current: index + 1, total: items.length })}
+          </AppText>
+          <View
+            style={{
+              minWidth: theme.touchTarget,
+              paddingHorizontal: theme.spacing.md,
+              paddingVertical: theme.spacing.xs,
+              borderRadius: theme.radius.pill,
+              backgroundColor: theme.colors.surfaceElevated,
+            }}
+          >
+            <ElapsedTimer
+              since={workout.session.startedAt}
+              variant="bodyStrong"
+              color="textPrimary"
+              accessibilityLabel={t('workout.elapsed')}
+            />
+          </View>
+        </View>
+        <ProgressBar
+          value={items.length ? done / items.length : 0}
+          accessibilityLabel={t('workout.exercisesDone', { done, total: items.length })}
+        />
+      </View>
+
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <ScrollView
-          keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{ padding: theme.spacing.lg, gap: theme.spacing.md }}
-        >
-          <ScreenHeader
-            title={name}
-            subtitle={t('workout.target', {
-              target: formatTarget(item.targetSets, item.targetRepsMin, item.targetRepsMax),
-            })}
-            onBack={() => router.back()}
-            backLabel={t('common.back')}
-          />
-          <Pressable
-            accessibilityRole="link"
-            onPress={() => router.push(exerciseHistoryHref(exerciseId))}
-            hitSlop={theme.spacing.sm}
-            style={{ alignSelf: 'flex-start' }}
+        <GestureDetector gesture={swipe}>
+          <ScrollView
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode="interactive"
+            contentContainerStyle={{ padding: theme.spacing.lg, paddingBottom: theme.spacing.xxl }}
           >
-            <AppText variant="caption" color="primary">
-              {t('workout.viewHistory')}
-            </AppText>
-          </Pressable>
-
-          <ExerciseMotion
-            exercise={item.exercise}
-            height={180}
-            accessibilityLabel={t('exercises.motion.label', { name })}
-          />
-
-          <Card>
-            <AppText variant="label" color="textSecondary">
-              {t('workout.lastTime')}
-              {last ? ` · ${formatDate(last.date, 'medium')}` : ''}
-            </AppText>
-            <AppText
-              variant={last ? 'bodyStrong' : 'body'}
-              color={last ? 'textPrimary' : 'textSecondary'}
-            >
-              {last && last.sets.length > 0 ? formatSetsLine(last.sets) : t('workout.firstTime')}
-            </AppText>
-          </Card>
-
-          {suggestion ? (
-            <Card
-              style={{
-                borderColor:
-                  suggestion.reasonKey === 'increase' ? theme.colors.success : theme.colors.border,
-              }}
-            >
-              <AppText
-                variant="label"
-                color={suggestion.reasonKey === 'increase' ? 'success' : 'textSecondary'}
-              >
-                {t('progress.suggestionTitle')}
-              </AppText>
-              <AppText variant="body">
-                {t(`progress.suggestion.${suggestion.reasonKey}`, {
-                  weight: formatWeight(suggestion.weightKg),
-                  reps: item.targetRepsMax,
-                  min: item.targetRepsMin,
-                  max: item.targetRepsMax,
-                })}
-              </AppText>
-              {canApply ? (
-                <Button
-                  label={t('progress.apply')}
-                  variant="secondary"
-                  icon="checkmark-done"
-                  onPress={applySuggestion}
-                  style={{ alignSelf: 'flex-start' }}
-                />
-              ) : null}
-            </Card>
-          ) : null}
-
-          <View
-            style={{
-              flexDirection: 'row',
-              gap: theme.spacing.xs,
-              paddingHorizontal: theme.spacing.xs,
-            }}
-          >
-            <AppText variant="label" color="textMuted" align="center" style={{ width: 24 }}>
-              {t('workout.setShort')}
-            </AppText>
-            <AppText variant="label" color="textMuted" align="center" style={{ flex: 1.15 }}>
-              {t('workout.weightKg')}
-            </AppText>
-            <AppText variant="label" color="textMuted" align="center" style={{ flex: 1 }}>
-              {t('workout.reps')}
-            </AppText>
-            <View style={{ width: 46 }} />
-          </View>
-
-          <View style={{ gap: theme.spacing.xs }}>
-            {rows.map((row, index) => (
-              <SetRowView
-                key={row.key}
-                ordinal={ordinals[index] ?? null}
-                row={row}
-                invalid={invalid[row.key]}
-                records={records[row.key]}
-                onChangeWeight={(value) => change(row, 'weightKg', value)}
-                onChangeReps={(value) => change(row, 'reps', value)}
-                onConfirm={() => confirm(index)}
-                onEdit={() => patchRow(row.key, { state: 'edited' })}
-                onLongPress={() => openRowMenu(row, ordinals[index] ?? null)}
-                onBlur={draftSaver.flush}
+            <Animated.View key={current.exerciseId} entering={entering} exiting={exiting}>
+              <ExerciseLogPanel
+                sessionId={sessionId}
+                exerciseId={current.exerciseId}
+                onSetsChanged={refresh}
               />
-            ))}
-          </View>
-          {Object.keys(invalid).length > 0 ? (
-            <AppText variant="caption" color="danger">
-              {t('workout.invalidSet')}
-            </AppText>
-          ) : null}
-          <AppText variant="caption" color="textMuted">
-            {t('workout.rowsHelp')}
-          </AppText>
+            </Animated.View>
+          </ScrollView>
+        </GestureDetector>
 
-          <Button
-            label={t('workout.addSet')}
-            variant="secondary"
-            icon="add"
-            onPress={() => setRows(appendRow(rows, lastSets))}
-            fullWidth
-          />
-        </ScrollView>
-
-        <RestTimerBar />
-        <View
-          style={{
-            padding: theme.spacing.lg,
-            borderTopWidth: 1,
-            borderTopColor: theme.colors.border,
-            backgroundColor: theme.colors.surface,
-          }}
-        >
-          <Button
-            label={nextExerciseId === null ? t('workout.backToWorkout') : t('workout.nextExercise')}
-            icon={nextExerciseId === null ? 'list' : 'arrow-forward'}
-            onPress={goNext}
-            fullWidth
-          />
-        </View>
+        <RestTimerDock
+          trailing={
+            <View style={{ flexDirection: 'row', gap: theme.spacing.sm }}>
+              <IconButton
+                icon="chevron-back"
+                variant="tonal"
+                directional
+                disabled={index === 0}
+                onPress={() => go(-1)}
+                accessibilityLabel={t('workout.previousExercise')}
+                style={{ width: 52, height: 52 }}
+              />
+              <Button
+                label={isLast ? t('workout.backToWorkout') : t('workout.nextExercise')}
+                icon={isLast ? 'list' : 'arrow-forward'}
+                variant={isLast ? 'secondary' : 'primary'}
+                onPress={() => (isLast ? router.back() : go(1))}
+                style={{ flex: 1 }}
+              />
+            </View>
+          }
+        />
       </KeyboardAvoidingView>
-    </Screen>
+    </SafeAreaView>
   );
 }

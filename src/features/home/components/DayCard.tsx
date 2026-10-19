@@ -1,74 +1,64 @@
+import { memo } from 'react';
 import { View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useTranslation } from 'react-i18next';
 
 import { AppText } from '@/components/AppText';
 import { Card } from '@/components/Card';
-import { Chip } from '@/components/Chip';
+import type { Exercise } from '@/db/schema';
+import { ExerciseThumb } from '@/features/exercises/components/ExerciseThumb';
 import { useTheme } from '@/theme';
 import { mirrorInRtl } from '@/utils/direction';
 
 type DayCardProps = {
   name: string;
+  exercises: readonly Exercise[];
   exerciseCount: number;
-  previewNames: readonly string[];
   lastDone: string | null;
-  isSuggested: boolean;
   onPress: () => void;
 };
 
-export function DayCard({
+/** Compact card for the other program days. */
+export const DayCard = memo(function DayCard({
   name,
+  exercises,
   exerciseCount,
-  previewNames,
   lastDone,
-  isSuggested,
   onPress,
 }: DayCardProps) {
   const { t } = useTranslation();
   const theme = useTheme();
-  const remaining = exerciseCount - previewNames.length;
+  const subtitle = `${t('home.exerciseCount', { count: exerciseCount })} · ${
+    lastDone ? t('home.lastDone', { when: lastDone }) : t('home.notDoneYet')
+  }`;
 
   return (
     <Card
       onPress={onPress}
-      accessibilityLabel={`${name}${isSuggested ? `, ${t('home.upNext')}` : ''}`}
-      style={isSuggested ? { borderColor: theme.colors.primary, borderWidth: 2 } : undefined}
+      accessibilityLabel={`${name}, ${subtitle}`}
+      style={{ paddingVertical: theme.spacing.md }}
     >
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.sm }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.md }}>
+        {exercises[0] ? (
+          <ExerciseThumb exercise={exercises[0]} size={48} />
+        ) : (
+          <View style={{ width: 48, height: 48 }} />
+        )}
         <View style={{ flex: 1, gap: theme.spacing.xs }}>
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: theme.spacing.sm,
-              flexWrap: 'wrap',
-            }}
-          >
-            <AppText variant="subheading">{name}</AppText>
-            {isSuggested ? <Chip label={t('home.upNext')} selected /> : null}
-          </View>
-          <AppText variant="caption" color="textSecondary">
-            {t('home.exerciseCount', { count: exerciseCount })}
+          <AppText variant="subheading" numberOfLines={1}>
+            {name}
+          </AppText>
+          <AppText variant="caption" color="textSecondary" numberOfLines={1}>
+            {subtitle}
           </AppText>
         </View>
-        {/* Decorative: the whole card is the button (nested buttons are invalid on web). */}
         <Ionicons
           name="chevron-forward"
           size={20}
-          color={theme.colors.textSecondary}
+          color={theme.colors.textMuted}
           style={mirrorInRtl()}
         />
       </View>
-      {previewNames.length > 0 ? (
-        <AppText variant="body" color="textSecondary" numberOfLines={2}>
-          {previewNames.join(' · ')}
-          {remaining > 0 ? ` ${t('home.andMore', { count: remaining })}` : ''}
-        </AppText>
-      ) : null}
-      <AppText variant="caption" color={lastDone ? 'textSecondary' : 'textMuted'}>
-        {lastDone ? t('home.lastDone', { when: lastDone }) : t('home.notDoneYet')}
-      </AppText>
     </Card>
   );
-}
+});

@@ -1,18 +1,21 @@
 import { useCallback, useState } from 'react';
-import { Alert, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
+import { ConfirmSheet } from '@/components/ConfirmSheet';
 import { ElapsedTimer } from '@/components/ElapsedTimer';
 import { EmptyState } from '@/components/EmptyState';
+import { IconButton } from '@/components/IconButton';
+import { ProgressBar } from '@/components/ProgressBar';
 import { Screen } from '@/components/Screen';
-import { ScreenHeader } from '@/components/ScreenHeader';
 import { ExerciseThumb } from '@/features/exercises/components/ExerciseThumb';
-import { RestTimerBar } from '@/features/restTimer/RestTimerBar';
+import { RestTimerDock } from '@/features/restTimer/RestTimerDock';
 import { dayLabel, exerciseName, formatTarget } from '@/i18n/format';
 import { useAppStore } from '@/store/appStore';
 import { useTheme } from '@/theme';
@@ -27,6 +30,7 @@ import {
   type WorkoutData,
 } from './workoutService';
 
+/** Workout overview: progress, "continue" to the next exercise, and the full exercise list. */
 export function WorkoutScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -34,6 +38,8 @@ export function WorkoutScreen() {
   const { sessionId: sessionParam } = useLocalSearchParams<{ sessionId: string }>();
   const sessionId = Number(sessionParam);
   const [data, setData] = useState<WorkoutData | null>(() => loadWorkout(sessionId));
+  const [sheet, setSheet] = useState<'finish' | 'discard' | null>(null);
+  const [unlogged, setUnlogged] = useState(0);
 
   useFocusEffect(useCallback(() => setData(loadWorkout(sessionId)), [sessionId]));
 
@@ -54,98 +60,186 @@ export function WorkoutScreen() {
 
   const { session, splitType, items } = data;
   const title = splitType ? dayLabel(splitType, session.dayKey) : session.dayKey;
+  const done = items.filter((i) => i.isComplete).length;
+  const next = items.find((i) => !i.isComplete);
 
   const finish = () => {
     finishWorkout(session.id);
     router.replace(summaryHref(session.id));
   };
 
-  const confirmFinish = () => {
-    const unlogged = countUnloggedExercises(session.id);
-    if (unlogged === 0) {
-      finish();
-      return;
-    }
-    Alert.alert(t('workout.unloggedTitle'), t('workout.unloggedMessage', { count: unlogged }), [
-      { text: t('common.cancel'), style: 'cancel' },
-      { text: t('workout.finishAnyway'), onPress: finish },
-    ]);
+  const requestFinish = () => {
+    const count = countUnloggedExercises(session.id);
+    if (count === 0) return finish();
+    setUnlogged(count);
+    setSheet('finish');
   };
 
-  const confirmDiscard = () =>
-    Alert.alert(t('home.discardTitle'), t('home.discardMessage'), [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('home.discard'),
-        style: 'destructive',
-        onPress: () => {
-          discardWorkout(session.id);
-          leave();
-        },
-      },
-    ]);
-
   return (
-    <Screen padded={false}>
-      <ScrollView contentContainerStyle={{ padding: theme.spacing.lg, gap: theme.spacing.md }}>
-        <ScreenHeader
-          title={title}
-          onBack={leave}
-          backLabel={t('common.back')}
-          trailing={<Button label={t('workout.finishShort')} onPress={confirmFinish} icon="flag" />}
-        />
-        {session.finishedAt ? null : (
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.sm }}>
-            <Ionicons name="timer-outline" size={18} color={theme.colors.primary} />
-            <ElapsedTimer since={session.startedAt} accessibilityLabel={t('workout.elapsed')} />
-          </View>
-        )}
+    <SafeAreaView
+      edges={['top', 'bottom']}
+      style={{ flex: 1, backgroundColor: theme.colors.background }}
+    >
+      <ScrollView
+        contentContainerStyle={{
+          padding: theme.spacing.lg,
+          gap: theme.spacing.lg,
+          paddingBottom: theme.spacing.xxl,
+        }}
+      >
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.sm }}>
+          <IconButton
+            icon="arrow-back"
+            variant="tonal"
+            directional
+            onPress={leave}
+            accessibilityLabel={t('common.back')}
+          />
+          <AppText
+            variant="heading"
+            style={{ flex: 1 }}
+            numberOfLines={1}
+            accessibilityRole="header"
+          >
+            {title}
+          </AppText>
+          <Button
+            label={t('workout.finishShort')}
+            icon="flag"
+            size="sm"
+            haptic="medium"
+            onPress={requestFinish}
+          />
+        </View>
 
-        {items.length === 0 ? (
+        <View style={{ gap: theme.spacing.sm }}>
+          <View
+            style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
+          >
+            <AppText variant="bodyStrong" color="textSecondary">
+              {t('workout.exercisesDone', { done, total: items.length })}
+            </AppText>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.xs }}>
+              <Ionicons name="timer-outline" size={18} color={theme.colors.primary} />
+              <ElapsedTimer
+                since={session.startedAt}
+                variant="numberSmall"
+                accessibilityLabel={t('workout.elapsed')}
+              />
+            </View>
+          </View>
+          <ProgressBar value={items.length ? done / items.length : 0} height={8} />
+        </View>
+
+        {next ? (
+          <Card
+            tone="accent"
+            onPress={() => router.push(exerciseLogHref(session.id, next.exerciseId))}
+            haptic="light"
+          >
+            <AppText variant="label" color="primary">
+              {done === 0 ? t('workout.startHere') : t('workout.upNext')}
+            </AppText>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.md }}>
+              <ExerciseThumb exercise={next.exercise} size={64} />
+              <View style={{ flex: 1, gap: theme.spacing.xs }}>
+                <AppText variant="subheading" numberOfLines={2}>
+                  {exerciseName(next.exercise, language)}
+                </AppText>
+                <AppText variant="caption" color="textSecondary">
+                  {t('workout.progress', { done: next.workingSets, target: next.targetSets })}
+                </AppText>
+              </View>
+              <Ionicons
+                name="arrow-forward-circle"
+                size={40}
+                color={theme.colors.primary}
+                style={mirrorInRtl()}
+              />
+            </View>
+          </Card>
+        ) : items.length > 0 ? (
+          <Card tone="success">
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.md }}>
+              <Ionicons name="checkmark-done-circle" size={32} color={theme.colors.success} />
+              <AppText variant="subheading" style={{ flex: 1 }}>
+                {t('workout.allDone')}
+              </AppText>
+            </View>
+            <Button
+              label={t('workout.finish')}
+              icon="flag"
+              haptic="success"
+              onPress={finish}
+              fullWidth
+            />
+          </Card>
+        ) : (
           <EmptyState
             icon="barbell-outline"
             title={t('workout.noExercisesTitle')}
             message={t('workout.noExercisesMessage')}
           />
-        ) : null}
-        {items.map((item) => {
-          const name = exerciseName(item.exercise, language);
-          const progress = t('workout.progress', {
-            done: item.workingSets,
-            target: item.targetSets,
-          });
-          return (
-            <Card
-              key={item.exerciseId}
-              onPress={() => router.push(exerciseLogHref(session.id, item.exerciseId))}
-              accessibilityLabel={`${name}, ${progress}`}
-              style={item.isComplete ? { borderColor: theme.colors.success } : undefined}
-            >
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.md }}>
-                <ExerciseThumb exercise={item.exercise} />
-                <View style={{ flex: 1, gap: theme.spacing.xs }}>
-                  <AppText variant="bodyStrong" numberOfLines={2}>
-                    {name}
-                  </AppText>
-                  <AppText variant="caption" color={item.isComplete ? 'success' : 'textSecondary'}>
-                    {progress} ·{' '}
-                    {formatTarget(item.targetSets, item.targetRepsMin, item.targetRepsMax)}
-                  </AppText>
+        )}
+
+        <View style={{ gap: theme.spacing.sm }}>
+          {items.map((item) => {
+            const name = exerciseName(item.exercise, language);
+            const progress = t('workout.progress', {
+              done: item.workingSets,
+              target: item.targetSets,
+            });
+            return (
+              <Card
+                key={item.exerciseId}
+                onPress={() => router.push(exerciseLogHref(session.id, item.exerciseId))}
+                accessibilityLabel={`${name}, ${progress}`}
+                style={{ paddingVertical: theme.spacing.md }}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.md }}>
+                  <ExerciseThumb exercise={item.exercise} size={52} />
+                  <View style={{ flex: 1, gap: theme.spacing.xs }}>
+                    <AppText variant="bodyStrong" numberOfLines={2}>
+                      {name}
+                    </AppText>
+                    <View
+                      style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.sm }}
+                    >
+                      <View style={{ flex: 1 }}>
+                        <ProgressBar
+                          value={
+                            item.targetSets ? Math.min(1, item.workingSets / item.targetSets) : 0
+                          }
+                          height={4}
+                          color={item.isComplete ? 'primary' : 'textSecondary'}
+                        />
+                      </View>
+                      <AppText
+                        variant="label"
+                        color={item.isComplete ? 'primary' : 'textSecondary'}
+                      >
+                        {item.workingSets}/{item.targetSets}
+                      </AppText>
+                    </View>
+                    <AppText variant="label" color="textMuted">
+                      {formatTarget(item.targetSets, item.targetRepsMin, item.targetRepsMax)}
+                    </AppText>
+                  </View>
+                  {item.isComplete ? (
+                    <Ionicons name="checkmark-circle" size={28} color={theme.colors.primary} />
+                  ) : (
+                    <Ionicons
+                      name="chevron-forward"
+                      size={20}
+                      color={theme.colors.textMuted}
+                      style={mirrorInRtl()}
+                    />
+                  )}
                 </View>
-                {item.isComplete ? (
-                  <Ionicons name="checkmark-circle" size={26} color={theme.colors.success} />
-                ) : (
-                  <Ionicons
-                    name="chevron-forward"
-                    size={20}
-                    color={theme.colors.textSecondary}
-                    style={mirrorInRtl()}
-                  />
-                )}
-              </View>
-            </Card>
-          );
-        })}
+              </Card>
+            );
+          })}
+        </View>
 
         <Button
           label={t('workout.addExercise')}
@@ -156,12 +250,37 @@ export function WorkoutScreen() {
         />
         <Button
           label={t('workout.discardWorkout')}
-          variant="ghost"
-          onPress={confirmDiscard}
+          variant="danger"
+          icon="trash-outline"
+          onPress={() => setSheet('discard')}
           fullWidth
         />
       </ScrollView>
-      <RestTimerBar />
-    </Screen>
+
+      <RestTimerDock />
+
+      <ConfirmSheet
+        visible={sheet === 'finish'}
+        title={t('workout.unloggedTitle')}
+        message={t('workout.unloggedMessage', { count: unlogged })}
+        confirmLabel={t('workout.finishAnyway')}
+        cancelLabel={t('common.cancel')}
+        onClose={() => setSheet(null)}
+        onConfirm={finish}
+      />
+      <ConfirmSheet
+        visible={sheet === 'discard'}
+        title={t('home.discardTitle')}
+        message={t('home.discardMessage')}
+        confirmLabel={t('home.discard')}
+        cancelLabel={t('common.cancel')}
+        destructive
+        onClose={() => setSheet(null)}
+        onConfirm={() => {
+          discardWorkout(session.id);
+          leave();
+        }}
+      />
+    </SafeAreaView>
   );
 }

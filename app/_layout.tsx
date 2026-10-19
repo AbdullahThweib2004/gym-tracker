@@ -8,7 +8,6 @@ import {
   IBMPlexSansArabic_700Bold,
   useFonts,
 } from '@expo-google-fonts/ibm-plex-sans-arabic';
-import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { DarkTheme, router, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
@@ -67,12 +66,10 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={styles.root}>
       <SafeAreaProvider>
-        <BottomSheetModalProvider>
-          <ThemeProvider value={navigationTheme}>
-            <StatusBar style="light" />
-            <AppGate />
-          </ThemeProvider>
-        </BottomSheetModalProvider>
+        <ThemeProvider value={navigationTheme}>
+          <StatusBar style="light" />
+          <AppGate />
+        </ThemeProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );

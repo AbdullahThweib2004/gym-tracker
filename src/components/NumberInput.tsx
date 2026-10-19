@@ -35,6 +35,8 @@ type NumberInputProps = {
   editable?: boolean;
   /** Tighter layout for rows with several inputs. */
   compact?: boolean;
+  /** `big`: large tabular number with 48 pt steppers (set cards). */
+  size?: 'default' | 'big';
   onFocus?: () => void;
   onBlur?: () => void;
 };
@@ -58,6 +60,7 @@ export function NumberInput({
   invalid = false,
   editable = true,
   compact = false,
+  size = 'default',
   onFocus,
   onBlur,
 }: NumberInputProps) {
@@ -96,10 +99,13 @@ export function NumberInput({
     onChange(next);
   };
 
+  const big = size === 'big';
+  const stepperSize = big ? 24 : 18;
+
   return (
-    <View style={{ gap: theme.spacing.xs }}>
+    <View style={{ gap: theme.spacing.xs, alignItems: big ? 'stretch' : undefined }}>
       {label ? (
-        <AppText variant="label" color="textSecondary">
+        <AppText variant="label" color="textSecondary" align={big ? 'center' : 'auto'}>
           {label}
         </AppText>
       ) : null}
@@ -107,17 +113,20 @@ export function NumberInput({
         style={[
           styles.row,
           {
-            backgroundColor: theme.colors.surfaceElevated,
+            backgroundColor: big ? theme.colors.surface : theme.colors.surfaceElevated,
             borderColor: invalid ? theme.colors.danger : theme.colors.border,
             borderRadius: theme.radius.md,
             paddingHorizontal: compact ? 0 : theme.spacing.xs,
+            minHeight: big ? 72 : 48,
           },
         ]}
       >
         {step !== undefined && editable ? (
           <IconButton
             icon="remove"
-            size={18}
+            size={stepperSize}
+            variant={big ? 'tonal' : 'plain'}
+            haptic={big ? 'selection' : undefined}
             onPress={() => bump(-1)}
             accessibilityLabel={decrementLabel}
             disabled={value !== null && value <= min}
@@ -138,10 +147,10 @@ export function NumberInput({
           style={[
             styles.input,
             compact && styles.compactInput,
-            theme.typography.subheading,
+            big ? theme.typography.numberLarge : theme.typography.subheading,
             {
               color: muted ? theme.colors.textMuted : theme.colors.textPrimary,
-              paddingVertical: theme.spacing.sm,
+              paddingVertical: big ? 0 : theme.spacing.sm,
               // Digits are always left-to-right, also inside an RTL layout.
               writingDirection: 'ltr',
             },
@@ -155,7 +164,9 @@ export function NumberInput({
         {step !== undefined && editable ? (
           <IconButton
             icon="add"
-            size={18}
+            size={stepperSize}
+            variant={big ? 'tonal' : 'plain'}
+            haptic={big ? 'selection' : undefined}
             onPress={() => bump(1)}
             accessibilityLabel={incrementLabel}
             disabled={value !== null && value >= max}
@@ -167,7 +178,7 @@ export function NumberInput({
 }
 
 const styles = StyleSheet.create({
-  row: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, minHeight: 48 },
+  row: { flexDirection: 'row', alignItems: 'center', borderWidth: 1 },
   input: { flex: 1, textAlign: 'center', minWidth: 48 },
   compactInput: { minWidth: 36, paddingHorizontal: 0 },
 });

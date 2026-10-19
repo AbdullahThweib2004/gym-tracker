@@ -53,8 +53,8 @@ font family per weight (`fonts.regular|medium|semibold|bold`); don't use `fontWe
 ## Components
 
 `Button` (primary / secondary / ghost / danger, sizes sm 44 · md 52 · lg 60), `Card` (tones:
-default / accent / warning / success), `IconButton` (plain / tonal / filled), `Chip`, `Sheet` and
-`ActionSheet` (bottom sheets), `Skeleton` (shimmer), `ProgressBar`, `StatTile`,
+default / accent / warning / success), `IconButton` (plain / tonal / filled), `Chip`, `Sheet`, `ActionSheet` and
+`ConfirmSheet` (bottom sheets), `Skeleton` (shimmer), `ProgressBar`, `StatTile`,
 `SegmentedControl`, `Stepper`, `SearchBar`, `TextField`, `NumberInput`, `ToggleRow`,
 `EmptyState`, `LoadingState`, `ScreenHeader`.
 

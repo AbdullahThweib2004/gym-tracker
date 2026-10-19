@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, isNotNull, isNull, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, gte, isNotNull, isNull, sql } from 'drizzle-orm';
 
 import { toIsoDate } from '@/utils/date';
 import { bestSet, computeVolume, sessionDurationMs, workingSets } from '@/utils/workoutStats';
@@ -245,4 +245,17 @@ export function insertFinishedSessions(sessions: readonly FinishedSessionInput[]
 /** Deletes every workout session; sets, extras and drafts go with them (cascade). */
 export function deleteAllSessions(executor: DbExecutor = db): void {
   executor.delete(workoutSessions).run();
+}
+
+/** Dates (YYYY-MM-DD) of finished sessions on or after `fromDate`. */
+export function listFinishedSessionDatesSince(
+  fromDate: string,
+  executor: DbExecutor = db,
+): string[] {
+  return executor
+    .select({ date: workoutSessions.date })
+    .from(workoutSessions)
+    .where(and(isNotNull(workoutSessions.finishedAt), gte(workoutSessions.date, fromDate)))
+    .all()
+    .map((row) => row.date);
 }

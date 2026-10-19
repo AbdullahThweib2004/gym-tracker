@@ -1,11 +1,12 @@
 import { useCallback, useState } from 'react';
-import { Alert, Pressable, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
 import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
+import { ConfirmSheet } from '@/components/ConfirmSheet';
 import { EmptyState } from '@/components/EmptyState';
 import { Screen } from '@/components/Screen';
 import { ScreenHeader } from '@/components/ScreenHeader';
@@ -39,6 +40,7 @@ export function SessionDetailScreen() {
   const { sessionId: param } = useLocalSearchParams<{ sessionId: string }>();
   const sessionId = Number(param);
   const [summary, setSummary] = useState<SessionSummary | null>(() => getSessionSummary(sessionId));
+  const [confirmDeleteSession, setConfirmDeleteSession] = useState(false);
   const [editing, setEditing] = useState<{ set: SessionSet; title: string } | null>(null);
 
   const reload = useCallback(() => setSummary(getSessionSummary(sessionId)), [sessionId]);
@@ -61,33 +63,6 @@ export function SessionDetailScreen() {
   const splitType =
     session.userProgramId === null ? null : getProgramById(session.userProgramId)?.splitType;
   const title = splitType ? dayLabel(splitType, session.dayKey) : session.dayKey;
-
-  const confirmDeleteSession = () =>
-    Alert.alert(t('history.deleteSessionTitle'), t('history.deleteSessionMessage'), [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('common.delete'),
-        style: 'destructive',
-        onPress: () => {
-          discardWorkout(session.id);
-          router.back();
-        },
-      },
-    ]);
-
-  const confirmDeleteSet = (set: SessionSet) =>
-    Alert.alert(t('history.deleteSetTitle'), t('history.deleteSetMessage'), [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('common.delete'),
-        style: 'destructive',
-        onPress: () => {
-          deleteSet(set.id);
-          setEditing(null);
-          reload();
-        },
-      },
-    ]);
 
   return (
     <Screen scroll>
@@ -166,9 +141,9 @@ export function SessionDetailScreen() {
 
       <Button
         label={t('history.deleteSession')}
-        variant="ghost"
+        variant="danger"
         icon="trash-outline"
-        onPress={confirmDeleteSession}
+        onPress={() => setConfirmDeleteSession(true)}
         fullWidth
       />
 
@@ -177,7 +152,11 @@ export function SessionDetailScreen() {
           title={editing.title}
           initial={editing.set}
           onClose={() => setEditing(null)}
-          onDelete={() => confirmDeleteSet(editing.set)}
+          onDelete={() => {
+            deleteSet(editing.set.id);
+            setEditing(null);
+            reload();
+          }}
           onSave={(values) => {
             updateSet(editing.set.id, values);
             setEditing(null);
@@ -185,6 +164,20 @@ export function SessionDetailScreen() {
           }}
         />
       ) : null}
+
+      <ConfirmSheet
+        visible={confirmDeleteSession}
+        title={t('history.deleteSessionTitle')}
+        message={t('history.deleteSessionMessage')}
+        confirmLabel={t('common.delete')}
+        cancelLabel={t('common.cancel')}
+        destructive
+        onClose={() => setConfirmDeleteSession(false)}
+        onConfirm={() => {
+          discardWorkout(session.id);
+          router.back();
+        }}
+      />
     </Screen>
   );
 }

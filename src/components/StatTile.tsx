@@ -9,9 +9,17 @@ type StatTileProps = {
   value: string;
   caption?: string;
   valueColor?: ColorToken;
+  /** `lg`: big number for hero stats. */
+  size?: 'md' | 'lg';
 };
 
-export function StatTile({ label, value, caption, valueColor = 'textPrimary' }: StatTileProps) {
+export function StatTile({
+  label,
+  value,
+  caption,
+  valueColor = 'textPrimary',
+  size = 'md',
+}: StatTileProps) {
   const theme = useTheme();
   return (
     <View
@@ -31,7 +39,12 @@ export function StatTile({ label, value, caption, valueColor = 'textPrimary' }: 
       <AppText variant="label" color="textSecondary">
         {label}
       </AppText>
-      <AppText variant="numberSmall" color={valueColor} numberOfLines={1} adjustsFontSizeToFit>
+      <AppText
+        variant={size === 'lg' ? 'number' : 'numberSmall'}
+        color={valueColor}
+        numberOfLines={1}
+        adjustsFontSizeToFit
+      >
         {value}
       </AppText>
       {caption ? (

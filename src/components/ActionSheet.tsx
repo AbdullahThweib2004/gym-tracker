@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
@@ -25,8 +26,18 @@ type ActionSheetProps = {
 /** A list of options in a bottom sheet (replaces Alert-based menus). */
 export function ActionSheet({ visible, onClose, title, message, actions }: ActionSheetProps) {
   const theme = useTheme();
+  // Run the chosen action only after this sheet has closed, so it can safely open another one.
+  const [chosen, setChosen] = useState<SheetAction | null>(null);
   return (
-    <Sheet visible={visible} onClose={onClose} title={title}>
+    <Sheet
+      visible={visible}
+      onClose={onClose}
+      title={title}
+      onClosed={() => {
+        chosen?.onPress();
+        setChosen(null);
+      }}
+    >
       {message ? <AppText color="textSecondary">{message}</AppText> : null}
       <View style={{ gap: theme.spacing.sm }}>
         {actions.map((action) => {
@@ -38,8 +49,8 @@ export function ActionSheet({ visible, onClose, title, message, actions }: Actio
               accessibilityLabel={action.label}
               haptic="selection"
               onPress={() => {
+                setChosen(action);
                 onClose();
-                action.onPress();
               }}
               style={({ pressed }) => ({
                 flexDirection: 'row',

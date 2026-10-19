@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { View } from 'react-native';
 
 import { useTheme } from '@/theme';
@@ -29,8 +30,19 @@ export function ConfirmSheet({
   onClose,
 }: ConfirmSheetProps) {
   const theme = useTheme();
+  // Act only after the sheet has closed, so the action may safely open another sheet. The
+  // action is captured at tap time: the parent's onClose may clear the state it depends on.
+  const [confirmedAction, setConfirmedAction] = useState<(() => void) | null>(null);
   return (
-    <Sheet visible={visible} onClose={onClose} title={title}>
+    <Sheet
+      visible={visible}
+      onClose={onClose}
+      title={title}
+      onClosed={() => {
+        confirmedAction?.();
+        setConfirmedAction(null);
+      }}
+    >
       {message ? <AppText color="textSecondary">{message}</AppText> : null}
       <View style={{ gap: theme.spacing.sm }}>
         <Button
@@ -39,8 +51,8 @@ export function ConfirmSheet({
           size="lg"
           haptic={destructive ? 'warning' : 'medium'}
           onPress={() => {
+            setConfirmedAction(() => onConfirm);
             onClose();
-            onConfirm();
           }}
           fullWidth
         />

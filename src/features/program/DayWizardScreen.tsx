@@ -1,11 +1,12 @@
 import { useCallback, useMemo, useState } from 'react';
-import { Alert, View } from 'react-native';
+import { View } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
 import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
+import { ConfirmSheet } from '@/components/ConfirmSheet';
 import { EmptyState } from '@/components/EmptyState';
 import { Screen } from '@/components/Screen';
 import { ScreenHeader } from '@/components/ScreenHeader';
@@ -22,7 +23,7 @@ import { moveItem } from '@/utils/list';
 import { newExerciseHref } from '@/features/exercises/routes';
 
 import { ExercisePicker } from './components/ExercisePicker';
-import { SelectedExercisesPanel } from './components/SelectedExercisesPanel';
+import { SelectedExercisesSheet, SelectedSummaryButton } from './components/SelectedExercisesPanel';
 import { TargetEditorModal } from './components/TargetEditorModal';
 import {
   getIncompleteActiveProgram,
@@ -63,7 +64,8 @@ export function DayWizardScreen() {
     const draft = useProgramDraftStore.getState().drafts[dayId];
     return !isEdit && draft ? draft : savedEntries;
   });
-  const [panelExpanded, setPanelExpanded] = useState(false);
+  const [listOpen, setListOpen] = useState(false);
+  const [confirmDiscard, setConfirmDiscard] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
   const selectedIds = useMemo(() => new Set(entries.map((e) => e.exerciseId)), [entries]);
@@ -121,10 +123,7 @@ export function DayWizardScreen() {
       goBack();
       return;
     }
-    Alert.alert(t('onboarding.wizard.discardTitle'), t('onboarding.wizard.discardMessage'), [
-      { text: t('common.cancel'), style: 'cancel' },
-      { text: t('onboarding.wizard.discard'), style: 'destructive', onPress: goBack },
-    ]);
+    setConfirmDiscard(true);
   };
 
   const handleNext = () => {
@@ -203,29 +202,50 @@ export function DayWizardScreen() {
           backgroundColor: theme.colors.surface,
         }}
       >
-        <SelectedExercisesPanel
-          entries={entries}
-          exercisesById={exercisesById}
-          expanded={panelExpanded}
-          onToggleExpanded={() => setPanelExpanded((v) => !v)}
-          onMove={(i, direction) => setEntries(moveItem(entries, i, i + direction))}
-          onEdit={setEditingIndex}
-          onRemove={removeAt}
-        />
         {entries.length === 0 ? (
           <AppText variant="caption" color="textMuted">
             {t('onboarding.wizard.pickAtLeastOne')}
           </AppText>
         ) : null}
-        <Button
-          label={primaryLabel}
-          onPress={handleNext}
-          disabled={entries.length === 0}
-          icon={isEdit || isLast ? 'checkmark' : undefined}
-          fullWidth
-        />
+        <View style={{ flexDirection: 'row', gap: theme.spacing.sm }}>
+          <SelectedSummaryButton
+            entries={entries}
+            exercisesById={exercisesById}
+            onPress={() => setListOpen(true)}
+          />
+          <Button
+            label={primaryLabel}
+            onPress={handleNext}
+            disabled={entries.length === 0}
+            icon={isEdit || isLast ? 'checkmark' : 'arrow-forward'}
+            haptic="medium"
+            style={{ flex: 1 }}
+          />
+        </View>
       </View>
 
+      <SelectedExercisesSheet
+        visible={listOpen}
+        onClose={() => setListOpen(false)}
+        entries={entries}
+        exercisesById={exercisesById}
+        onMove={(i, direction) => setEntries(moveItem(entries, i, i + direction))}
+        onEdit={(i) => {
+          setListOpen(false);
+          setEditingIndex(i);
+        }}
+        onRemove={removeAt}
+      />
+      <ConfirmSheet
+        visible={confirmDiscard}
+        title={t('onboarding.wizard.discardTitle')}
+        message={t('onboarding.wizard.discardMessage')}
+        confirmLabel={t('onboarding.wizard.discard')}
+        cancelLabel={t('common.cancel')}
+        destructive
+        onClose={() => setConfirmDiscard(false)}
+        onConfirm={goBack}
+      />
       <TargetEditorModal
         visible={editing !== undefined}
         title={editingExercise ? exerciseName(editingExercise, language) : ''}

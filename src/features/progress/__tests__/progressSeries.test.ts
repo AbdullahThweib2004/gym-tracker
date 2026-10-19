@@ -3,7 +3,6 @@ import {
   chartBaseline,
   computeProgressStats,
   filterByRange,
-  labelIndexes,
 } from '../progressSeries';
 
 const set = (
@@ -83,11 +82,5 @@ describe('chart helpers', () => {
     expect(chartBaseline([100, 100])).toBe(85);
     expect(chartBaseline([0, 5])).toBe(0);
     expect(chartBaseline([])).toBe(0);
-  });
-
-  it('labels the first, last and evenly spaced points', () => {
-    expect([...labelIndexes(3)]).toEqual([0, 1, 2]);
-    expect([...labelIndexes(10)]).toEqual([0, 3, 6, 9]);
-    expect([...labelIndexes(0)]).toEqual([]);
   });
 });

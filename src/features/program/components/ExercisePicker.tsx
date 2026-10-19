@@ -1,32 +1,25 @@
-import { useMemo, useState } from 'react';
-import { Pressable, ScrollView, SectionList, View } from 'react-native';
+import { memo, useMemo, useState } from 'react';
+import { ScrollView, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import { FlashList } from '@shopify/flash-list';
 import { useTranslation } from 'react-i18next';
 
 import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
 import { Chip } from '@/components/Chip';
+import { PressableScale } from '@/components/PressableScale';
 import { SearchBar } from '@/components/SearchBar';
-import { EQUIPMENT, type Equipment, type MuscleGroup } from '@/constants/muscles';
+import { EQUIPMENT, MUSCLE_GROUPS, type Equipment, type MuscleGroup } from '@/constants/muscles';
 import type { Exercise } from '@/db/schema';
-import { ExerciseThumb } from '@/features/exercises/components/ExerciseThumb';
+import { ExerciseThumb, muscleGroupIcon } from '@/features/exercises/components/ExerciseThumb';
 import { exerciseName } from '@/i18n/format';
 import { useAppStore } from '@/store/appStore';
 import { useTheme } from '@/theme';
-import { mirrorInRtl } from '@/utils/direction';
 
 import { buildPickerSections } from '../pickerSections';
 
-type PickerSection =
-  | {
-      kind: 'group';
-      key: string;
-      muscleGroup: MuscleGroup;
-      total: number;
-      selectedCount: number;
-      data: Exercise[];
-    }
-  | { kind: 'divider'; key: string; data: Exercise[] };
+type MuscleFilter = 'suggested' | 'all' | MuscleGroup;
 
 type ExercisePickerProps = {
   exercises: readonly Exercise[];
@@ -35,100 +28,185 @@ type ExercisePickerProps = {
   onToggle: (exercise: Exercise) => void;
   /** Shows a "+ Create" button (e.g. to open the custom exercise form). */
   onCreate?: () => void;
+  /** Space at the bottom of the grid (e.g. above a floating footer). */
+  bottomInset?: number;
 };
 
+type GridCardProps = {
+  exercise: Exercise;
+  name: string;
+  equipmentLabel: string;
+  selected: boolean;
+  onToggle: (exercise: Exercise) => void;
+};
+
+const GridCard = memo(function GridCard({
+  exercise,
+  name,
+  equipmentLabel,
+  selected,
+  onToggle,
+}: GridCardProps) {
+  const theme = useTheme();
+  return (
+    <PressableScale
+      accessibilityRole="checkbox"
+      accessibilityState={{ checked: selected }}
+      accessibilityLabel={`${name}, ${equipmentLabel}`}
+      onPress={() => onToggle(exercise)}
+      haptic="selection"
+      scaleTo={0.96}
+      style={{
+        flex: 1,
+        gap: theme.spacing.sm,
+        padding: theme.spacing.sm,
+        borderRadius: theme.radius.lg,
+        borderWidth: selected ? 2 : 1,
+        borderColor: selected ? theme.colors.primary : theme.colors.border,
+        backgroundColor: selected ? theme.colors.primarySoft : theme.colors.surface,
+      }}
+    >
+      <ExerciseThumb exercise={exercise} fill showAddPhotoHint radius={theme.radius.md} />
+      {selected ? (
+        <View
+          style={{
+            position: 'absolute',
+            top: theme.spacing.md,
+            end: theme.spacing.md,
+            width: 28,
+            height: 28,
+            borderRadius: theme.radius.pill,
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: theme.colors.primary,
+          }}
+        >
+          <Ionicons name="checkmark" size={18} color={theme.colors.onPrimary} />
+        </View>
+      ) : null}
+      <View
+        style={{
+          gap: theme.spacing.xs,
+          paddingHorizontal: theme.spacing.xs,
+          paddingBottom: theme.spacing.xs,
+        }}
+      >
+        <AppText variant="bodyStrong" numberOfLines={2} style={{ minHeight: 48 }}>
+          {name}
+        </AppText>
+        <AppText variant="label" color="textSecondary" numberOfLines={1}>
+          {equipmentLabel}
+        </AppText>
+      </View>
+    </PressableScale>
+  );
+});
+
+/** Exercise picker: sticky search and filters over a 2-column grid of image cards. */
 export function ExercisePicker({
   exercises,
   suggestedMuscleGroups,
   selectedIds,
   onToggle,
   onCreate,
+  bottomInset = 0,
 }: ExercisePickerProps) {
   const { t } = useTranslation();
   const theme = useTheme();
   const language = useAppStore((s) => s.language);
+  const hasSuggestion =
+    suggestedMuscleGroups.length > 0 && suggestedMuscleGroups.length < MUSCLE_GROUPS.length;
   const [query, setQuery] = useState('');
   const [equipment, setEquipment] = useState<Equipment[]>([]);
-  const [expanded, setExpanded] = useState<ReadonlySet<MuscleGroup>>(
-    () => new Set(suggestedMuscleGroups),
-  );
-
+  const [muscle, setMuscle] = useState<MuscleFilter>(hasSuggestion ? 'suggested' : 'all');
   const searching = query.trim().length > 0;
 
-  const sections = useMemo((): PickerSection[] => {
+  const data = useMemo(() => {
     const { suggested, other } = buildPickerSections(
       exercises,
       suggestedMuscleGroups,
       { query, equipment },
-      (exercise) => exerciseName(exercise, language),
+      (e) => exerciseName(e, language),
     );
-    const toGroup = ({
-      muscleGroup,
-      exercises: list,
-    }: (typeof suggested)[number]): PickerSection => ({
-      kind: 'group',
-      key: muscleGroup,
-      muscleGroup,
-      total: list.length,
-      selectedCount: list.filter((e) => selectedIds.has(e.id)).length,
-      // Collapsed sections render no rows; searching expands every matching group.
-      data: searching || expanded.has(muscleGroup) ? list : [],
-    });
-    const result = suggested.map(toGroup);
-    if (other.length > 0) {
-      if (suggested.length > 0) result.push({ kind: 'divider', key: 'other', data: [] });
-      result.push(...other.map(toGroup));
-    }
-    return result;
-  }, [
-    exercises,
-    suggestedMuscleGroups,
-    query,
-    equipment,
-    language,
-    selectedIds,
-    expanded,
-    searching,
-  ]);
-
-  const toggleGroup = (group: MuscleGroup) =>
-    setExpanded((prev) => {
-      const next = new Set(prev);
-      if (next.has(group)) next.delete(group);
-      else next.add(group);
-      return next;
-    });
+    const sections =
+      searching || muscle === 'all'
+        ? [...suggested, ...other]
+        : muscle === 'suggested'
+          ? suggested
+          : [...suggested, ...other].filter((s) => s.muscleGroup === muscle);
+    return sections.flatMap((s) => s.exercises);
+  }, [exercises, suggestedMuscleGroups, query, equipment, language, muscle, searching]);
 
   const toggleEquipment = (value: Equipment) =>
     setEquipment((prev) =>
       prev.includes(value) ? prev.filter((e) => e !== value) : [...prev, value],
     );
 
+  const chipRow = { gap: theme.spacing.xs, paddingEnd: theme.spacing.lg };
+
   return (
-    <View style={{ flex: 1, gap: theme.spacing.sm }}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.sm }}>
-        <View style={{ flex: 1 }}>
-          <SearchBar
-            value={query}
-            onChangeText={setQuery}
-            placeholder={t('exercises.search')}
-            clearLabel={t('exercises.clearSearch')}
-          />
+    <View style={{ flex: 1 }}>
+      {/* Sticky header: stays in place while the grid scrolls. */}
+      <View style={{ gap: theme.spacing.sm, paddingBottom: theme.spacing.sm }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.sm }}>
+          <View style={{ flex: 1 }}>
+            <SearchBar
+              value={query}
+              onChangeText={setQuery}
+              placeholder={t('exercises.search')}
+              clearLabel={t('exercises.clearSearch')}
+            />
+          </View>
+          {onCreate ? (
+            <Button
+              label={t('exercises.createShort')}
+              icon="add"
+              variant="secondary"
+              onPress={onCreate}
+            />
+          ) : null}
         </View>
-        {onCreate ? (
-          <Button
-            label={t('exercises.createShort')}
-            icon="add"
-            variant="secondary"
-            onPress={onCreate}
-          />
-        ) : null}
-      </View>
-      <View>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ gap: theme.spacing.xs }}
+          contentContainerStyle={chipRow}
+        >
+          {hasSuggestion ? (
+            <Chip
+              label={t('exercises.forThisDay')}
+              icon="flash"
+              selected={!searching && muscle === 'suggested'}
+              onPress={() => setMuscle('suggested')}
+            />
+          ) : null}
+          <Chip
+            label={t('exercises.allMuscles')}
+            selected={!searching && muscle === 'all'}
+            onPress={() => setMuscle('all')}
+          />
+          {MUSCLE_GROUPS.map((group) => {
+            const selected = !searching && muscle === group;
+            return (
+              <Chip
+                key={group}
+                label={t(`muscleGroups.${group}`)}
+                selected={selected}
+                onPress={() => setMuscle(group)}
+                leading={
+                  <MaterialCommunityIcons
+                    name={muscleGroupIcon(group)}
+                    size={16}
+                    color={selected ? theme.colors.onPrimary : theme.colors.primary}
+                  />
+                }
+              />
+            );
+          })}
+        </ScrollView>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={chipRow}
         >
           <Chip
             label={t('exercises.allEquipment')}
@@ -145,104 +223,48 @@ export function ExercisePicker({
           ))}
         </ScrollView>
       </View>
-      <SectionList
-        sections={sections}
+
+      <FlashList
+        data={data}
+        numColumns={2}
         keyExtractor={(item) => String(item.id)}
-        stickySectionHeadersEnabled={false}
+        extraData={selectedIds}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
-        style={{ flex: 1 }}
+        contentContainerStyle={{ paddingBottom: bottomInset + theme.spacing.lg }}
         ListEmptyComponent={
-          <AppText color="textSecondary" align="center" style={{ padding: theme.spacing.xl }}>
-            {t('exercises.noResults')}
-          </AppText>
+          <View style={{ padding: theme.spacing.xl, alignItems: 'center', gap: theme.spacing.md }}>
+            <AppText color="textSecondary" align="center">
+              {t('exercises.noResults')}
+            </AppText>
+            {onCreate ? (
+              <Button
+                label={t('exercises.create')}
+                icon="add"
+                variant="secondary"
+                onPress={onCreate}
+              />
+            ) : null}
+          </View>
         }
-        renderSectionHeader={({ section }) => {
-          if (section.kind === 'divider') {
-            return (
-              <AppText
-                variant="label"
-                color="textMuted"
-                style={{ marginTop: theme.spacing.lg, marginBottom: theme.spacing.xs }}
-              >
-                {t('exercises.otherMuscles')}
-              </AppText>
-            );
-          }
-          const isOpen = searching || expanded.has(section.muscleGroup);
-          return (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityState={{ expanded: isOpen }}
-              onPress={() => toggleGroup(section.muscleGroup)}
-              disabled={searching}
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: theme.spacing.sm,
-                paddingVertical: theme.spacing.md,
-                borderBottomWidth: 1,
-                borderBottomColor: theme.colors.border,
-                backgroundColor: theme.colors.background,
-              }}
-            >
-              <AppText variant="bodyStrong" style={{ flex: 1 }}>
-                {t(`muscleGroups.${section.muscleGroup}`)}
-              </AppText>
-              {section.selectedCount > 0 ? (
-                <Chip
-                  label={t('exercises.selectedInGroup', { count: section.selectedCount })}
-                  selected
-                />
-              ) : null}
-              <AppText variant="caption" color="textMuted">
-                {section.total}
-              </AppText>
-              <Ionicons
-                name={isOpen ? 'chevron-down' : 'chevron-forward'}
-                size={18}
-                color={theme.colors.textSecondary}
-                style={isOpen ? undefined : mirrorInRtl()}
-              />
-            </Pressable>
-          );
-        }}
-        renderItem={({ item }) => {
-          const selected = selectedIds.has(item.id);
-          const name = exerciseName(item, language);
-          return (
-            <Pressable
-              accessibilityRole="checkbox"
-              accessibilityState={{ checked: selected }}
-              accessibilityLabel={`${name}, ${t(`equipment.${item.equipment}`)}`}
-              onPress={() => onToggle(item)}
-              style={({ pressed }) => ({
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: theme.spacing.md,
-                paddingVertical: theme.spacing.sm,
-                paddingHorizontal: theme.spacing.xs,
-                borderRadius: theme.radius.md,
-                backgroundColor: pressed ? theme.colors.surface : theme.colors.transparent,
-              })}
-            >
-              <ExerciseThumb exercise={item} size={40} />
-              <View style={{ flex: 1 }}>
-                <AppText variant="body" numberOfLines={2}>
-                  {name}
-                </AppText>
-                <AppText variant="caption" color="textSecondary">
-                  {t(`equipment.${item.equipment}`)}
-                </AppText>
-              </View>
-              <Ionicons
-                name={selected ? 'checkmark-circle' : 'ellipse-outline'}
-                size={24}
-                color={selected ? theme.colors.success : theme.colors.border}
-              />
-            </Pressable>
-          );
-        }}
+        renderItem={({ item, index }) => (
+          <View
+            style={{
+              flex: 1,
+              paddingBottom: theme.spacing.sm,
+              paddingEnd: index % 2 === 0 ? theme.spacing.xs : 0,
+              paddingStart: index % 2 === 1 ? theme.spacing.xs : 0,
+            }}
+          >
+            <GridCard
+              exercise={item}
+              name={exerciseName(item, language)}
+              equipmentLabel={t(`equipment.${item.equipment}`)}
+              selected={selectedIds.has(item.id)}
+              onToggle={onToggle}
+            />
+          </View>
+        )}
       />
     </View>
   );

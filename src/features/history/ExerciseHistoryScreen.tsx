@@ -10,8 +10,9 @@ import { Screen } from '@/components/Screen';
 import { ScreenHeader } from '@/components/ScreenHeader';
 import { getExerciseById } from '@/db/repositories/exercises';
 import { listExerciseHistory, type ExerciseHistoryEntry } from '@/db/repositories/sessionSets';
+import { IconButton } from '@/components/IconButton';
 import { ExerciseMotion } from '@/features/exercises/components/ExerciseMotion';
-import { ExerciseThumb } from '@/features/exercises/components/ExerciseThumb';
+import { editExerciseHref } from '@/features/exercises/routes';
 import { sessionDetailHref } from '@/features/workout/routes';
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { StatTile } from '@/components/StatTile';
@@ -86,7 +87,14 @@ export function ExerciseHistoryScreen() {
           subtitle={`${t(`muscleGroups.${exercise.muscleGroup}`)} · ${t(`equipment.${exercise.equipment}`)}`}
           onBack={() => router.back()}
           backLabel={t('common.back')}
-          trailing={<ExerciseThumb exercise={exercise} />}
+          trailing={
+            <IconButton
+              icon="camera-outline"
+              variant="tonal"
+              onPress={() => router.push(editExerciseHref(exercise.id))}
+              accessibilityLabel={t('exercises.photo.edit')}
+            />
+          }
         />
       </View>
       <FlatList
@@ -101,7 +109,7 @@ export function ExerciseHistoryScreen() {
           <View style={{ gap: theme.spacing.md, marginBottom: theme.spacing.md }}>
             <ExerciseMotion
               exercise={exercise}
-              height={220}
+              height={260}
               accessibilityLabel={t('exercises.motion.label', {
                 name: exerciseName(exercise, language),
               })}
@@ -142,6 +150,11 @@ export function ExerciseHistoryScreen() {
                     <ProgressChart
                       points={points}
                       metric={metric}
+                      formatValue={(value) =>
+                        metric === 'volume'
+                          ? formatVolume(value)
+                          : formatWeight(Math.round(value * 2) / 2)
+                      }
                       accessibilityLabel={t('progress.chartLabel', {
                         metric: t(`progress.metric.${metric}`),
                         count: points.length,
@@ -151,21 +164,25 @@ export function ExerciseHistoryScreen() {
                 </Card>
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: theme.spacing.sm }}>
                   <StatTile
+                    size="lg"
                     label={t('progress.stats.heaviest')}
                     value={stats.heaviest ? formatWeight(stats.heaviest.weightKg) : '—'}
                     caption={stats.heaviest ? formatDate(stats.heaviest.date, 'medium') : undefined}
                   />
                   <StatTile
+                    size="lg"
                     label={t('progress.stats.best1RM')}
                     value={
                       stats.best1RM === null ? '—' : formatWeight(Math.round(stats.best1RM * 2) / 2)
                     }
                   />
                   <StatTile
+                    size="lg"
                     label={t('progress.stats.sessions')}
                     value={String(stats.totalSessions)}
                   />
                   <StatTile
+                    size="lg"
                     label={t('progress.stats.change')}
                     value={
                       stats.bestWeightChange === null

@@ -152,7 +152,9 @@
     "deleteSetTitle": "Delete this set?",
     "deleteSetMessage": "This can’t be undone.",
     "openExerciseHistory": "Opens this exercise’s history",
-    "editSetHint": "Edit or delete this set"
+    "editSetHint": "Edit or delete this set",
+    "workoutCount_one": "{{count}} workout",
+    "workoutCount_other": "{{count}} workouts"
   },
   "settings": {
     "title": "Settings",
@@ -184,7 +186,9 @@
     "data": "Your data",
     "credits": "Credits",
     "creditsImages": "Exercise images: free-exercise-db (public domain)",
-    "openLinkHint": "Opens in your browser"
+    "openLinkHint": "Opens in your browser",
+    "split": "Split",
+    "never": "Never"
   },
   "onboarding": {
     "title": "Choose your split",
@@ -217,7 +221,9 @@
       "discardMessage": "Your changes to this day won’t be saved.",
       "discard": "Discard",
       "selectedCount_one": "{{count}} selected",
-      "selectedCount_other": "{{count}} selected"
+      "selectedCount_other": "{{count}} selected",
+      "openSelectedHint": "Shows the selected exercises to reorder or edit",
+      "selectedHint": "Tap an exercise to set sets, reps and rest. Use the arrows to change the order."
     }
   },
   "exercises": {
@@ -265,14 +271,18 @@
         "library": "Allow photo access in Settings to choose a photo."
       },
       "failedTitle": "Couldn’t save the photo",
-      "failedMessage": "Please try again."
+      "failedMessage": "Please try again.",
+      "edit": "Add or change photo"
     },
     "motion": {
       "label": "{{name}} demonstration",
       "start": "Start position",
       "end": "End position",
       "openHint": "Opens both positions full screen"
-    }
+    },
+    "addPhotoHint": "Add photo",
+    "forThisDay": "This day",
+    "allMuscles": "All"
   },
   "languages": {
     "en": "English",

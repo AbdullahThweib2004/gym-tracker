@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useEffectEvent, useState, type ReactNode } from 'react';
 import {
   KeyboardAvoidingView,
   Modal,
@@ -32,6 +32,8 @@ type SheetProps = {
   children: ReactNode;
   /** Use for long content; the sheet then scrolls within 85% of the screen height. */
   scrollable?: boolean;
+  /** Called after the closing animation, once the sheet is gone (safe to open another one). */
+  onClosed?: () => void;
 };
 
 /** Distance (pt) or speed that dismisses the sheet when dragged down. */
@@ -43,7 +45,14 @@ const DISMISS_VELOCITY = 900;
  * backdrop or use Back (Android) to close. Built on Modal + Reanimated + Gesture Handler, so
  * it works in Expo Go on iOS, Android and web. Fades instead of sliding with Reduce Motion.
  */
-export function Sheet({ visible, onClose, title, children, scrollable = false }: SheetProps) {
+export function Sheet({
+  visible,
+  onClose,
+  title,
+  children,
+  scrollable = false,
+  onClosed,
+}: SheetProps) {
   const theme = useTheme();
   const { t } = useTranslation();
   const reduceMotion = useReduceMotion();
@@ -52,6 +61,11 @@ export function Sheet({ visible, onClose, title, children, scrollable = false }:
   // Stay mounted while the closing animation runs.
   const [mounted, setMounted] = useState(visible);
   if (visible && !mounted) setMounted(true);
+  // An effect event: always calls the latest onClosed without restarting the animation.
+  const finishClose = useEffectEvent(() => {
+    setMounted(false);
+    onClosed?.();
+  });
   const translateY = useSharedValue(screenHeight);
   const backdrop = useSharedValue(0);
 
@@ -69,7 +83,7 @@ export function Sheet({ visible, onClose, title, children, scrollable = false }:
         withTiming(
           reduceMotion ? 0 : screenHeight,
           { duration: theme.motion.normal, easing: Easing.in(Easing.cubic) },
-          () => runOnJS(setMounted)(false),
+          () => runOnJS(finishClose)(),
         ),
       );
     }

@@ -27,6 +27,7 @@ import {
   getSessionSummary,
   getSessionWithSets,
   listFinishedSessionsWithStats,
+  listSessionExercisePreviews,
 } from '../repositories/workoutSessions';
 import { seedDatabase } from '../seed';
 
@@ -226,5 +227,20 @@ describe('summary and history totals', () => {
       workingSets: 0,
       volumeKg: 0,
     });
+  });
+});
+
+describe('history previews', () => {
+  it('lists each session’s distinct exercises in logged order, capped', () => {
+    const { program, pull, rowId, curlId } = setUp();
+    const session = startWorkout(program, pull);
+    logSet(session.id, curlId, 1, 12.5, 12);
+    logSet(session.id, rowId, 1, 60, 10);
+    logSet(session.id, curlId, 2, 12.5, 10);
+    finishWorkout(session.id);
+    const previews = listSessionExercisePreviews([session.id], 4);
+    expect(previews.get(session.id)?.map((e) => e.id)).toEqual([curlId, rowId]);
+    expect(listSessionExercisePreviews([session.id], 1).get(session.id)).toHaveLength(1);
+    expect(listSessionExercisePreviews([]).size).toBe(0);
   });
 });

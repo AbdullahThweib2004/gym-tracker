@@ -92,14 +92,6 @@ export function chartBaseline(values: readonly number[]): number {
   return Math.max(0, Math.floor(min - padding));
 }
 
-/** Indexes of points that get an x-axis label: first, last and a few evenly spaced between. */
-export function labelIndexes(count: number, maxLabels = 4): Set<number> {
-  if (count <= 0) return new Set();
-  if (count <= maxLabels) return new Set(Array.from({ length: count }, (_, i) => i));
-  const step = (count - 1) / (maxLabels - 1);
-  return new Set(Array.from({ length: maxLabels }, (_, i) => Math.round(i * step)));
-}
-
 export function metricValue(point: SessionPoint, metric: ProgressMetric): number {
   return point[metric];
 }

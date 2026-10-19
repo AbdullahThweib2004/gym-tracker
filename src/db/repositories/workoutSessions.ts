@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, gte, isNotNull, isNull, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, gte, inArray, isNotNull, isNull, sql } from 'drizzle-orm';
 
 import { toIsoDate } from '@/utils/date';
 import { bestSet, computeVolume, sessionDurationMs, workingSets } from '@/utils/workoutStats';
@@ -258,4 +258,30 @@ export function listFinishedSessionDatesSince(
     .where(and(isNotNull(workoutSessions.finishedAt), gte(workoutSessions.date, fromDate)))
     .all()
     .map((row) => row.date);
+}
+
+/**
+ * For each session, its distinct exercises in the order they were first logged (at most
+ * `perSession`). One query for the whole history list.
+ */
+export function listSessionExercisePreviews(
+  sessionIds: readonly number[],
+  perSession = 4,
+  executor: DbExecutor = db,
+): Map<number, Exercise[]> {
+  const result = new Map<number, Exercise[]>();
+  if (sessionIds.length === 0) return result;
+  const rows = executor
+    .select({ sessionId: sessionSets.sessionId, exercise: exercises })
+    .from(sessionSets)
+    .innerJoin(exercises, eq(sessionSets.exerciseId, exercises.id))
+    .where(inArray(sessionSets.sessionId, [...sessionIds]))
+    .orderBy(asc(sessionSets.sessionId), asc(sessionSets.createdAt), asc(sessionSets.id))
+    .all();
+  for (const { sessionId, exercise } of rows) {
+    const list = result.get(sessionId) ?? [];
+    if (list.length < perSession && !list.some((e) => e.id === exercise.id)) list.push(exercise);
+    result.set(sessionId, list);
+  }
+  return result;
 }

@@ -1,105 +1,164 @@
-import { Pressable, ScrollView, View } from 'react-native';
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import Animated, { FadeOut, LinearTransition } from 'react-native-reanimated';
 
 import { AppText } from '@/components/AppText';
 import { IconButton } from '@/components/IconButton';
+import { PressableScale } from '@/components/PressableScale';
+import { Sheet } from '@/components/Sheet';
 import type { Exercise } from '@/db/schema';
+import { ExerciseThumb } from '@/features/exercises/components/ExerciseThumb';
 import { exerciseName } from '@/i18n/format';
 import { useAppStore } from '@/store/appStore';
 import type { DraftEntry } from '@/store/programDraftStore';
-import { useTheme } from '@/theme';
+import { useReduceMotion, useTheme } from '@/theme';
 
-type SelectedExercisesPanelProps = {
+type SelectedSummaryButtonProps = {
   entries: readonly DraftEntry[];
   exercisesById: ReadonlyMap<number, Exercise>;
-  expanded: boolean;
-  onToggleExpanded: () => void;
+  onPress: () => void;
+};
+
+/** Footer button: "5 selected" with a stack of thumbnails; opens the selected list. */
+export function SelectedSummaryButton({
+  entries,
+  exercisesById,
+  onPress,
+}: SelectedSummaryButtonProps) {
+  const { t } = useTranslation();
+  const theme = useTheme();
+  const thumbs = entries.slice(0, 3).flatMap((e) => {
+    const exercise = exercisesById.get(e.exerciseId);
+    return exercise ? [exercise] : [];
+  });
+  return (
+    <PressableScale
+      accessibilityRole="button"
+      accessibilityLabel={t('onboarding.wizard.selectedCount', { count: entries.length })}
+      accessibilityHint={t('onboarding.wizard.openSelectedHint')}
+      disabled={entries.length === 0}
+      onPress={onPress}
+      haptic="light"
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: theme.spacing.sm,
+        minHeight: 52,
+        paddingHorizontal: theme.spacing.md,
+        borderRadius: theme.radius.md,
+        borderWidth: 1,
+        borderColor: theme.colors.border,
+        backgroundColor: theme.colors.surfaceElevated,
+        opacity: entries.length === 0 ? 0.6 : 1,
+      }}
+    >
+      <View style={{ flexDirection: 'row' }}>
+        {thumbs.map((exercise, i) => (
+          <View
+            key={exercise.id}
+            style={{
+              marginStart: i === 0 ? 0 : -12,
+              borderRadius: theme.radius.sm,
+              borderWidth: 2,
+              borderColor: theme.colors.surfaceElevated,
+            }}
+          >
+            <ExerciseThumb exercise={exercise} size={32} radius={theme.radius.sm} />
+          </View>
+        ))}
+      </View>
+      <AppText variant="bodyStrong">
+        {t('onboarding.wizard.selectedCount', { count: entries.length })}
+      </AppText>
+    </PressableScale>
+  );
+}
+
+type SelectedExercisesSheetProps = {
+  visible: boolean;
+  onClose: () => void;
+  entries: readonly DraftEntry[];
+  exercisesById: ReadonlyMap<number, Exercise>;
   onMove: (index: number, direction: -1 | 1) => void;
   onEdit: (index: number) => void;
   onRemove: (index: number) => void;
 };
 
-export function SelectedExercisesPanel({
+/** The day's selected exercises in order: reorder, edit sets/reps/rest, or remove. */
+export function SelectedExercisesSheet({
+  visible,
+  onClose,
   entries,
   exercisesById,
-  expanded,
-  onToggleExpanded,
   onMove,
   onEdit,
   onRemove,
-}: SelectedExercisesPanelProps) {
+}: SelectedExercisesSheetProps) {
   const { t } = useTranslation();
   const theme = useTheme();
+  const reduceMotion = useReduceMotion();
   const language = useAppStore((s) => s.language);
 
   return (
-    <View style={{ gap: theme.spacing.sm }}>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityState={{ expanded }}
-        accessibilityLabel={t('onboarding.wizard.selectedCount', { count: entries.length })}
-        onPress={onToggleExpanded}
-        disabled={entries.length === 0}
-        style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.sm }}
-      >
-        <AppText variant="bodyStrong" style={{ flex: 1 }}>
-          {t('onboarding.wizard.selectedCount', { count: entries.length })}
-        </AppText>
-        {entries.length > 0 ? (
-          <>
-            <AppText variant="caption" color="primary">
-              {expanded ? t('onboarding.wizard.hideSelected') : t('onboarding.wizard.showSelected')}
-            </AppText>
-            <Ionicons
-              name={expanded ? 'chevron-down' : 'chevron-up'}
-              size={18}
-              color={theme.colors.primary}
-            />
-          </>
-        ) : null}
-      </Pressable>
-
-      {expanded && entries.length > 0 ? (
-        <ScrollView style={{ maxHeight: 260 }} contentContainerStyle={{ gap: theme.spacing.xs }}>
-          {entries.map((entry, index) => {
-            const exercise = exercisesById.get(entry.exerciseId);
-            const name = exercise ? exerciseName(exercise, language) : '';
-            return (
-              <View
-                key={entry.exerciseId}
+    <Sheet
+      visible={visible}
+      onClose={onClose}
+      title={t('onboarding.wizard.selectedCount', { count: entries.length })}
+      scrollable
+    >
+      <AppText variant="caption" color="textSecondary">
+        {t('onboarding.wizard.selectedHint')}
+      </AppText>
+      <View style={{ gap: theme.spacing.sm }}>
+        {entries.map((entry, index) => {
+          const exercise = exercisesById.get(entry.exerciseId);
+          const name = exercise ? exerciseName(exercise, language) : '';
+          return (
+            <Animated.View
+              key={entry.exerciseId}
+              layout={reduceMotion ? undefined : LinearTransition.duration(theme.motion.normal)}
+              exiting={reduceMotion ? undefined : FadeOut.duration(theme.motion.fast)}
+              style={{
+                gap: theme.spacing.xs,
+                padding: theme.spacing.sm,
+                borderRadius: theme.radius.lg,
+                borderWidth: 1,
+                borderColor: theme.colors.border,
+                backgroundColor: theme.colors.surfaceElevated,
+              }}
+            >
+              <PressableScale
+                accessibilityRole="button"
+                accessibilityLabel={t('onboarding.wizard.editTargetsFor', { name })}
+                onPress={() => onEdit(index)}
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',
-                  gap: theme.spacing.xs,
-                  paddingStart: theme.spacing.sm,
-                  borderRadius: theme.radius.md,
-                  backgroundColor: theme.colors.surfaceElevated,
+                  gap: theme.spacing.md,
+                  minHeight: 48,
                 }}
               >
-                <AppText variant="caption" color="textMuted" style={{ minWidth: 18 }}>
-                  {index + 1}
+                {exercise ? <ExerciseThumb exercise={exercise} size={44} /> : null}
+                <AppText variant="bodyStrong" numberOfLines={2} style={{ flex: 1 }}>
+                  {index + 1}. {name}
                 </AppText>
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel={t('onboarding.wizard.editTargetsFor', { name })}
-                  onPress={() => onEdit(index)}
-                  style={{ flex: 1, paddingVertical: theme.spacing.sm }}
+              </PressableScale>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.xs }}>
+                <AppText
+                  variant="caption"
+                  color="primary"
+                  style={{ flex: 1, paddingStart: theme.spacing.xs }}
                 >
-                  <AppText variant="body" numberOfLines={1}>
-                    {name}
-                  </AppText>
-                  <AppText variant="caption" color="textSecondary">
-                    {t('onboarding.wizard.targetSummary', {
-                      sets: entry.targetSets,
-                      min: entry.targetRepsMin,
-                      max: entry.targetRepsMax,
-                    })}
-                  </AppText>
-                </Pressable>
+                  {t('onboarding.wizard.targetSummary', {
+                    sets: entry.targetSets,
+                    min: entry.targetRepsMin,
+                    max: entry.targetRepsMax,
+                  })}
+                </AppText>
                 <IconButton
                   icon="chevron-up"
                   size={18}
+                  variant="tonal"
                   onPress={() => onMove(index, -1)}
                   disabled={index === 0}
                   accessibilityLabel={t('onboarding.wizard.moveUp', { name })}
@@ -107,6 +166,7 @@ export function SelectedExercisesPanel({
                 <IconButton
                   icon="chevron-down"
                   size={18}
+                  variant="tonal"
                   onPress={() => onMove(index, 1)}
                   disabled={index === entries.length - 1}
                   accessibilityLabel={t('onboarding.wizard.moveDown', { name })}
@@ -119,10 +179,10 @@ export function SelectedExercisesPanel({
                   accessibilityLabel={t('onboarding.wizard.removeNamed', { name })}
                 />
               </View>
-            );
-          })}
-        </ScrollView>
-      ) : null}
-    </View>
+            </Animated.View>
+          );
+        })}
+      </View>
+    </Sheet>
   );
 }

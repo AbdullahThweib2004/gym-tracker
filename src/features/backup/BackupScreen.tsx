@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
+import { ConfirmSheet } from '@/components/ConfirmSheet';
 import { Screen } from '@/components/Screen';
 import { ScreenHeader } from '@/components/ScreenHeader';
 import { Skeleton } from '@/components/Skeleton';
@@ -23,6 +24,7 @@ export function BackupScreen() {
   const [lastBackupAt, setLastBackupAt] = useState(() => getLastBackupAt());
   const [busy, setBusy] = useState<'export' | 'read' | 'restore' | null>(null);
   const [selected, setSelected] = useState<BackupFile | null>(null);
+  const [confirmRestore, setConfirmRestore] = useState(false);
 
   const errorMessage = (error: BackupError) => {
     switch (error.code) {
@@ -65,24 +67,16 @@ export function BackupScreen() {
     }
   };
 
-  const confirmRestore = (backup: BackupFile) =>
-    Alert.alert(t('backup.confirmTitle'), t('backup.confirmMessage'), [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('backup.restore'),
-        style: 'destructive',
-        onPress: async () => {
-          setBusy('restore');
-          try {
-            await restoreBackup(backup);
-          } catch (error) {
-            console.error(error);
-            setBusy(null);
-            Alert.alert(t('backup.restoreFailedTitle'), t('backup.restoreFailedMessage'));
-          }
-        },
-      },
-    ]);
+  const restore = async (backup: BackupFile) => {
+    setBusy('restore');
+    try {
+      await restoreBackup(backup);
+    } catch (error) {
+      console.error(error);
+      setBusy(null);
+      Alert.alert(t('backup.restoreFailedTitle'), t('backup.restoreFailedMessage'));
+    }
+  };
 
   const preview = selected ? previewBackup(selected) : null;
 
@@ -168,7 +162,7 @@ export function BackupScreen() {
               label={t('backup.restore')}
               variant="danger"
               icon="refresh"
-              onPress={() => confirmRestore(selected)}
+              onPress={() => setConfirmRestore(true)}
               loading={busy === 'restore'}
               disabled={busy !== null}
               fullWidth
@@ -176,6 +170,16 @@ export function BackupScreen() {
           </View>
         ) : null}
       </Card>
+      <ConfirmSheet
+        visible={confirmRestore}
+        title={t('backup.confirmTitle')}
+        message={t('backup.confirmMessage')}
+        confirmLabel={t('backup.restore')}
+        cancelLabel={t('common.cancel')}
+        destructive
+        onClose={() => setConfirmRestore(false)}
+        onConfirm={() => selected && void restore(selected)}
+      />
     </Screen>
   );
 }

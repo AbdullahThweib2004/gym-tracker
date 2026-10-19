@@ -180,7 +180,13 @@
     "deleteSetTitle": "حذف هذه المجموعة؟",
     "deleteSetMessage": "لا يمكن التراجع عن ذلك.",
     "openExerciseHistory": "يفتح سجل هذا التمرين",
-    "editSetHint": "تعديل هذه المجموعة أو حذفها"
+    "editSetHint": "تعديل هذه المجموعة أو حذفها",
+    "workoutCount_zero": "لا تمارين",
+    "workoutCount_one": "تمرين واحد",
+    "workoutCount_two": "تمرينان",
+    "workoutCount_few": "{{count}} تمارين",
+    "workoutCount_many": "{{count}} تمريناً",
+    "workoutCount_other": "{{count}} تمرين"
   },
   "settings": {
     "title": "الإعدادات",
@@ -216,7 +222,9 @@
     "data": "بياناتك",
     "credits": "المصادر",
     "creditsImages": "صور التمارين: free-exercise-db (ملكية عامة)",
-    "openLinkHint": "يفتح في المتصفح"
+    "openLinkHint": "يفتح في المتصفح",
+    "split": "نظام التقسيم",
+    "never": "أبداً"
   },
   "onboarding": {
     "title": "اختر نظام التقسيم",
@@ -253,7 +261,9 @@
       "selectedCount_two": "تمرينان مختاران",
       "selectedCount_few": "{{count}} تمارين مختارة",
       "selectedCount_many": "{{count}} تمريناً مختاراً",
-      "selectedCount_other": "{{count}} تمرين مختار"
+      "selectedCount_other": "{{count}} تمرين مختار",
+      "openSelectedHint": "يعرض التمارين المختارة لترتيبها أو تعديلها",
+      "selectedHint": "اضغط على تمرين لتحديد المجموعات والتكرارات والراحة، واستخدم الأسهم لتغيير الترتيب."
     }
   },
   "exercises": {
@@ -305,14 +315,18 @@
         "library": "اسمح بالوصول للصور من الإعدادات لاختيار صورة."
       },
       "failedTitle": "تعذّر حفظ الصورة",
-      "failedMessage": "حاول مرة أخرى."
+      "failedMessage": "حاول مرة أخرى.",
+      "edit": "إضافة صورة أو تغييرها"
     },
     "motion": {
       "label": "طريقة أداء {{name}}",
       "start": "وضع البداية",
       "end": "وضع النهاية",
       "openHint": "يعرض الوضعين بملء الشاشة"
-    }
+    },
+    "addPhotoHint": "أضف صورة",
+    "forThisDay": "لهذا اليوم",
+    "allMuscles": "الكل"
   },
   "languages": {
     "en": "English",

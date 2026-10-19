@@ -1,17 +1,17 @@
 import { useCallback, useState } from 'react';
-import { Alert, Linking, Pressable, View } from 'react-native';
+import { Linking, View } from 'react-native';
 import Constants from 'expo-constants';
-import Ionicons from '@expo/vector-icons/Ionicons';
 import { router, useFocusEffect } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
+import { ActionSheet } from '@/components/ActionSheet';
 import { AppText } from '@/components/AppText';
-import { Button } from '@/components/Button';
-import { Card } from '@/components/Card';
+import { ConfirmSheet } from '@/components/ConfirmSheet';
+import { IconButton } from '@/components/IconButton';
 import { Screen } from '@/components/Screen';
-import { Stepper } from '@/components/Stepper';
-import { ToggleRow } from '@/components/ToggleRow';
+import { SettingsRow, SettingsSection } from '@/components/SettingsGroup';
 import { LANGUAGES, type Language } from '@/constants/settings';
+import { getLastBackupAt } from '@/features/backup/backupService';
 import { exerciseLibraryHref } from '@/features/exercises/routes';
 import { getActiveProgramSummary } from '@/features/program/programService';
 import {
@@ -20,11 +20,10 @@ import {
   REST_MIN_SECONDS,
 } from '@/features/restTimer/restMath';
 import { useRestTimerStore } from '@/features/restTimer/restTimerStore';
-import { dayLabel, formatRestSeconds, splitLabel } from '@/i18n/format';
+import { dayLabel, formatDate, formatRestSeconds, splitLabel } from '@/i18n/format';
 import { switchLanguage } from '@/i18n/language';
 import { useAppStore } from '@/store/appStore';
 import { useTheme } from '@/theme';
-import { mirrorInRtl } from '@/utils/direction';
 
 // Type-only (erased at build time), so it doesn't pull the dev module into production.
 import type * as DevToolsModule from '@/features/dev/DevToolsSection';
@@ -42,41 +41,20 @@ export function SettingsScreen() {
   const theme = useTheme();
   const language = useAppStore((s) => s.language);
   const setLanguage = useAppStore((s) => s.setLanguage);
-  const version = Constants.expoConfig?.version ?? '—';
+  const version = Constants.expoConfig?.version ?? '';
   const restSettings = useRestTimerStore((s) => s.settings);
   const updateRestSettings = useRestTimerStore((s) => s.updateSettings);
   const [summary, setSummary] = useState(() => getActiveProgramSummary());
+  const [lastBackupAt, setLastBackupAt] = useState(() => getLastBackupAt());
+  const [sheet, setSheet] = useState<'language' | 'split' | null>(null);
+  const [pendingLanguage, setPendingLanguage] = useState<Language | null>(null);
 
   useFocusEffect(
     useCallback(() => {
       setSummary(getActiveProgramSummary());
+      setLastBackupAt(getLastBackupAt());
     }, []),
   );
-
-  const confirmLanguage = (next: Language) => {
-    if (next === language) return;
-    // Show the prompt in the target language so the user can read it either way.
-    Alert.alert(
-      t('settings.changeLanguageTitle', { lng: next }),
-      t('settings.changeLanguageMessage', { lng: next, language: t(`languages.${next}`) }),
-      [
-        { text: t('common.cancel', { lng: next }), style: 'cancel' },
-        {
-          text: t('settings.restart', { lng: next }),
-          onPress: () => {
-            setLanguage(next);
-            void switchLanguage(next);
-          },
-        },
-      ],
-    );
-  };
-
-  const confirmChangeSplit = () =>
-    Alert.alert(t('settings.changeSplitTitle'), t('settings.changeSplitMessage'), [
-      { text: t('common.cancel'), style: 'cancel' },
-      { text: t('settings.changeSplitConfirm'), onPress: () => router.push('/onboarding') },
-    ]);
 
   const editDay = (dayId: number) =>
     router.push({
@@ -84,166 +62,187 @@ export function SettingsScreen() {
       params: { dayId: String(dayId), mode: 'edit' },
     });
 
-  return (
-    <Screen scroll edges={[]}>
-      {summary ? (
-        <Card>
-          <AppText variant="subheading">{t('settings.myProgram')}</AppText>
-          <AppText color="textSecondary">{splitLabel(summary.program.splitType)}</AppText>
-          <View style={{ marginTop: theme.spacing.xs }}>
-            {summary.days.map(({ day, exerciseCount }) => {
-              const name = dayLabel(summary.program.splitType, day.dayKey);
-              return (
-                <Pressable
-                  key={day.id}
-                  accessibilityRole="button"
-                  accessibilityLabel={t('settings.editDay', { day: name })}
-                  onPress={() => editDay(day.id)}
-                  style={({ pressed }) => ({
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    gap: theme.spacing.md,
-                    paddingVertical: theme.spacing.md,
-                    paddingHorizontal: theme.spacing.sm,
-                    borderRadius: theme.radius.md,
-                    backgroundColor: pressed
-                      ? theme.colors.surfaceElevated
-                      : theme.colors.transparent,
-                  })}
-                >
-                  <View style={{ flex: 1 }}>
-                    <AppText variant="bodyStrong">{name}</AppText>
-                    <AppText variant="caption" color="textSecondary">
-                      {t('home.exerciseCount', { count: exerciseCount })}
-                    </AppText>
-                  </View>
-                  <Ionicons
-                    name="chevron-forward"
-                    size={18}
-                    color={theme.colors.textSecondary}
-                    style={mirrorInRtl()}
-                  />
-                </Pressable>
-              );
-            })}
-          </View>
-          <Button
-            label={t('settings.changeSplit')}
-            variant="secondary"
-            icon="swap-horizontal"
-            onPress={confirmChangeSplit}
-          />
-        </Card>
-      ) : null}
+  const rest = restSettings.defaultRestSeconds;
 
-      <Card>
-        <AppText variant="subheading">{t('settings.language')}</AppText>
-        <AppText variant="caption" color="textSecondary">
-          {t('settings.languageHint')}
-        </AppText>
-        <View style={{ gap: theme.spacing.xs, marginTop: theme.spacing.sm }}>
-          {LANGUAGES.map((code) => {
-            const selected = code === language;
+  return (
+    <Screen
+      scroll
+      edges={[]}
+      contentStyle={{ gap: theme.spacing.xl, paddingBottom: theme.spacing.xxxl }}
+    >
+      {summary ? (
+        <SettingsSection title={t('settings.myProgram')}>
+          <SettingsRow
+            icon="albums-outline"
+            label={t('settings.split')}
+            value={splitLabel(summary.program.splitType)}
+          />
+          {summary.days.map(({ day, exerciseCount }) => {
+            const name = dayLabel(summary.program.splitType, day.dayKey);
             return (
-              <Pressable
-                key={code}
-                accessibilityRole="radio"
-                accessibilityState={{ selected }}
-                onPress={() => confirmLanguage(code)}
-                style={({ pressed }) => ({
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  paddingVertical: theme.spacing.md,
-                  paddingHorizontal: theme.spacing.md,
-                  borderRadius: theme.radius.md,
-                  backgroundColor:
-                    pressed || selected ? theme.colors.surfaceElevated : theme.colors.transparent,
-                })}
-              >
-                <AppText variant="bodyStrong">{t(`languages.${code}`)}</AppText>
-                {selected ? (
-                  <Ionicons name="checkmark" size={20} color={theme.colors.primary} />
-                ) : null}
-              </Pressable>
+              <SettingsRow
+                key={day.id}
+                icon="calendar-outline"
+                label={name}
+                value={t('home.exerciseCount', { count: exerciseCount })}
+                accessibilityHint={t('settings.editDay', { day: name })}
+                onPress={() => editDay(day.id)}
+              />
             );
           })}
-        </View>
-      </Card>
+          <SettingsRow
+            icon="swap-horizontal"
+            iconColor="warning"
+            label={t('settings.changeSplit')}
+            onPress={() => setSheet('split')}
+          />
+        </SettingsSection>
+      ) : null}
 
-      <Card>
-        <AppText variant="subheading">{t('settings.data')}</AppText>
-        <Button
-          label={t('exercises.title')}
-          variant="secondary"
+      <SettingsSection title={t('settings.data')} footer={t('backup.photosNotIncluded')}>
+        <SettingsRow
           icon="barbell-outline"
+          label={t('exercises.title')}
           onPress={() => router.push(exerciseLibraryHref)}
-          fullWidth
         />
-        <Button
-          label={t('backup.title')}
-          variant="secondary"
+        <SettingsRow
           icon="cloud-upload-outline"
+          label={t('backup.title')}
+          value={lastBackupAt ? formatDate(lastBackupAt, 'short') : t('settings.never')}
           onPress={() => router.push('/backup')}
-          fullWidth
         />
-      </Card>
+      </SettingsSection>
 
-      <Card>
-        <AppText variant="subheading">{t('restTimer.settingsTitle')}</AppText>
-        <Stepper
+      <SettingsSection title={t('restTimer.settingsTitle')}>
+        <SettingsRow
+          icon="hourglass-outline"
           label={t('restTimer.defaultRest')}
-          value={restSettings.defaultRestSeconds}
-          min={REST_MIN_SECONDS}
-          max={REST_MAX_SECONDS}
-          step={REST_ADJUST_SECONDS}
-          formatValue={formatRestSeconds}
-          onChange={(defaultRestSeconds) => updateRestSettings({ defaultRestSeconds })}
-          decrementLabel={t('common.decrease')}
-          incrementLabel={t('common.increase')}
+          trailing={
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.xs }}>
+              <IconButton
+                icon="remove"
+                size={18}
+                variant="tonal"
+                haptic="selection"
+                disabled={rest <= REST_MIN_SECONDS}
+                onPress={() =>
+                  updateRestSettings({
+                    defaultRestSeconds: Math.max(REST_MIN_SECONDS, rest - REST_ADJUST_SECONDS),
+                  })
+                }
+                accessibilityLabel={`${t('common.decrease')} ${t('restTimer.defaultRest')}`}
+              />
+              <AppText
+                variant="bodyStrong"
+                align="center"
+                style={{ minWidth: 48 }}
+                accessibilityLiveRegion="polite"
+              >
+                {formatRestSeconds(rest)}
+              </AppText>
+              <IconButton
+                icon="add"
+                size={18}
+                variant="tonal"
+                haptic="selection"
+                disabled={rest >= REST_MAX_SECONDS}
+                onPress={() =>
+                  updateRestSettings({
+                    defaultRestSeconds: Math.min(REST_MAX_SECONDS, rest + REST_ADJUST_SECONDS),
+                  })
+                }
+                accessibilityLabel={`${t('common.increase')} ${t('restTimer.defaultRest')}`}
+              />
+            </View>
+          }
         />
-        <ToggleRow
+        <SettingsRow
+          icon="play-circle-outline"
           label={t('restTimer.autoStart')}
-          hint={t('restTimer.autoStartHint')}
-          value={restSettings.autoStart}
-          onValueChange={(autoStart) => updateRestSettings({ autoStart })}
+          subtitle={t('restTimer.autoStartHint')}
+          toggle={{
+            value: restSettings.autoStart,
+            onChange: (autoStart) => updateRestSettings({ autoStart }),
+          }}
         />
-        <ToggleRow
+        <SettingsRow
+          icon="notifications-outline"
           label={t('restTimer.alerts')}
-          hint={t('restTimer.alertsHint')}
-          value={restSettings.alerts}
-          onValueChange={(alerts) => updateRestSettings({ alerts })}
+          subtitle={t('restTimer.alertsHint')}
+          toggle={{
+            value: restSettings.alerts,
+            onChange: (alerts) => updateRestSettings({ alerts }),
+          }}
         />
-      </Card>
+      </SettingsSection>
 
-      <Card>
-        <AppText variant="subheading">{t('settings.about')}</AppText>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-          <AppText color="textSecondary">{t('settings.version')}</AppText>
-          <AppText>{version}</AppText>
-        </View>
-        <Pressable
-          accessibilityRole="link"
+      <SettingsSection title={t('settings.language')} footer={t('settings.languageHint')}>
+        <SettingsRow
+          icon="language-outline"
+          label={t('settings.language')}
+          value={t(`languages.${language}`)}
+          onPress={() => setSheet('language')}
+        />
+      </SettingsSection>
+
+      <SettingsSection title={t('settings.about')}>
+        <SettingsRow
+          icon="information-circle-outline"
+          label={t('settings.version')}
+          value={version}
+        />
+        <SettingsRow
+          icon="images-outline"
+          label={t('settings.credits')}
+          subtitle={t('settings.creditsImages')}
+          external
           accessibilityHint={t('settings.openLinkHint')}
           onPress={() => void Linking.openURL(EXERCISE_IMAGES_CREDIT_URL)}
-          style={({ pressed }) => ({
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: theme.spacing.md,
-            minHeight: 44,
-            paddingVertical: theme.spacing.sm,
-            borderRadius: theme.radius.sm,
-            backgroundColor: pressed ? theme.colors.surfaceElevated : theme.colors.transparent,
-          })}
-        >
-          <View style={{ flex: 1, gap: theme.spacing.xs }}>
-            <AppText color="textSecondary">{t('settings.credits')}</AppText>
-            <AppText variant="caption">{t('settings.creditsImages')}</AppText>
-          </View>
-          <Ionicons name="open-outline" size={18} color={theme.colors.primary} />
-        </Pressable>
-      </Card>
+        />
+      </SettingsSection>
+
       {DevToolsSection ? <DevToolsSection /> : null}
+
+      <ActionSheet
+        visible={sheet === 'language'}
+        onClose={() => setSheet(null)}
+        title={t('settings.language')}
+        actions={LANGUAGES.filter((code) => code !== language).map((code) => ({
+          label: t(`languages.${code}`),
+          icon: 'language-outline',
+          onPress: () => setPendingLanguage(code),
+        }))}
+      />
+      {/* The confirmation is shown in the target language so it can be read either way. */}
+      <ConfirmSheet
+        visible={pendingLanguage !== null}
+        title={pendingLanguage ? t('settings.changeLanguageTitle', { lng: pendingLanguage }) : ''}
+        message={
+          pendingLanguage
+            ? t('settings.changeLanguageMessage', {
+                lng: pendingLanguage,
+                language: t(`languages.${pendingLanguage}`),
+              })
+            : undefined
+        }
+        confirmLabel={pendingLanguage ? t('settings.restart', { lng: pendingLanguage }) : ''}
+        cancelLabel={pendingLanguage ? t('common.cancel', { lng: pendingLanguage }) : ''}
+        onClose={() => setPendingLanguage(null)}
+        onConfirm={() => {
+          if (!pendingLanguage) return;
+          setLanguage(pendingLanguage);
+          void switchLanguage(pendingLanguage);
+        }}
+      />
+      <ConfirmSheet
+        visible={sheet === 'split'}
+        title={t('settings.changeSplitTitle')}
+        message={t('settings.changeSplitMessage')}
+        confirmLabel={t('settings.changeSplitConfirm')}
+        cancelLabel={t('common.cancel')}
+        onClose={() => setSheet(null)}
+        onConfirm={() => router.push('/onboarding')}
+      />
     </Screen>
   );
 }

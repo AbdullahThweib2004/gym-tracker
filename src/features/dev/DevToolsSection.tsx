@@ -1,55 +1,53 @@
-import { Alert } from 'react-native';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { AppText } from '@/components/AppText';
-import { Button } from '@/components/Button';
-import { Card } from '@/components/Card';
+import { ConfirmSheet } from '@/components/ConfirmSheet';
+import { SettingsRow, SettingsSection } from '@/components/SettingsGroup';
 
 import { clearWorkoutHistory, generateDemoHistory } from './devService';
 
 /**
- * Developer tools. Only loaded when __DEV__ is true (see SettingsScreen), so this module is
- * not part of production bundles.
+ * Developer tools, visually separated from the real settings. Only loaded when __DEV__ is true
+ * (see SettingsScreen), so this module is not part of production bundles.
  */
 export function DevToolsSection() {
   const { t } = useTranslation();
-
-  const generate = () => {
-    const count = generateDemoHistory();
-    Alert.alert(t('settings.dev.title'), t('settings.dev.generated', { count }));
-  };
-
-  const clear = () =>
-    Alert.alert(t('settings.dev.clearTitle'), t('settings.dev.clearMessage'), [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('settings.dev.clearConfirm'),
-        style: 'destructive',
-        onPress: () => {
-          clearWorkoutHistory();
-          Alert.alert(t('settings.dev.title'), t('settings.dev.cleared'));
-        },
-      },
-    ]);
+  const [confirmClear, setConfirmClear] = useState(false);
+  const [result, setResult] = useState<string | null>(null);
 
   return (
-    <Card>
-      <AppText variant="subheading">{t('settings.dev.title')}</AppText>
-      <AppText variant="caption" color="textSecondary">
-        {t('settings.dev.hint')}
-      </AppText>
-      <Button
-        label={t('settings.dev.generate')}
-        variant="secondary"
-        icon="flask-outline"
-        onPress={generate}
+    <>
+      <SettingsSection
+        title={t('settings.dev.title')}
+        footer={result ?? t('settings.dev.hint')}
+        tone="warning"
+      >
+        <SettingsRow
+          icon="flask-outline"
+          iconColor="warning"
+          label={t('settings.dev.generate')}
+          onPress={() => setResult(t('settings.dev.generated', { count: generateDemoHistory() }))}
+        />
+        <SettingsRow
+          icon="trash-outline"
+          label={t('settings.dev.clear')}
+          destructive
+          onPress={() => setConfirmClear(true)}
+        />
+      </SettingsSection>
+      <ConfirmSheet
+        visible={confirmClear}
+        title={t('settings.dev.clearTitle')}
+        message={t('settings.dev.clearMessage')}
+        confirmLabel={t('settings.dev.clearConfirm')}
+        cancelLabel={t('common.cancel')}
+        destructive
+        onClose={() => setConfirmClear(false)}
+        onConfirm={() => {
+          clearWorkoutHistory();
+          setResult(t('settings.dev.cleared'));
+        }}
       />
-      <Button
-        label={t('settings.dev.clear')}
-        variant="ghost"
-        icon="trash-outline"
-        onPress={clear}
-      />
-    </Card>
+    </>
   );
 }

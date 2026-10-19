@@ -7,6 +7,7 @@ import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { Chip } from '@/components/Chip';
+import { ConfirmSheet } from '@/components/ConfirmSheet';
 import { EmptyState } from '@/components/EmptyState';
 import { Screen } from '@/components/Screen';
 import { ScreenHeader } from '@/components/ScreenHeader';
@@ -48,6 +49,7 @@ export function ExerciseFormScreen() {
   /** For a new exercise the photo is copied into storage only when it's saved. */
   const [pendingPhoto, setPendingPhoto] = useState<string | null>(null);
   const [nameError, setNameError] = useState(false);
+  const [deleteSheet, setDeleteSheet] = useState<'confirm' | 'inUse' | null>(null);
 
   if (!isNew && !exercise) {
     return (
@@ -108,34 +110,6 @@ export function ExerciseFormScreen() {
       return;
     }
     router.back();
-  };
-
-  const confirmDelete = () => {
-    if (!exercise) return;
-    Alert.alert(t('exercises.deleteTitle'), t('exercises.deleteMessage'), [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('common.delete'),
-        style: 'destructive',
-        onPress: () => {
-          const result = deleteExercise(exercise.id);
-          if (result === 'deleted') {
-            router.back();
-            return;
-          }
-          Alert.alert(t('exercises.inUseTitle'), t('exercises.inUseMessage'), [
-            { text: t('common.cancel'), style: 'cancel' },
-            {
-              text: t('exercises.archive'),
-              onPress: () => {
-                archiveExercise(exercise.id, true);
-                router.back();
-              },
-            },
-          ]);
-        },
-      },
-    ]);
   };
 
   const hasPhoto = Boolean(previewExercise.imageUri);
@@ -291,13 +265,40 @@ export function ExerciseFormScreen() {
                 label={t('exercises.delete')}
                 variant="ghost"
                 icon="trash-outline"
-                onPress={confirmDelete}
+                onPress={() => setDeleteSheet('confirm')}
                 fullWidth
               />
             ) : null}
           </View>
         ) : null}
       </ScrollView>
+      <ConfirmSheet
+        visible={deleteSheet === 'confirm'}
+        title={t('exercises.deleteTitle')}
+        message={t('exercises.deleteMessage')}
+        confirmLabel={t('common.delete')}
+        cancelLabel={t('common.cancel')}
+        destructive
+        onClose={() => setDeleteSheet(null)}
+        onConfirm={() => {
+          if (!exercise) return;
+          if (deleteExercise(exercise.id) === 'deleted') router.back();
+          else setDeleteSheet('inUse');
+        }}
+      />
+      <ConfirmSheet
+        visible={deleteSheet === 'inUse'}
+        title={t('exercises.inUseTitle')}
+        message={t('exercises.inUseMessage')}
+        confirmLabel={t('exercises.archive')}
+        cancelLabel={t('common.cancel')}
+        onClose={() => setDeleteSheet(null)}
+        onConfirm={() => {
+          if (!exercise) return;
+          archiveExercise(exercise.id, true);
+          router.back();
+        }}
+      />
     </Screen>
   );
 }

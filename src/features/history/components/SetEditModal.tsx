@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { KeyboardAvoidingView, Modal, Platform, Pressable, View } from 'react-native';
+import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
+import { Sheet } from '@/components/Sheet';
 import { NumberInput } from '@/components/NumberInput';
 import { MAX_REPS, MAX_WEIGHT_KG, WEIGHT_STEP_KG } from '@/constants/settings';
 import { validateRow } from '@/features/workout/setRows';
@@ -23,77 +24,87 @@ export function SetEditModal({ title, initial, onSave, onDelete, onClose }: SetE
   const theme = useTheme();
   const [weightKg, setWeight] = useState<number | null>(initial.weightKg);
   const [reps, setReps] = useState<number | null>(initial.reps);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
   const validation = validateRow({ weightKg, reps });
 
   return (
-    <Modal visible transparent animationType="slide" onRequestClose={onClose}>
-      {/* Bottom sheet with inputs: lift it above the keyboard on both platforms. */}
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      >
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t('common.cancel')}
-          onPress={onClose}
-          style={{ flex: 1, backgroundColor: theme.colors.overlay, justifyContent: 'flex-end' }}
-        >
-          <Pressable
-            onPress={() => undefined}
-            accessible={false}
-            style={{
-              backgroundColor: theme.colors.surface,
-              borderTopStartRadius: theme.radius.xl,
-              borderTopEndRadius: theme.radius.xl,
-              padding: theme.spacing.xl,
-              paddingBottom: theme.spacing.xxl,
-              gap: theme.spacing.lg,
-            }}
-          >
-            <AppText variant="subheading">{title}</AppText>
-            <NumberInput
-              label={t('workout.weightKg')}
-              value={weightKg}
-              onChange={setWeight}
-              allowDecimal
-              step={WEIGHT_STEP_KG}
-              max={MAX_WEIGHT_KG}
-              invalid={!validation.ok && validation.weight}
-              accessibilityLabel={t('workout.weight')}
-              decrementLabel={t('workout.decreaseWeight')}
-              incrementLabel={t('workout.increaseWeight')}
+    <Sheet visible onClose={onClose} title={title}>
+      <View style={{ flexDirection: 'row', gap: theme.spacing.sm }}>
+        <View style={{ flex: 1 }}>
+          <NumberInput
+            size="big"
+            label={t('workout.weightKg')}
+            value={weightKg}
+            onChange={setWeight}
+            allowDecimal
+            step={WEIGHT_STEP_KG}
+            max={MAX_WEIGHT_KG}
+            compact
+            invalid={!validation.ok && validation.weight}
+            accessibilityLabel={t('workout.weight')}
+            decrementLabel={t('workout.decreaseWeight')}
+            incrementLabel={t('workout.increaseWeight')}
+          />
+        </View>
+        <View style={{ flex: 1 }}>
+          <NumberInput
+            size="big"
+            label={t('workout.reps')}
+            value={reps}
+            onChange={setReps}
+            step={1}
+            max={MAX_REPS}
+            compact
+            invalid={!validation.ok && validation.reps}
+            accessibilityLabel={t('workout.reps')}
+            decrementLabel={t('workout.decreaseReps')}
+            incrementLabel={t('workout.increaseReps')}
+          />
+        </View>
+      </View>
+      <Button
+        label={t('common.save')}
+        icon="checkmark"
+        size="lg"
+        haptic="success"
+        onPress={() =>
+          validation.ok && onSave({ weightKg: validation.weightKg, reps: validation.reps })
+        }
+        disabled={!validation.ok}
+        fullWidth
+      />
+      {/* Deleting asks for a second tap here instead of stacking another dialog. */}
+      {confirmingDelete ? (
+        <View style={{ gap: theme.spacing.sm }}>
+          <AppText variant="caption" color="danger" align="center">
+            {t('history.deleteSetMessage')}
+          </AppText>
+          <View style={{ flexDirection: 'row', gap: theme.spacing.sm }}>
+            <Button
+              label={t('common.cancel')}
+              variant="secondary"
+              onPress={() => setConfirmingDelete(false)}
+              style={{ flex: 1 }}
             />
-            <NumberInput
-              label={t('workout.reps')}
-              value={reps}
-              onChange={setReps}
-              step={1}
-              max={MAX_REPS}
-              invalid={!validation.ok && validation.reps}
-              accessibilityLabel={t('workout.reps')}
-              decrementLabel={t('workout.decreaseReps')}
-              incrementLabel={t('workout.increaseReps')}
+            <Button
+              label={t('common.delete')}
+              variant="danger"
+              icon="trash"
+              haptic="warning"
+              onPress={onDelete}
+              style={{ flex: 1 }}
             />
-            <View style={{ flexDirection: 'row', gap: theme.spacing.sm }}>
-              <Button
-                label={t('workout.deleteSet')}
-                variant="ghost"
-                icon="trash-outline"
-                onPress={onDelete}
-                style={{ flex: 1 }}
-              />
-              <Button
-                label={t('common.save')}
-                onPress={() =>
-                  validation.ok && onSave({ weightKg: validation.weightKg, reps: validation.reps })
-                }
-                disabled={!validation.ok}
-                style={{ flex: 1 }}
-              />
-            </View>
-          </Pressable>
-        </Pressable>
-      </KeyboardAvoidingView>
-    </Modal>
+          </View>
+        </View>
+      ) : (
+        <Button
+          label={t('workout.deleteSet')}
+          variant="ghost"
+          icon="trash-outline"
+          onPress={() => setConfirmingDelete(true)}
+          fullWidth
+        />
+      )}
+    </Sheet>
   );
 }

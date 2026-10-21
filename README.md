@@ -72,19 +72,30 @@ npm test             # jest
 npm run db:generate  # generate a migration after changing src/db/schema.ts
 npm run demo:capture # record the demo flow on the web build (needs ffmpeg)
 npm run demo:compose # framed demo videos in media-out/ and the README screenshots
+npm run publish:phone # quality gate, then publish an EAS Update for Expo Go
 ```
 
 In development builds, Settings has a **Developer tools** section that can generate 8 weeks of demo history or clear all workout history. It is not included in production builds.
 
+## Run on your phone without a dev server
+
+The app is published with [EAS Update](https://docs.expo.dev/eas-update/introduction/) to the `main` branch, with `runtimeVersion` set to `exposdk:57.0.0` so Expo Go (SDK 57) can load it. You don't need to run `npx expo start`.
+
+- **First time:** open this link on the phone, or turn it into a QR code and scan it with the iPhone Camera:
+  `exp://u.expo.dev/47b86ed8-f35e-4363-9429-82d0db4d4fad?channel-name=main&runtime-version=exposdk:57.0.0`
+- **After that:** open Expo Go and tap **Gym Tracker** under **Recently opened**.
+- **Publish a new version:** commit, then run `npm run publish:phone`. It runs the type check, lint and tests, then publishes with the latest commit message. Reopen the app in Expo Go to get it.
+
+Workout data stays in Expo Go's local storage on the phone. Uninstalling Expo Go deletes it, so export a backup first.
+
 ## Building with EAS
 
-Builds use [EAS Build](https://docs.expo.dev/build/introduction/) with the profiles in `eas.json`:
+Builds use [EAS Build](https://docs.expo.dev/build/introduction/) with the profiles in `eas.json`. `eas-cli` is a dev dependency, so run it with `npx`:
 
 ```bash
-npm install -g eas-cli
-eas login
-eas build --profile preview --platform android   # installable APK for testing
-eas build --profile production --platform all    # store builds
+npx eas login
+npx eas build --profile preview --platform android   # installable APK for testing
+npx eas build --profile production --platform all    # store builds
 ```
 
 The `development` profile builds a development client.
@@ -161,13 +172,23 @@ npx expo start
 
 امسح رمز QR بكاميرا الآيفون أو بتطبيق Expo Go على أندرويد.
 
+### التشغيل على الهاتف بدون خادم التطوير
+
+التطبيق منشور عبر EAS Update على الفرع `main`، وقيمة `runtimeVersion` هي `exposdk:57.0.0` ليتمكن Expo Go (SDK 57) من فتحه.
+
+- **أول مرة:** افتح هذا الرابط على الهاتف، أو حوّله إلى رمز QR وامسحه بكاميرا الآيفون:
+  `exp://u.expo.dev/47b86ed8-f35e-4363-9429-82d0db4d4fad?channel-name=main&runtime-version=exposdk:57.0.0`
+- **بعد ذلك:** افتح Expo Go واضغط على **Gym Tracker** ضمن **Recently opened**.
+- **نشر نسخة جديدة:** بعد عمل commit شغّل `npm run publish:phone`، فيفحص الأنواع والـ lint والاختبارات ثم ينشر التحديث برسالة آخر commit.
+
+بيانات التمارين محفوظة داخل Expo Go على الهاتف، وحذف Expo Go يحذفها، لذا صدّر نسخة احتياطية أولاً.
+
 ### البناء عبر EAS
 
 ```bash
-npm install -g eas-cli
-eas login
-eas build --profile preview --platform android   # ملف APK للتجربة
-eas build --profile production --platform all    # نسخ المتاجر
+npx eas login
+npx eas build --profile preview --platform android   # ملف APK للتجربة
+npx eas build --profile production --platform all    # نسخ المتاجر
 ```
 
 ### النسخ الاحتياطي والاستعادة

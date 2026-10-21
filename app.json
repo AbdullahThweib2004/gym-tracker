@@ -73,7 +73,15 @@
     },
     "backgroundColor": "#0A0A0A",
     "extra": {
-      "supportsRTL": true
+      "supportsRTL": true,
+      "eas": {
+        "projectId": "47b86ed8-f35e-4363-9429-82d0db4d4fad"
+      }
+    },
+    "owner": "abdullahthweib",
+    "runtimeVersion": "exposdk:57.0.0",
+    "updates": {
+      "url": "https://u.expo.dev/47b86ed8-f35e-4363-9429-82d0db4d4fad"
     }
   }
 }
